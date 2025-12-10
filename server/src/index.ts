@@ -3,8 +3,8 @@ import cors from 'cors'
 import multer from 'multer'
 import path from 'path'
 import fs from 'fs'
-import { deleteDocument, getDocument, listDocuments, saveDocument, updateDocument } from './storage'
-import { buildOnlyOfficeConfig } from './onlyoffice'
+import { deleteDocument, getDocument, listDocuments, saveDocument, updateDocument } from './storage.js'
+import { buildOnlyOfficeConfig } from './onlyoffice.js'
 
 const app = express()
 const port = process.env.PORT ? Number(process.env.PORT) : 4000
