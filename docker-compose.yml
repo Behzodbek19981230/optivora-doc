@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  doc-server:
+    build:
+      context: ./server
+    container_name: optivora-doc-server
+    environment:
+      - PORT=4000
+      - CLIENT_ORIGIN=${CLIENT_ORIGIN:-http://localhost:3000}
+      - APP_URL=${APP_URL:-http://localhost:4000}
+    volumes:
+      - ./server/storage:/app/storage
+    ports:
+      - '4000:4000'
+    depends_on:
+      - onlyoffice
+
+  onlyoffice:
+    image: onlyoffice/documentserver:latest
+    container_name: onlyoffice-documentserver
+    restart: unless-stopped
+    ports:
+      - '8082:80'
+    environment:
+      - JWT_ENABLED=false
+      # If you plan to use JWT, set JWT_ENABLED=true and configure secrets
+    volumes:
+      - onlyoffice_data:/var/www/onlyoffice/Data
+      - onlyoffice_log:/var/log/onlyoffice
+
+volumes:
+  onlyoffice_data:
+  onlyoffice_log:
