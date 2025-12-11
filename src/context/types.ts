@@ -29,8 +29,24 @@ export type UserDataType = {
     name: string
     description: string
   } | null
-  companies?: any[]
-  companies_detail?: any[]
+  companies?: number[]
+  companies_detail?: Array<{
+    id: number
+    code?: string
+    name: string
+    is_active?: boolean
+    phone?: string
+    region?: number
+    region_detail?: any
+    district?: number
+    district_detail?: any
+    address?: string
+    created_time?: string
+    created_by?: any
+    logo?: string | null
+  }>
+  company_current?: number | null
+  company_id?: number | null
 }
 
 export type AuthValuesType = {

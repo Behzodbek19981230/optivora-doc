@@ -38,34 +38,32 @@ const AuthProvider = ({ children }: Props) => {
 
   // ** Hooks
   const router = useRouter()
-
-  useEffect(() => {
-    const initAuth = async (): Promise<void> => {
-      const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)!
-      if (storedToken) {
-        setLoading(true)
-        await DataService.get(authConfig.meEndpoint)
-          .then(async response => {
-            setLoading(false)
-            const userData = response.data as UserDataType
-            setUser({ ...userData })
-            if (!localStorage.getItem('userData')) window.localStorage.setItem('userData', JSON.stringify(userData))
-          })
-          .catch(() => {
-            localStorage.removeItem('userData')
-            localStorage.removeItem('refreshToken')
-            localStorage.removeItem('accessToken')
-            setUser(null)
-            setLoading(false)
-            if (authConfig.onTokenExpiration === 'logout' && !router.pathname.includes('login')) {
-              router.replace('/login')
-            }
-          })
-      } else {
-        setLoading(false)
-      }
+  const initAuth = async (): Promise<void> => {
+    const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)!
+    if (storedToken) {
+      setLoading(true)
+      await DataService.get(authConfig.meEndpoint)
+        .then(async response => {
+          setLoading(false)
+          const userData = response.data as UserDataType
+          setUser({ ...userData })
+          if (!localStorage.getItem('userData')) window.localStorage.setItem('userData', JSON.stringify(userData))
+        })
+        .catch(() => {
+          localStorage.removeItem('userData')
+          localStorage.removeItem('refreshToken')
+          localStorage.removeItem('accessToken')
+          setUser(null)
+          setLoading(false)
+          if (authConfig.onTokenExpiration === 'logout' && !router.pathname.includes('login')) {
+            router.replace('/login')
+          }
+        })
+    } else {
+      setLoading(false)
     }
-
+  }
+  useEffect(() => {
     initAuth()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -75,17 +73,36 @@ const AuthProvider = ({ children }: Props) => {
       .then(async response => {
         const loginData = response.data as { access: string; refresh?: string; userData: UserDataType }
 
-        if (params.rememberMe && loginData.access) {
-          window.localStorage.setItem(authConfig.storageTokenKeyName, loginData.access)
-          window.localStorage.setItem('userData', JSON.stringify(loginData.userData))
+        // augment user with company_id if missing
+        const userData = { ...loginData.userData }
+        if (userData.company_current == null && Array.isArray(userData.companies) && userData.companies.length > 0) {
+          userData.company_id = userData.companies[0]
+        } else if (userData.company_current != null) {
+          userData.company_id = userData.company_current
         }
 
-        setUser({ ...loginData.userData })
+        // Persist token & user immediately to avoid AuthGuard redirect loop
+        if (loginData.access) {
+          window.localStorage.setItem(authConfig.storageTokenKeyName, loginData.access)
+        }
+        window.localStorage.setItem('userData', JSON.stringify(userData))
+        setUser(userData)
+
+        // Optionally refresh profile in background
+        initAuth()
 
         const returnUrl = router.query.returnUrl as string | undefined
-        const roleName = (loginData.userData as any)?.roles?.name || (loginData.userData as any)?.role || 'admin'
+        const roleName = (userData as any)?.roles?.name || (userData as any)?.role || 'admin'
         const homeRoute = getHomeRoute(roleName)
-        const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : homeRoute || '/'
+
+        // If user has no current company, force company selection page
+        const needsCompanySelection =
+          userData.company_current == null && (!userData.company_id || userData.company_id == null)
+        const redirectURL = needsCompanySelection
+          ? '/choose-company'
+          : returnUrl && returnUrl !== '/'
+          ? returnUrl
+          : homeRoute || '/'
 
         router.replace(redirectURL)
       })
