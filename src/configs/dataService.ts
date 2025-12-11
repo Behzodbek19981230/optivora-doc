@@ -206,7 +206,7 @@ class DataService {
     path: string,
     params: Record<string, string | number | boolean> = {},
     headers: OptionalHeaders = {}
-  ): Promise<AxiosResponse<T>> {
+  ) {
     return client.get<T>(path, {
       params,
       headers: { ...getAuthHeader(), ...headers }
