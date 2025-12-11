@@ -81,6 +81,7 @@ app.delete('/documents/:id', (req, res) => {
 app.post('/documents/onlyoffice-config/:id', (req, res) => {
   const doc = getDocument(req.params.id)
   if (!doc) return res.status(404).json({ error: 'Not found' })
+  // Use internal Docker DNS for OnlyOffice to reach this server
   const baseUrl = process.env.APP_URL || `http://localhost:${port}`
   const config = buildOnlyOfficeConfig({
     id: doc.meta.id,
@@ -118,6 +119,17 @@ app.post('/documents/callback/:id', express.json(), (req, res) => {
 
 app.listen(port, () => {
   console.log(`Doc server listening on http://localhost:${port}`)
+  // Ensure a default test.docx exists so API returns it
+  try {
+    const exists = listDocuments().some(d => `${d.name}${d.ext}`.toLowerCase() === 'test.docx')
+    if (!exists) {
+      const buf = Buffer.from('')
+      saveDocument('test', '.docx', buf)
+      console.log('Seeded default document: test.docx')
+    }
+  } catch (e) {
+    console.warn('Failed to seed default document:', e)
+  }
 })
 
 function getMimeByExt(ext: string): string {

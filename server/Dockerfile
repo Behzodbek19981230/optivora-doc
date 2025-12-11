@@ -2,7 +2,7 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json* yarn.lock* pnpm-lock.yaml* ./
-# Prefer npm; fallback to yarn if lockfile present
+# Always install production deps for runner; dev deps will be used in build stage
 RUN if [ -f package-lock.json ]; then npm ci; elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; else npm install; fi
 
 FROM node:20-alpine AS build
@@ -15,6 +15,7 @@ RUN npx tsc -p tsconfig.json
 FROM node:20-alpine AS runner
 ENV NODE_ENV=production
 WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY package.json ./
 RUN npm pkg set type="module"

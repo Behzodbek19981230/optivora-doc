@@ -1,7 +1,9 @@
 import fs from 'fs'
 import path from 'path'
 
-const ROOT = path.resolve(process.cwd(), 'server', 'storage')
+// Use /app/storage inside container and ./server/storage locally
+// process.cwd() in container is /app, so resolving 'storage' maps to the mounted volume
+const ROOT = path.resolve(process.cwd(), 'storage')
 const DOCS = path.join(ROOT, 'documents')
 
 export type DocumentMeta = {
