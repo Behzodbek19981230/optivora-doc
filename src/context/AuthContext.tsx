@@ -12,6 +12,8 @@ import authConfig from 'src/configs/auth'
 
 // ** Types
 import { AuthValuesType, LoginParams, ErrCallbackType, UserDataType } from './types'
+import { DataService } from 'src/configs/dataService'
+import getHomeRoute from 'src/layouts/components/acl/getHomeRoute'
 
 // ** Defaults
 const defaultProvider: AuthValuesType = {
@@ -42,15 +44,12 @@ const AuthProvider = ({ children }: Props) => {
       const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)!
       if (storedToken) {
         setLoading(true)
-        await axios
-          .get(authConfig.meEndpoint, {
-            headers: {
-              Authorization: storedToken
-            }
-          })
+        await DataService.get(authConfig.meEndpoint)
           .then(async response => {
             setLoading(false)
-            setUser({ ...response.data.userData })
+            const userData = response.data as UserDataType
+            setUser({ ...userData })
+            if (!localStorage.getItem('userData')) window.localStorage.setItem('userData', JSON.stringify(userData))
           })
           .catch(() => {
             localStorage.removeItem('userData')
@@ -72,22 +71,24 @@ const AuthProvider = ({ children }: Props) => {
   }, [])
 
   const handleLogin = (params: LoginParams, errorCallback?: ErrCallbackType) => {
-    axios
-      .post(authConfig.loginEndpoint, params)
+    DataService.login(authConfig.loginEndpoint, params)
       .then(async response => {
-        params.rememberMe
-          ? window.localStorage.setItem(authConfig.storageTokenKeyName, response.data.accessToken)
-          : null
-        const returnUrl = router.query.returnUrl
+        const loginData = response.data as { access: string; refresh?: string; userData: UserDataType }
 
-        setUser({ ...response.data.userData })
-        params.rememberMe ? window.localStorage.setItem('userData', JSON.stringify(response.data.userData)) : null
+        if (params.rememberMe && loginData.access) {
+          window.localStorage.setItem(authConfig.storageTokenKeyName, loginData.access)
+          window.localStorage.setItem('userData', JSON.stringify(loginData.userData))
+        }
 
-        const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
+        setUser({ ...loginData.userData })
 
-        router.replace(redirectURL as string)
+        const returnUrl = router.query.returnUrl as string | undefined
+        const roleName = (loginData.userData as any)?.roles?.name || (loginData.userData as any)?.role || 'admin'
+        const homeRoute = getHomeRoute(roleName)
+        const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : homeRoute || '/'
+
+        router.replace(redirectURL)
       })
-
       .catch(err => {
         if (errorCallback) errorCallback(err)
       })

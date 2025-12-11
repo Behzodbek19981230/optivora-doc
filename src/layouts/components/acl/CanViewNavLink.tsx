@@ -19,11 +19,18 @@ const CanViewNavLink = (props: Props) => {
   // ** Hook
   const ability = useContext(AbilityContext)
 
+  // If link explicitly disables auth, always show it
   if (navLink && navLink.auth === false) {
     return <>{children}</>
-  } else {
-    return ability && ability.can(navLink?.action, navLink?.subject) ? <>{children}</> : null
   }
+
+  // If no action/subject defined on nav item, do not restrict by ACL
+  if (!navLink?.action || !navLink?.subject) {
+    return <>{children}</>
+  }
+
+  // Otherwise, enforce ACL
+  return ability && ability.can(navLink.action, navLink.subject) ? <>{children}</> : null
 }
 
 export default CanViewNavLink

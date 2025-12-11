@@ -1,5 +1,5 @@
 // ** React Imports
-import { ReactNode, useEffect } from 'react'
+import { ReactNode } from 'react'
 
 // ** Next Import
 import { useRouter } from 'next/router'
@@ -11,7 +11,7 @@ import type { ACLObj, AppAbility } from 'src/configs/acl'
 import { AbilityContext } from 'src/layouts/components/acl/Can'
 
 // ** Config Import
-import { buildAbilityFor } from 'src/configs/acl'
+import { buildAbilityFor, defaultACLObj } from 'src/configs/acl'
 
 // ** Component Import
 import NotAuthorized from 'src/pages/401'
@@ -22,7 +22,6 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 import { useAuth } from 'src/hooks/useAuth'
 
 // ** Util Import
-import getHomeRoute from 'src/layouts/components/acl/getHomeRoute'
 
 interface AclGuardProps {
   children: ReactNode
@@ -33,52 +32,37 @@ interface AclGuardProps {
 
 const AclGuard = (props: AclGuardProps) => {
   // ** Props
-  const { aclAbilities, children, guestGuard = false, authGuard = true } = props
+  const { children, authGuard = true, guestGuard = false, aclAbilities } = props
 
   // ** Hooks
   const auth = useAuth()
   const router = useRouter()
 
-  // ** Vars
-  let ability: AppAbility
-
-  useEffect(() => {
-    if (auth.user && auth.user.role && !guestGuard && router.route === '/') {
-      const homeRoute = getHomeRoute(auth.user.role)
-      router.replace(homeRoute)
-    }
-  }, [auth.user, guestGuard, router])
-
-  // User is logged in, build ability for the user based on his role
-  if (auth.user && !ability) {
-    ability = buildAbilityFor(auth.user.role, aclAbilities.subject)
-    if (router.route === '/') {
-      return <Spinner />
-    }
+  // Allow error pages and routes without auth guard
+  if (router.route === '/404' || router.route === '/500' || !authGuard || guestGuard) {
+    return <>{children}</>
   }
 
-  // If guest guard or no guard is true or any error page
-  if (guestGuard || router.route === '/404' || router.route === '/500' || !authGuard) {
-    // If user is logged in and his ability is built
-    if (auth.user && ability) {
-      return <AbilityContext.Provider value={ability}>{children}</AbilityContext.Provider>
-    } else {
-      // If user is not logged in (render pages like login, register etc..)
-      return <>{children}</>
-    }
+  // While auth is resolving, show spinner
+  if (auth.loading) {
+    return <Spinner />
   }
 
-  // Check the access of current user and render pages
-  if (ability && auth.user && ability.can(aclAbilities.action, aclAbilities.subject)) {
-    if (router.route === '/') {
-      return <Spinner />
-    }
+  // Build ability from user role; default to 'admin' for full access unless backend provides a role
+  const role = (auth.user as any)?.roles?.name || (auth.user as any)?.role || 'admin'
+  const ability = buildAbilityFor(role, aclAbilities.subject) as AppAbility
 
-    return <AbilityContext.Provider value={ability}>{children}</AbilityContext.Provider>
+  // If no explicit ACL specified (defaults to manage all), don't enforce ACL and just provide ability context
+  const isDefaultAcl = aclAbilities.action === defaultACLObj.action && aclAbilities.subject === defaultACLObj.subject
+  if (isDefaultAcl) {
+    return <AbilityContext.Provider value={ability as any}>{children}</AbilityContext.Provider>
   }
 
-  // Render Not Authorized component if the current user has limited access
-  return (
+  // Enforce page ACL
+  const allowed = ability && ability.can(aclAbilities.action, aclAbilities.subject)
+  return allowed ? (
+    <AbilityContext.Provider value={ability as any}>{children}</AbilityContext.Provider>
+  ) : (
     <BlankLayout>
       <NotAuthorized />
     </BlankLayout>
