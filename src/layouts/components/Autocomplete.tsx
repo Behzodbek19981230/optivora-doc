@@ -66,7 +66,7 @@ const defaultSuggestionsData: DefaultSuggestionsType[] = [
       {
         icon: 'tabler:chart-pie-2',
         suggestion: 'Analytics',
-        link: '/dashboards/analytics'
+        link: '/dashboards'
       },
       {
         icon: 'tabler:device-analytics',

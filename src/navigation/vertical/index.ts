@@ -8,20 +8,7 @@ const navigation = (): VerticalNavItemsType => {
       icon: 'tabler:smart-home',
       badgeContent: 'new',
       badgeColor: 'error',
-      children: [
-        {
-          title: 'Analytics',
-          path: '/dashboards/analytics'
-        },
-        {
-          title: 'CRM',
-          path: '/dashboards/crm'
-        },
-        {
-          title: 'eCommerce',
-          path: '/dashboards/ecommerce'
-        }
-      ]
+      path: '/dashboards'
     },
     {
       sectionTitle: 'Apps & Pages'
@@ -350,7 +337,6 @@ const navigation = (): VerticalNavItemsType => {
       icon: 'tabler:brand-tabler'
     },
     {
-      
       title: 'Cards',
       icon: 'tabler:id',
       children: [
@@ -461,7 +447,7 @@ const navigation = (): VerticalNavItemsType => {
         {
           title: 'More',
           path: '/components/more'
-        },
+        }
       ]
     },
     {
@@ -522,7 +508,7 @@ const navigation = (): VerticalNavItemsType => {
         {
           title: 'Input Mask',
           path: '/forms/form-elements/input-mask'
-        },
+        }
       ]
     },
     {

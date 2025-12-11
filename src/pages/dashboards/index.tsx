@@ -1,21 +1,19 @@
 // ** MUI Import
 import Grid from '@mui/material/Grid'
 
-// ** Demo Component Imports
-import EcommerceProfit from 'src/views/dashboards/ecommerce/EcommerceProfit'
-import EcommerceOrders from 'src/views/dashboards/ecommerce/EcommerceOrders'
-import EcommerceExpenses from 'src/views/dashboards/ecommerce/EcommerceExpenses'
-import EcommerceStatistics from 'src/views/dashboards/ecommerce/EcommerceStatistics'
-import EcommerceInvoiceTable from 'src/views/dashboards/ecommerce/EcommerceInvoiceTable'
-import EcommerceTransactions from 'src/views/dashboards/ecommerce/EcommerceTransactions'
-import EcommerceRevenueReport from 'src/views/dashboards/ecommerce/EcommerceRevenueReport'
-import EcommerceEarningReports from 'src/views/dashboards/ecommerce/EcommerceEarningReports'
-import EcommerceGeneratedLeads from 'src/views/dashboards/ecommerce/EcommerceGeneratedLeads'
-import EcommercePopularProducts from 'src/views/dashboards/ecommerce/EcommercePopularProducts'
-import EcommerceCongratulationsJohn from 'src/views/dashboards/ecommerce/EcommerceCongratulationsJohn'
-
 // ** Custom Component Import
 import ApexChartWrapper from 'src/@core/styles/libs/react-apexcharts'
+import EcommerceCongratulationsJohn from 'src/views/dashboards/EcommerceCongratulationsJohn'
+import EcommerceEarningReports from 'src/views/dashboards/EcommerceEarningReports'
+import EcommerceExpenses from 'src/views/dashboards/EcommerceExpenses'
+import EcommerceGeneratedLeads from 'src/views/dashboards/EcommerceGeneratedLeads'
+import EcommerceInvoiceTable from 'src/views/dashboards/EcommerceInvoiceTable'
+import EcommerceOrders from 'src/views/dashboards/EcommerceOrders'
+import EcommercePopularProducts from 'src/views/dashboards/EcommercePopularProducts'
+import EcommerceProfit from 'src/views/dashboards/EcommerceProfit'
+import EcommerceRevenueReport from 'src/views/dashboards/EcommerceRevenueReport'
+import EcommerceStatistics from 'src/views/dashboards/EcommerceStatistics'
+import EcommerceTransactions from 'src/views/dashboards/EcommerceTransactions'
 
 const EcommerceDashboard = () => {
   return (

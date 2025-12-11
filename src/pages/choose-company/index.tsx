@@ -72,7 +72,7 @@ const ChooseCompanyPage = () => {
     const updated = { ...user, company_current: id, company_id: id }
     setUser(updated)
     window.localStorage.setItem('userData', JSON.stringify(updated))
-    router.replace('/dashboards/analytics')
+    router.replace('/dashboards')
   }
 
   return (

@@ -4,6 +4,7 @@ import Button from '@mui/material/Button'
 import { styled } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
+import { useAuth } from 'src/hooks/useAuth'
 
 const Illustration = styled('img')(({ theme }) => ({
   right: 20,
@@ -16,11 +17,12 @@ const Illustration = styled('img')(({ theme }) => ({
 }))
 
 const EcommerceCongratulationsJohn = () => {
+  const { user } = useAuth()
   return (
     <Card sx={{ position: 'relative' }}>
       <CardContent>
         <Typography variant='h5' sx={{ mb: 0.5 }}>
-          Congratulations John! 🎉
+          Congratulations {user?.fullname}! 🎉
         </Typography>
         <Typography sx={{ mb: 2, color: 'text.secondary' }}>Best seller of the month</Typography>
         <Typography variant='h4' sx={{ mb: 0.75, color: 'primary.main' }}>
