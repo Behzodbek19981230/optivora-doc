@@ -174,7 +174,7 @@ const CompanyDropdown = ({ auth }: any) => {
   const selected =
     companiesDetail.find((c: any) => c.id === selectedId) ||
     (selectedId ? { id: selectedId, name: `Company ${selectedId}` } : null)
-  console.log(selected)
+  console.log(auth)
 
   const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)

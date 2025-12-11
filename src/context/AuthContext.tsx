@@ -46,18 +46,36 @@ const AuthProvider = ({ children }: Props) => {
         .then(async response => {
           setLoading(false)
           const raw = response.data as UserDataType
-          // ensure company_current / company_id exist based on companies
           const normalized: UserDataType = { ...raw }
-          if (normalized.company_current == null) {
-            if (Array.isArray(normalized.companies) && normalized.companies.length > 0) {
-              normalized.company_current = normalized.companies[0]
+
+          // Prefer previously chosen company from localStorage if available
+          let chosenId: number | null = null
+          try {
+            const stored = window.localStorage.getItem('userData')
+            if (stored) {
+              const parsed = JSON.parse(stored) as Partial<UserDataType>
+              chosenId = (parsed.company_id as any) ?? (parsed.company_current as any) ?? null
+            }
+          } catch {}
+
+          // If we have a chosen company, keep it; otherwise derive from companies
+          if (chosenId != null) {
+            normalized.company_current = chosenId
+            normalized.company_id = chosenId
+          } else {
+            if (normalized.company_current == null) {
+              if (Array.isArray(normalized.companies) && normalized.companies.length > 0) {
+                normalized.company_current = normalized.companies[0]
+              }
+            }
+            if (normalized.company_id == null) {
+              normalized.company_id = normalized.company_current ?? null
             }
           }
-          if (normalized.company_id == null) {
-            normalized.company_id = normalized.company_current ?? null
-          }
+
           setUser(normalized)
-          if (!localStorage.getItem('userData')) window.localStorage.setItem('userData', JSON.stringify(normalized))
+          // Always sync to localStorage so refresh keeps the same company
+          window.localStorage.setItem('userData', JSON.stringify(normalized))
         })
         .catch(() => {
           localStorage.removeItem('userData')
