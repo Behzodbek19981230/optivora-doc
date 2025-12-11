@@ -1,5 +1,6 @@
 // ** MUI Imports
 import Box from '@mui/material/Box'
+import React, { useState } from 'react'
 import IconButton from '@mui/material/IconButton'
 
 // ** Icon Imports
@@ -10,6 +11,7 @@ import { Settings } from 'src/@core/context/settingsContext'
 
 // ** Components
 import Autocomplete from 'src/layouts/components/Autocomplete'
+import { Button, Menu, MenuItem, Avatar, ListItemIcon, ListItemText } from '@mui/material'
 import ModeToggler from 'src/@core/layouts/components/shared-components/ModeToggler'
 import UserDropdown from 'src/@core/layouts/components/shared-components/UserDropdown'
 import LanguageDropdown from 'src/@core/layouts/components/shared-components/LanguageDropdown'
@@ -20,6 +22,7 @@ import ShortcutsDropdown, { ShortcutsType } from 'src/@core/layouts/components/s
 
 // ** Hook Import
 import { useAuth } from 'src/hooks/useAuth'
+import { useRouter } from 'next/router'
 
 interface Props {
   hidden: boolean
@@ -139,7 +142,7 @@ const AppBarContent = (props: Props) => {
             <Icon fontSize='1.5rem' icon='tabler:menu-2' />
           </IconButton>
         ) : null}
-        {auth.user && <Autocomplete hidden={hidden} settings={settings} />}
+        {auth.user && <CompanyDropdown auth={auth} />}
       </Box>
       <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center' }}>
         <LanguageDropdown settings={settings} saveSettings={saveSettings} />
@@ -157,3 +160,70 @@ const AppBarContent = (props: Props) => {
 }
 
 export default AppBarContent
+
+// Company dropdown component for prettier UI than Select
+const CompanyDropdown = ({ auth }: any) => {
+  const router = useRouter()
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const open = Boolean(anchorEl)
+  console.log(auth)
+
+  const companiesDetail = auth.user?.companies_detail || []
+  const companiesIds = auth.user?.companies || []
+  const selectedId = auth.user?.company_id ?? auth.user?.company_current ?? null
+  const selected =
+    companiesDetail.find((c: any) => c.id === selectedId) ||
+    (selectedId ? { id: selectedId, name: `Company ${selectedId}` } : null)
+  console.log(selected)
+
+  const handleOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+  const handleClose = () => setAnchorEl(null)
+
+  const choose = (id: number) => {
+    const updated = { ...auth.user, company_current: id, company_id: id }
+    auth.setUser(updated)
+    window.localStorage.setItem('userData', JSON.stringify(updated))
+    handleClose()
+    router.reload()
+  }
+
+  return (
+    <>
+      <Button
+        onClick={handleOpen}
+        color='inherit'
+        startIcon={
+          <Avatar sx={{ width: 24, height: 24 }} src={selected?.logo || undefined}>
+            <Icon icon='tabler:building' />
+          </Avatar>
+        }
+        sx={{ textTransform: 'none' }}
+      >
+        {selected ? `${selected.name}${selected.code ? ` (${selected.code})` : ''}` : 'Choose company'}
+      </Button>
+      <Menu anchorEl={anchorEl} open={open} onClose={handleClose} keepMounted>
+        {companiesDetail.length > 0
+          ? companiesDetail.map((c: any) => (
+              <MenuItem key={c.id} selected={c.id === selectedId} onClick={() => choose(c.id)}>
+                <ListItemIcon>
+                  <Avatar sx={{ width: 24, height: 24 }} src={c.logo || undefined}>
+                    <Icon icon='tabler:building' />
+                  </Avatar>
+                </ListItemIcon>
+                <ListItemText primary={c.name} secondary={c.code ? `Code: ${c.code}` : undefined} />
+              </MenuItem>
+            ))
+          : companiesIds.map((id: number) => (
+              <MenuItem key={id} selected={id === selectedId} onClick={() => choose(id)}>
+                <ListItemIcon>
+                  <Icon icon='tabler:building' />
+                </ListItemIcon>
+                <ListItemText primary={`Company ${id}`} />
+              </MenuItem>
+            ))}
+      </Menu>
+    </>
+  )
+}

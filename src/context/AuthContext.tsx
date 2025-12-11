@@ -45,9 +45,19 @@ const AuthProvider = ({ children }: Props) => {
       await DataService.get(authConfig.meEndpoint)
         .then(async response => {
           setLoading(false)
-          const userData = response.data as UserDataType
-          setUser({ ...userData })
-          if (!localStorage.getItem('userData')) window.localStorage.setItem('userData', JSON.stringify(userData))
+          const raw = response.data as UserDataType
+          // ensure company_current / company_id exist based on companies
+          const normalized: UserDataType = { ...raw }
+          if (normalized.company_current == null) {
+            if (Array.isArray(normalized.companies) && normalized.companies.length > 0) {
+              normalized.company_current = normalized.companies[0]
+            }
+          }
+          if (normalized.company_id == null) {
+            normalized.company_id = normalized.company_current ?? null
+          }
+          setUser(normalized)
+          if (!localStorage.getItem('userData')) window.localStorage.setItem('userData', JSON.stringify(normalized))
         })
         .catch(() => {
           localStorage.removeItem('userData')
