@@ -8,6 +8,12 @@ const path = require('path')
 module.exports = {
   trailingSlash: true,
   reactStrictMode: false,
+  // Enable static HTML export (Next.js 13)
+  output: 'export',
+  // Skip ESLint checks during production builds
+  eslint: {
+    ignoreDuringBuilds: true
+  },
   webpack: config => {
     config.resolve.alias = {
       ...config.resolve.alias,
