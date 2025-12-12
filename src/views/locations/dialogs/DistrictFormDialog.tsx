@@ -11,6 +11,7 @@ import MenuItem from '@mui/material/MenuItem'
 import { useFetchList } from 'src/hooks/useFetchList'
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
+import toast from 'react-hot-toast'
 
 export type District = {
   id?: number
@@ -67,6 +68,7 @@ const DistrictFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
       else if (mode === 'edit' && item) await DataService.put(endpoints.districtById(item.id), values)
       onSaved()
       onClose()
+      toast.success('Tuman muvaffaqiyatli saqlandi')
     } catch (error) {
       console.error('Failed to save district:', error)
     }

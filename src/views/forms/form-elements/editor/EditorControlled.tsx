@@ -6,12 +6,16 @@ import { EditorState } from 'draft-js'
 
 // ** Component Import
 import ReactDraftWysiwyg from 'src/@core/components/react-draft-wysiwyg'
-
-const EditorControlled = () => {
+interface Props {
+  editorState: EditorState
+  onEditorStateChange: (data: EditorState) => void
+}
+const EditorControlled = (props: Props) => {
   // ** State
-  const [value, setValue] = useState(EditorState.createEmpty())
 
-  return <ReactDraftWysiwyg editorState={value} onEditorStateChange={data => setValue(data)} />
+  return (
+    <ReactDraftWysiwyg editorState={props.editorState} onEditorStateChange={data => props.onEditorStateChange(data)} />
+  )
 }
 
 export default EditorControlled

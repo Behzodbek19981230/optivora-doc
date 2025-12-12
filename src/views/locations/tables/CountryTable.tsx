@@ -29,6 +29,8 @@ const CountryTable = () => {
     perPage: rowsPerPage,
     search
   })
+  console.log(data)
+
   const [openForm, setOpenForm] = useState(false)
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create')
   const [selected, setSelected] = useState<any | null>(null)

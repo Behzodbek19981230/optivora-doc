@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { DataService } from 'src/configs/dataService'
+import { ApiResponse, DataService } from 'src/configs/dataService'
 
 type ListParams = {
   page?: number
@@ -29,13 +29,14 @@ export const useFetchList = <T = any>(path: string, params: ListParams = {}): Us
   const { data, isLoading, error } = useQuery<{ items: T[]; total: number }>({
     queryKey,
     queryFn: async () => {
-      const res = await DataService.get<any>(path, safeParams)
+      const res = await DataService.get(path, safeParams)
       // Support either { data, meta } shape or plain array
-      const payload = res.data as any
-      const items: T[] = Array.isArray(payload) ? payload : payload?.data ?? []
-      const total: number = Array.isArray(payload)
-        ? items.length
-        : payload?.meta?.total ?? payload?.total ?? items.length
+      const payload = res.data as {
+        results?: T[]
+        pagination: { currentPage: number; lastPage: number; perPage: number; total: number }
+      }
+      const items: T[] = Array.isArray(payload) ? payload : payload?.results ?? []
+      const total: number = Array.isArray(payload) ? items.length : payload?.pagination?.total ?? items.length
       return { items, total }
     },
     staleTime: 30_000

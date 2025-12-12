@@ -9,6 +9,7 @@ import Button from '@mui/material/Button'
 import CustomTextField from 'src/@core/components/mui/text-field'
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
+import toast from 'react-hot-toast'
 
 export type Country = {
   id?: number
@@ -60,6 +61,7 @@ const CountryFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
       else if (mode === 'edit' && item) await DataService.put(endpoints.countryById(item.id), values)
       onSaved()
       onClose()
+      toast.success('Mamlakat muvaffaqiyatli saqlandi')
     } catch (error) {
       console.error('Error saving country:', error)
     }

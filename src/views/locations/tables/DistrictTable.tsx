@@ -19,6 +19,8 @@ import DeleteConfirmDialog from '../dialogs/DeleteConfirmDialog'
 import IconifyIcon from 'src/@core/components/icon'
 import endpoints from 'src/configs/endpoints'
 import { useFetchList } from 'src/hooks/useFetchList'
+import toast from 'react-hot-toast'
+import { DataService } from 'src/configs/dataService'
 
 const DistrictTable = () => {
   const [page, setPage] = useState(0)
@@ -51,9 +53,10 @@ const DistrictTable = () => {
   const handleDeleteConfirm = async () => {
     if (selected) {
       // TODO: Replace with your actual DataService
-      // await DataService.delete(`/district/${selected.id}`)
+      await DataService.delete(`/district/${selected.id}`)
       mutate()
       setOpenDelete(false)
+      toast.success('Tuman muvaffaqiyatli o‘chirildi')
     }
   }
 

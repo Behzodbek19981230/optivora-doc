@@ -10,24 +10,7 @@ import defaultAuthConfig from 'src/configs/auth'
 // ** Types
 import { UserDataType } from 'src/context/types'
 
-const users: UserDataType[] = [
-  {
-    id: 1,
-    role: 'admin',
-    password: 'admin',
-    fullName: 'John Doe',
-    username: 'johndoe',
-    email: 'admin@vuexy.com'
-  },
-  {
-    id: 2,
-    role: 'client',
-    password: 'client',
-    fullName: 'Jane Doe',
-    username: 'janedoe',
-    email: 'client@vuexy.com'
-  }
-]
+const users: UserDataType[] = []
 
 // ! These two secrets should be in .env file and not in any other file
 const jwtConfig = {
@@ -62,50 +45,6 @@ mock.onPost('/jwt/login').reply(request => {
     }
 
     return [400, { error }]
-  }
-})
-
-mock.onPost('/jwt/register').reply(request => {
-  if (request.data.length > 0) {
-    const { email, password, username } = JSON.parse(request.data)
-    const isEmailAlreadyInUse = users.find(user => user.email === email)
-    const isUsernameAlreadyInUse = users.find(user => user.username === username)
-    const error = {
-      email: isEmailAlreadyInUse ? 'This email is already in use.' : null,
-      username: isUsernameAlreadyInUse ? 'This username is already in use.' : null
-    }
-
-    if (!error.username && !error.email) {
-      const { length } = users
-      let lastIndex = 0
-      if (length) {
-        lastIndex = users[length - 1].id
-      }
-      const userData = {
-        id: lastIndex + 1,
-        email,
-        password,
-        username,
-        avatar: null,
-        fullName: '',
-        role: 'admin'
-      }
-
-      users.push(userData)
-
-      const accessToken = jwt.sign({ id: userData.id }, jwtConfig.secret as string)
-
-      const user = { ...userData }
-      delete user.password
-
-      const response = { accessToken }
-
-      return [200, response]
-    }
-
-    return [200, { error }]
-  } else {
-    return [401, { error: 'Invalid Data' }]
   }
 })
 

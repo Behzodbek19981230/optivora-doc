@@ -9,26 +9,26 @@ const endpoints = {
   login: '/auth/token',
   logout: '/auth/logout',
   me: '/user-view',
-  companyProfile: '/api/v1/company-profile',
-  companyProfileById: (id: string | number | string[] | null | undefined) =>
-    `/api/v1/company-profile/${normalizeId(id)}`,
-  companyProfileFields: '/api/v1/company-profile/fields',
-  country: '/api/v1/country',
-  district: '/api/v1/district',
-  districtById: (id: string | number | string[] | null | undefined) => `/api/v1/district/${normalizeId(id)}`,
-  region: '/api/v1/region',
-  regionById: (id: string | number | string[] | null | undefined) => `/api/v1/region/${normalizeId(id)}`,
+  companyProfile: '/company-profile',
+  companyProfileById: (id: string | number | string[] | null | undefined) => `/company-profile/${normalizeId(id)}`,
+  companyProfileFields: '/company-profile/fields',
+  country: '/country/',
+  district: '/district',
+  districtById: (id: string | number | string[] | null | undefined) => `/district/${normalizeId(id)}`,
+  region: '/region/',
+  regionById: (id: string | number | string[] | null | undefined) => `/region/${normalizeId(id)}`,
 
-  countryById: (id: string | number | string[] | null | undefined) => `/api/v1/country/${normalizeId(id)}`,
-  countryFields: '/api/v1/country/fields',
-
+  countryById: (id: string | number | string[] | null | undefined) => `/country/${normalizeId(id)}`,
+  countryFields: '/country/fields/',
+  command: '/command/',
+  commandById: (id: string | number | string[] | null | undefined) => `/command/${normalizeId(id)}`,
   // CMS resources
-  industries: '/api/v1/industry',
-  industryById: (id: string | number | string[] | null | undefined) => `/api/v1/industry/${normalizeId(id)}`,
-  industryFields: '/api/v1/industry/fields',
+  industries: '/industry',
+  industryById: (id: string | number | string[] | null | undefined) => `/industry/${normalizeId(id)}`,
+  industryFields: '/industry/fields',
 
-  user: '/api/v1/user',
-  userById: (id: number) => `/api/v1/user/${id}`,
+  user: '/user',
+  userById: (id: number) => `/user/${id}`,
 
   equipmentCategories: '/equipment-category',
   equipmentCategoryById: (id: string | number | string[] | null | undefined) =>
@@ -57,8 +57,8 @@ const endpoints = {
   inquiries: '/inquiry',
   inquiryById: (id: string | number | string[] | null | undefined) => `/inquiry/${normalizeId(id)}`,
 
-  downloads: '/download',
-  downloadById: (id: string | number | string[] | null | undefined) => `/download/${normalizeId(id)}`,
+  downloads: '/command-file/',
+  downloadById: (id: string | number | string[] | null | undefined) => `/command-file/${normalizeId(id)}`,
 
   news: '/news-post',
   newsById: (id: string | number | string[] | null | undefined) => `/news-post/${normalizeId(id)}`,

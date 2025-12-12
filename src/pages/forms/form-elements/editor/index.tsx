@@ -17,9 +17,6 @@ import { EditorWrapper } from 'src/@core/styles/libs/react-draft-wysiwyg'
 import EditorControlled from 'src/views/forms/form-elements/editor/EditorControlled'
 import EditorUncontrolled from 'src/views/forms/form-elements/editor/EditorUncontrolled'
 
-// ** Source code imports
-import * as source from 'src/views/forms/form-elements/editor/EditorSourceCode'
-
 // ** Styles
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'
 
@@ -43,28 +40,10 @@ const Editors = () => {
           subtitle={<Typography sx={{ color: 'text.secondary' }}>A Wysiwyg Built on ReactJS and DraftJS</Typography>}
         />
         <Grid item xs={12}>
-          <CardSnippet
-            sx={{ overflow: 'visible' }}
-            title='Controlled Wysiwyg Editor'
-            code={{
-              tsx: source.EditorControlledTSXCode,
-              jsx: source.EditorControlledJSXCode
-            }}
-          >
-            <EditorControlled />
-          </CardSnippet>
+          {/* <EditorControlled /> */}
         </Grid>
         <Grid item xs={12}>
-          <CardSnippet
-            sx={{ overflow: 'visible' }}
-            title='Uncontrolled Wysiwyg Editor'
-            code={{
-              tsx: source.EditorUncontrolledTSXCode,
-              jsx: source.EditorUncontrolledJSXCode
-            }}
-          >
-            <EditorUncontrolled />
-          </CardSnippet>
+          <EditorUncontrolled />
         </Grid>
       </Grid>
     </EditorWrapper>

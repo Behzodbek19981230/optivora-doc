@@ -19,12 +19,14 @@ import DeleteConfirmDialog from '../dialogs/DeleteConfirmDialog'
 import IconifyIcon from 'src/@core/components/icon'
 import endpoints from 'src/configs/endpoints'
 import { useFetchList } from 'src/hooks/useFetchList'
+import { DataService } from 'src/configs/dataService'
+import toast from 'react-hot-toast'
 
 const RegionTable = () => {
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [search, setSearch] = useState('')
-  const { data, total, loading, mutate } = useFetchList<any>(endpoints.country, {
+  const { data, total, loading, mutate } = useFetchList<any>(endpoints.region, {
     page: page + 1,
     perPage: rowsPerPage,
     search
@@ -51,9 +53,10 @@ const RegionTable = () => {
   const handleDeleteConfirm = async () => {
     if (selected) {
       // TODO: Replace with your actual DataService
-      // await DataService.delete(`/region/${selected.id}`)
+      await DataService.delete(`/region/${selected.id}`)
       mutate()
       setOpenDelete(false)
+      toast.success('Viloyat muvaffaqiyatli o‘chirildi')
     }
   }
 

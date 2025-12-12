@@ -20,6 +20,11 @@ const navigation = (): VerticalNavItemsType => {
       path: '/apps/calendar'
     },
     {
+      title: 'Buyruqlar',
+      icon: 'tabler:command',
+      path: '/commands'
+    },
+    {
       title: 'Hududlar',
       icon: 'tabler:map-pin',
       path: '/locations'
