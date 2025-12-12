@@ -27,8 +27,8 @@ const endpoints = {
   industryById: (id: string | number | string[] | null | undefined) => `/industry/${normalizeId(id)}`,
   industryFields: '/industry/fields',
 
-  user: '/user',
-  userById: (id: number) => `/user/${id}`,
+  users: '/user',
+  userById: (id: string | number | string[] | null | undefined) => `/user/${normalizeId(id)}`,
 
   equipmentCategories: '/equipment-category',
   equipmentCategoryById: (id: string | number | string[] | null | undefined) =>

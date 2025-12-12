@@ -15,6 +15,11 @@ const navigation = (): VerticalNavItemsType => {
     },
 
     {
+      title: 'Foydalanuvchilar',
+      icon: 'tabler:users',
+      path: '/users'
+    },
+    {
       title: 'Calendar',
       icon: 'tabler:calendar',
       path: '/apps/calendar'
@@ -30,7 +35,7 @@ const navigation = (): VerticalNavItemsType => {
       path: '/locations'
     },
     {
-      title: 'Bo`lim/Lavozim',
+      title: 'Bo‘lim/Lavozim',
       icon: 'tabler:users-group',
       path: '/org'
     },
