@@ -30,6 +30,11 @@ const navigation = (): VerticalNavItemsType => {
       path: '/commands'
     },
     {
+      title: 'Javob xatlari',
+      icon: 'tabler:mail',
+      path: '/reply-letter'
+    },
+    {
       title: 'Hududlar',
       icon: 'tabler:map-pin',
       path: '/locations'

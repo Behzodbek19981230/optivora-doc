@@ -43,6 +43,13 @@ const endpoints = {
   company: '/company/',
   companyById: (id: string | number | string[] | null | undefined) => `/company/${normalizeId(id)}`,
 
+  // Reply letters (Javob xatlari)
+  replyLetter: '/reply-letter/',
+  replyLetterById: (id: string | number | string[] | null | undefined) => `/reply-letter/${normalizeId(id)}`,
+  // files attached to reply letters
+  replyLetterFile: '/reply-letter-file/',
+  replyLetterFileById: (id: string | number | string[] | null | undefined) => `/reply-letter-file/${normalizeId(id)}`,
+
   // Org structure
   department: '/department/',
   departmentById: (id: string | number | string[] | null | undefined) => `/department/${normalizeId(id)}`,
