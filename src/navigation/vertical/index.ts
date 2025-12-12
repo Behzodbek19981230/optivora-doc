@@ -28,6 +28,16 @@ const navigation = (): VerticalNavItemsType => {
       title: 'Hududlar',
       icon: 'tabler:map-pin',
       path: '/locations'
+    },
+    {
+      title: 'Bo`lim/Lavozim',
+      icon: 'tabler:users-group',
+      path: '/org'
+    },
+    {
+      title: 'Kompaniyalar',
+      icon: 'tabler:building',
+      path: '/company'
     }
   ]
 }

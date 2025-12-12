@@ -39,6 +39,15 @@ const endpoints = {
 
   partners: '/partner',
   partnerById: (id: string | number | string[] | null | undefined) => `/partner/${normalizeId(id)}`,
+  // Company CRUD
+  company: '/company/',
+  companyById: (id: string | number | string[] | null | undefined) => `/company/${normalizeId(id)}`,
+
+  // Org structure
+  department: '/department/',
+  departmentById: (id: string | number | string[] | null | undefined) => `/department/${normalizeId(id)}`,
+  position: '/position/',
+  positionById: (id: string | number | string[] | null | undefined) => `/position/${normalizeId(id)}`,
 
   projects: '/project',
   projectById: (id: string | number | string[] | null | undefined) => `/project/${normalizeId(id)}`,
