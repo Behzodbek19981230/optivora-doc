@@ -2,6 +2,7 @@
 const normalizeId = (id: string | number | string[] | null | undefined) => {
   if (Array.isArray(id)) return id[0]
   if (id === null || id === undefined) return ''
+
   return String(id)
 }
 
@@ -22,6 +23,7 @@ const endpoints = {
   countryFields: '/country/fields/',
   command: '/command/',
   commandById: (id: string | number | string[] | null | undefined) => `/command/${normalizeId(id)}`,
+
   // CMS resources
   industries: '/industry',
   industryById: (id: string | number | string[] | null | undefined) => `/industry/${normalizeId(id)}`,
@@ -39,6 +41,7 @@ const endpoints = {
 
   partners: '/partner',
   partnerById: (id: string | number | string[] | null | undefined) => `/partner/${normalizeId(id)}`,
+
   // Company CRUD
   company: '/company/',
   companyById: (id: string | number | string[] | null | undefined) => `/company/${normalizeId(id)}`,
@@ -46,6 +49,7 @@ const endpoints = {
   // Reply letters (Javob xatlari)
   replyLetter: '/reply-letter/',
   replyLetterById: (id: string | number | string[] | null | undefined) => `/reply-letter/${normalizeId(id)}`,
+
   // files attached to reply letters
   replyLetterFile: '/reply-letter-file/',
   replyLetterFileById: (id: string | number | string[] | null | undefined) => `/reply-letter-file/${normalizeId(id)}`,

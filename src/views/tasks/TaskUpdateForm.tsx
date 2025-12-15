@@ -1,5 +1,30 @@
 import { useEffect, useState } from 'react'
-import { Grid, Stack, Button, MenuItem, Card, CardContent } from '@mui/material'
+import {
+  Grid,
+  Stack,
+  Button,
+  MenuItem,
+  Card,
+  CardContent,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  FormLabel,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  Typography
+} from '@mui/material'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
@@ -13,7 +38,7 @@ import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { useFetchList } from 'src/hooks/useFetchList'
 import DatePicker from 'react-datepicker'
 import { useAuth } from 'src/hooks/useAuth'
-import TaskPartPanel from './view/TaskPartPanel'
+import Icon from 'src/@core/components/icon'
 
 export type TaskPayload = {
   status?: string
@@ -40,17 +65,17 @@ const defaults: TaskPayload = {
   status: 'new',
   type: 'task',
   name: '',
-  task_form: undefined,
-  sending_org: undefined,
+  task_form: 0,
+  sending_org: 0,
   input_doc_number: '',
   output_doc_number: '',
   start_date: '',
   end_date: '',
   priority: 'ordinary',
-  department: undefined,
-  signed_by: undefined,
+  department: 0,
+  signed_by: 0,
   note: '',
-  list_of_magazine: undefined
+  list_of_magazine: 0
 }
 
 // Yup validation schema
@@ -69,6 +94,7 @@ const schema: yup.ObjectSchema<TaskPayload> = yup.object({
     .test('end-after-start', 'Tugash sanasi boshlanishdan keyin bo‘lsin', function (value) {
       const { start_date } = this.parent as TaskPayload
       if (!start_date || !value) return true
+
       return new Date(value) >= new Date(start_date)
     }),
   priority: yup.string().oneOf(['ordinary', 'orgently']).required('Majburiy maydon'),
@@ -77,6 +103,18 @@ const schema: yup.ObjectSchema<TaskPayload> = yup.object({
   list_of_magazine: yup.number().required('Majburiy maydon'),
   signed_by: yup.number().required('Majburiy maydon')
 }) as yup.ObjectSchema<TaskPayload>
+
+type TaskPartPayload = {
+  task: number
+  title: string
+  department: number
+  assignee: number
+  start_date: string
+  end_date: string
+  note: string
+}
+
+type TaskPartItem = TaskPartPayload & { id: number; status: string }
 
 const TaskUpdateForm = () => {
   const { control, handleSubmit, reset } = useForm<TaskPayload>({
@@ -87,6 +125,21 @@ const TaskUpdateForm = () => {
   const router = useRouter()
   const { id } = router.query
   const { user } = useAuth()
+
+  // State for assignment mode
+  const [assignmentMode, setAssignmentMode] = useState<'simple' | 'split'>('simple')
+  const [simpleAssignee, setSimpleAssignee] = useState<number>(0)
+  const [taskParts, setTaskParts] = useState<TaskPartItem[]>([])
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [partForm, setPartForm] = useState<Partial<TaskPartPayload>>({
+    title: '',
+    department: 0,
+    assignee: 0,
+    start_date: '',
+    end_date: '',
+    note: ''
+  })
+  const [partErrors, setPartErrors] = useState<{ [K in keyof TaskPartPayload]?: string }>({})
 
   const { data: departments } = useFetchList<{ id: number; name: string }>(endpoints.department, {
     page: 1,
@@ -117,14 +170,137 @@ const TaskUpdateForm = () => {
       if (!id || Array.isArray(id)) return
       const res = await DataService.get<TaskPayload>(endpoints.taskById(id))
       const data = res.data as TaskPayload
+
       // Reset form with existing values
       reset({
         ...defaults,
-        ...data
+        ...data,
+
+        // Normalize numeric selects to numbers with fallback
+        task_form: typeof data.task_form === 'number' ? data.task_form : 0,
+        sending_org: data.sending_org || 0,
+        department: typeof data.department === 'number' ? data.department : 0,
+        signed_by: typeof data.signed_by === 'number' ? data.signed_by : 0,
+        list_of_magazine: typeof data.list_of_magazine === 'number' ? data.list_of_magazine : 0,
+
+        // Ensure dates are ISO yyyy-MM-dd if present
+        start_date: data.start_date ? new Date(data.start_date).toISOString().slice(0, 10) : '',
+        end_date: data.end_date ? new Date(data.end_date).toISOString().slice(0, 10) : ''
       })
     }
     fetchTask()
   }, [id, reset])
+
+  useEffect(() => {
+    const fetchTaskParts = async () => {
+      if (!id || Array.isArray(id)) return
+      try {
+        const res = await DataService.get<any>(endpoints.taskPart, { task: id, perPage: 50 })
+        setTaskParts((res.data?.results || []) as TaskPartItem[])
+      } catch (e) {
+        console.error('Error fetching task parts:', e)
+      }
+    }
+    fetchTaskParts()
+  }, [id])
+
+  const handleCreateSimpleAssignment = async () => {
+    if (!id || Array.isArray(id) || !simpleAssignee) return
+    try {
+      await DataService.post(endpoints.taskPart, {
+        task: Number(id),
+        title: 'Oddiy topshiriq',
+        department: 0,
+        assignee: simpleAssignee,
+        start_date: '',
+        end_date: '',
+        status: 'new',
+        note: '',
+        created_by: user?.id || 1,
+        updated_by: user?.id || 1
+      })
+      toast.success('Ijrochi biriktirildi')
+
+      // Refresh task parts
+      const res = await DataService.get<any>(endpoints.taskPart, { task: id, perPage: 50 })
+      setTaskParts((res.data?.results || []) as TaskPartItem[])
+    } catch (e: any) {
+      toast.error(e?.message || 'Xatolik yuz berdi')
+    }
+  }
+
+  const handleOpenDialog = () => {
+    setPartForm({
+      title: '',
+      department: 0,
+      assignee: 0,
+      start_date: '',
+      end_date: '',
+      note: ''
+    })
+    setPartErrors({})
+    setDialogOpen(true)
+  }
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false)
+  }
+
+  const handleSaveTaskPart = async () => {
+    if (!id || Array.isArray(id)) return
+
+    // Validate required fields
+    const errors: { [K in keyof TaskPartPayload]?: string } = {}
+    if (!partForm.title || !partForm.title.trim()) errors.title = 'Majburiy maydon'
+    if (!partForm.department || Number(partForm.department) <= 0) errors.department = 'Majburiy maydon'
+    if (!partForm.assignee || Number(partForm.assignee) <= 0) errors.assignee = 'Majburiy maydon'
+    if (!partForm.start_date) errors.start_date = 'Majburiy maydon'
+    if (!partForm.end_date) errors.end_date = 'Majburiy maydon'
+    if (partForm.start_date && partForm.end_date) {
+      const s = new Date(partForm.start_date)
+      const e = new Date(partForm.end_date)
+      if (e < s) errors.end_date = 'Tugash sanasi boshlanishdan keyin bo‘lsin'
+    }
+    if (!partForm.note || !String(partForm.note).trim()) errors.note = 'Majburiy maydon'
+    setPartErrors(errors)
+    if (Object.keys(errors).length > 0) {
+      toast.error('Qismlar formasi to‘ldirilishi shart')
+
+      return
+    }
+    try {
+      await DataService.post(endpoints.taskPart, {
+        task: Number(id),
+        title: partForm.title || 'Yangi qism',
+        department: partForm.department || 0,
+        assignee: partForm.assignee || 0,
+        start_date: partForm.start_date || '',
+        end_date: partForm.end_date || '',
+        status: 'new',
+        note: partForm.note || '',
+        created_by: user?.id || 1,
+        updated_by: user?.id || 1
+      })
+      toast.success('Task part yaratildi')
+      setDialogOpen(false)
+
+      // Refresh task parts
+      const res = await DataService.get<any>(endpoints.taskPart, { task: id, perPage: 50 })
+      setTaskParts((res.data?.results || []) as TaskPartItem[])
+    } catch (e: any) {
+      toast.error(e?.message || 'Xatolik yuz berdi')
+    }
+  }
+
+  const handleDeleteTaskPart = async (partId: number) => {
+    try {
+      await DataService.delete(endpoints.taskPartById(partId))
+      toast.success("Task part o'chirildi")
+      setTaskParts(taskParts.filter(p => p.id !== partId))
+    } catch (e: any) {
+      toast.error(e?.message || 'Xatolik yuz berdi')
+    }
+  }
 
   const onSubmit = async (values: TaskPayload) => {
     try {
@@ -224,6 +400,7 @@ const TaskUpdateForm = () => {
                       error={!!fieldState.error}
                       helperText={fieldState.error?.message}
                     >
+                      <MenuItem value={0}>---</MenuItem>
                       {(companies || []).map(c => (
                         <MenuItem key={c.id} value={c.id}>
                           {c.name}
@@ -274,6 +451,7 @@ const TaskUpdateForm = () => {
                   rules={{ required: 'Majburiy maydon' }}
                   render={({ field, fieldState }) => {
                     const selectedDate = field.value ? new Date(field.value) : null
+
                     return (
                       <div>
                         <DatePicker
@@ -303,6 +481,7 @@ const TaskUpdateForm = () => {
                   rules={{ required: 'Majburiy maydon' }}
                   render={({ field, fieldState }) => {
                     const selectedDate = field.value ? new Date(field.value) : null
+
                     return (
                       <div>
                         <DatePicker
@@ -340,6 +519,7 @@ const TaskUpdateForm = () => {
                       error={!!fieldState.error}
                       helperText={fieldState.error?.message}
                     >
+                      <MenuItem value={0}>---</MenuItem>
                       {(departments || []).map(d => (
                         <MenuItem key={d.id} value={d.id}>
                           {d.name}
@@ -363,6 +543,7 @@ const TaskUpdateForm = () => {
                       error={!!fieldState.error}
                       helperText={fieldState.error?.message}
                     >
+                      <MenuItem value={0}>---</MenuItem>
                       {(users || []).map(u => (
                         <MenuItem key={u.id} value={u.id}>
                           {u.fullname}
@@ -430,7 +611,197 @@ const TaskUpdateForm = () => {
           </form>
         </DatePickerWrapper>
       </CardContent>
-      <TaskPartPanel taskId={Array.isArray(id) ? id[0] : (id as string)} />
+
+      {/* Assignment Section */}
+      <CardContent>
+        <FormControl component='fieldset'>
+          <FormLabel component='legend'>Ijrochi biriktiruvi usuli</FormLabel>
+          <RadioGroup
+            row
+            value={assignmentMode}
+            onChange={e => setAssignmentMode(e.target.value as 'simple' | 'split')}
+          >
+            <FormControlLabel value='simple' control={<Radio />} label='Oddiy biriktirish' />
+            <FormControlLabel value='split' control={<Radio />} label="Qismlarga bo'lish" />
+          </RadioGroup>
+        </FormControl>
+
+        {assignmentMode === 'simple' ? (
+          <Stack spacing={2} sx={{ mt: 3 }}>
+            <Typography variant='subtitle2'>Bitta ijrochi tanlang:</Typography>
+            <Grid container spacing={2} alignItems='end'>
+              <Grid item xs={12} sm={8}>
+                <CustomTextField
+                  select
+                  fullWidth
+                  label='Ijrochi'
+                  value={simpleAssignee}
+                  onChange={e => setSimpleAssignee(Number(e.target.value))}
+                >
+                  <MenuItem value={0}>---</MenuItem>
+                  {(users || []).map(u => (
+                    <MenuItem key={u.id} value={u.id}>
+                      {u.fullname}
+                    </MenuItem>
+                  ))}
+                </CustomTextField>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <Button variant='contained' fullWidth onClick={handleCreateSimpleAssignment} disabled={!simpleAssignee}>
+                  Biriktirish
+                </Button>
+              </Grid>
+            </Grid>
+          </Stack>
+        ) : (
+          <Stack spacing={2} sx={{ mt: 3 }}>
+            <Stack direction='row' justifyContent='space-between' alignItems='center'>
+              <Typography variant='subtitle2'>Task qismlari:</Typography>
+              <Button variant='contained' size='small' startIcon={<Icon icon='mdi:plus' />} onClick={handleOpenDialog}>
+                Qo'shish
+              </Button>
+            </Stack>
+
+            {taskParts.length > 0 ? (
+              <TableContainer component={Paper}>
+                <Table size='small'>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Sarlavha</TableCell>
+                      <TableCell>Bo'lim</TableCell>
+                      <TableCell>Ijrochi</TableCell>
+                      <TableCell>Bosh. sanasi</TableCell>
+                      <TableCell>Tug. sanasi</TableCell>
+                      <TableCell>Izoh</TableCell>
+                      <TableCell align='right'>Amal</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {taskParts.map(part => (
+                      <TableRow key={part.id}>
+                        <TableCell>{part.title}</TableCell>
+                        <TableCell>
+                          {departments?.find(d => d.id === part.department)?.name || part.department}
+                        </TableCell>
+                        <TableCell>{users?.find(u => u.id === part.assignee)?.fullname || part.assignee}</TableCell>
+                        <TableCell>{part.start_date}</TableCell>
+                        <TableCell>{part.end_date}</TableCell>
+                        <TableCell>{part.note}</TableCell>
+                        <TableCell align='right'>
+                          <IconButton size='small' color='error' onClick={() => handleDeleteTaskPart(part.id)}>
+                            <Icon icon='mdi:delete' />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <Typography variant='body2' color='text.secondary'>
+                Hali qismlar qo'shilmagan
+              </Typography>
+            )}
+          </Stack>
+        )}
+      </CardContent>
+
+      {/* Dialog for adding task parts */}
+      <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth='sm' fullWidth>
+        <DialogTitle>Task part qo'shish</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={3} sx={{ mt: 1 }}>
+            <Grid item xs={12}>
+              <CustomTextField
+                fullWidth
+                label='Sarlavha'
+                value={partForm.title}
+                onChange={e => setPartForm({ ...partForm, title: e.target.value })}
+                error={!!partErrors.title}
+                helperText={partErrors.title}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                select
+                fullWidth
+                label="Bo'lim"
+                value={partForm.department}
+                onChange={e => setPartForm({ ...partForm, department: Number(e.target.value) })}
+                error={!!partErrors.department}
+                helperText={partErrors.department}
+              >
+                <MenuItem value={0}>---</MenuItem>
+                {(departments || []).map(d => (
+                  <MenuItem key={d.id} value={d.id}>
+                    {d.name}
+                  </MenuItem>
+                ))}
+              </CustomTextField>
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                select
+                fullWidth
+                label='Ijrochi'
+                value={partForm.assignee}
+                onChange={e => setPartForm({ ...partForm, assignee: Number(e.target.value) })}
+                error={!!partErrors.assignee}
+                helperText={partErrors.assignee}
+              >
+                <MenuItem value={0}>---</MenuItem>
+                {(users || []).map(u => (
+                  <MenuItem key={u.id} value={u.id}>
+                    {u.fullname}
+                  </MenuItem>
+                ))}
+              </CustomTextField>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <CustomTextField
+                fullWidth
+                type='date'
+                label='Boshlanish sanasi'
+                value={partForm.start_date}
+                onChange={e => setPartForm({ ...partForm, start_date: e.target.value })}
+                InputLabelProps={{ shrink: true }}
+                error={!!partErrors.start_date}
+                helperText={partErrors.start_date}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <CustomTextField
+                fullWidth
+                type='date'
+                label='Tugash sanasi'
+                value={partForm.end_date}
+                onChange={e => setPartForm({ ...partForm, end_date: e.target.value })}
+                InputLabelProps={{ shrink: true }}
+                error={!!partErrors.end_date}
+                helperText={partErrors.end_date}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                fullWidth
+                multiline
+                rows={3}
+                label='Izoh'
+                value={partForm.note}
+                onChange={e => setPartForm({ ...partForm, note: e.target.value })}
+                error={!!partErrors.note}
+                helperText={partErrors.note}
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Bekor qilish</Button>
+          <Button variant='contained' onClick={handleSaveTaskPart}>
+            Saqlash
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   )
 }

@@ -44,11 +44,17 @@ const TaskTable = () => {
       sortable: false,
       renderCell: params => {
         const id = (params.row as any).id
+
         return (
           <Stack direction='row' spacing={1}>
             <Tooltip title='View'>
               <IconButton size='small' component={Link} href={`/tasks/view/${id}`}>
                 <IconifyIcon icon='tabler:eye' />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title='Edit'>
+              <IconButton size='small' component={Link} href={`/tasks/update/${id}`}>
+                <IconifyIcon icon='tabler:pencil' />
               </IconButton>
             </Tooltip>
           </Stack>
