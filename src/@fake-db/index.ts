@@ -19,5 +19,7 @@ import './pages/help-center'
 import './server-side-menu/vertical'
 import './server-side-menu/horizontal'
 import './documents'
+import './document-form'
+import './list-of-magazine'
 
 mock.onAny().passThrough()

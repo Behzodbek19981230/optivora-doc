@@ -54,6 +54,14 @@ const endpoints = {
   documents: '/documents/',
   documentById: (id: string | number | string[] | null | undefined) => `/documents/${normalizeId(id)}`,
 
+  // Document Forms (Hujjat shakli)
+  documentForm: '/document-form/',
+  documentFormById: (id: string | number | string[] | null | undefined) => `/document-form/${normalizeId(id)}`,
+
+  // List of Magazines (Jurnallar ro'yxati)
+  listOfMagazine: '/list-of-magazine/',
+  listOfMagazineById: (id: string | number | string[] | null | undefined) => `/list-of-magazine/${normalizeId(id)}`,
+
   // Org structure
   department: '/department/',
   departmentById: (id: string | number | string[] | null | undefined) => `/department/${normalizeId(id)}`,

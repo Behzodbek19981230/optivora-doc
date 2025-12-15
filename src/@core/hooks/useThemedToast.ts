@@ -9,13 +9,14 @@ const useThemedToast = () => {
   const success = (message: string, opts?: Options) =>
     toast.success(message, {
       style: {
-        padding: '16px',
-        color: theme.palette.primary.main,
-        border: `1px solid ${theme.palette.primary.main}`
+        paddingInline: '10px',
+        paddingBlock: '6px',
+        color: theme.palette.success.main,
+        border: `1px solid ${theme.palette.success.main}`
       },
       iconTheme: {
-        primary: theme.palette.primary.main,
-        secondary: theme.palette.primary.contrastText
+        primary: theme.palette.success.main,
+        secondary: theme.palette.success.contrastText
       },
       ...opts
     })
@@ -23,7 +24,8 @@ const useThemedToast = () => {
   const error = (message: string, opts?: Options) =>
     toast.error(message, {
       style: {
-        padding: '16px',
+        paddingInline: '10px',
+        paddingBlock: '6px',
         color: theme.palette.error.main,
         border: `1px solid ${theme.palette.error.main}`
       },

@@ -50,6 +50,16 @@ const navigation = (): VerticalNavItemsType => {
       path: '/users'
     },
     {
+      title: 'Hujjat shakli',
+      icon: 'tabler:file-description',
+      path: '/document-form'
+    },
+    {
+      title: "Jurnallar ro'yxati",
+      icon: 'tabler:notebook',
+      path: '/list-of-magazine'
+    },
+    {
       title: 'Bo‘lim/Lavozim',
       icon: 'tabler:users-group',
       path: '/org'
