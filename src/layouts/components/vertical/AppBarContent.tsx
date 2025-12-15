@@ -11,7 +11,7 @@ import { Settings } from 'src/@core/context/settingsContext'
 
 // ** Components
 import Autocomplete from 'src/layouts/components/Autocomplete'
-import { Button, Menu, MenuItem, Avatar, ListItemIcon, ListItemText } from '@mui/material'
+import { Button, Menu, MenuItem, Avatar, ListItemIcon, ListItemText, Typography } from '@mui/material'
 import ModeToggler from 'src/@core/layouts/components/shared-components/ModeToggler'
 import UserDropdown from 'src/@core/layouts/components/shared-components/UserDropdown'
 import LanguageDropdown from 'src/@core/layouts/components/shared-components/LanguageDropdown'
@@ -191,35 +191,82 @@ const CompanyDropdown = ({ auth }: any) => {
 
   return (
     <>
-      <Button
-        onClick={handleOpen}
-        color='inherit'
-        startIcon={
-          <Avatar sx={{ width: 24, height: 24 }} src={selected?.logo || undefined}>
-            <Icon icon='tabler:building' />
-          </Avatar>
-        }
-        sx={{ textTransform: 'none' }}
-      >
-        {selected ? `${selected.name}${selected.code ? ` (${selected.code})` : ''}` : 'Choose company'}
+      <Button onClick={handleOpen} color='primary' variant='outlined' size='small' className=''>
+        {selected ? (
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            {selected.logo && (
+              <Avatar
+                src={`${process.env.NEXT_PUBLIC_FILE_URL}${selected.logo}`}
+                alt={selected.name}
+                sx={{ width: 20, height: 20, mr: 1, bgcolor: 'background.default', objectFit: 'contain' }}
+              />
+            )}
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start'
+              }}
+            >
+              <span>{selected.name}</span>
+              <Typography variant='caption' color='text.secondary'>
+                {selected.region_detail?.name},{selected.district_detail?.name}
+              </Typography>
+            </Box>
+          </Box>
+        ) : (
+          'Select Company'
+        )}
+        <Icon
+          icon='tabler:chevron-down'
+          fontSize='1.25rem'
+          style={{
+            marginLeft: 8,
+            transition: 'transform 0.25s ease-in-out',
+            transform: open ? 'rotate(180deg)' : 'none'
+          }}
+        />
       </Button>
       <Menu anchorEl={anchorEl} open={open} onClose={handleClose} keepMounted>
         {companiesDetail.length > 0
           ? companiesDetail.map((c: any) => (
-              <MenuItem key={c.id} selected={c.id === selectedId} onClick={() => choose(c.id)}>
-                <ListItemIcon>
-                  <Avatar sx={{ width: 24, height: 24 }} src={c.logo || undefined}>
-                    <Icon icon='tabler:building' />
-                  </Avatar>
-                </ListItemIcon>
-                <ListItemText primary={c.name} secondary={c.code ? `Code: ${c.code}` : undefined} />
+              <MenuItem
+                key={c.id}
+                selected={c.id === selectedId}
+                onClick={() => choose(c.id)}
+                sx={{
+                  width: 300
+                }}
+              >
+                {c.logo && (
+                  <Avatar
+                    src={`${process.env.NEXT_PUBLIC_FILE_URL}${c.logo}`}
+                    alt={c.name}
+                    sx={{ width: 20, height: 20, mr: 1, bgcolor: 'background.default' }}
+                  />
+                )}
+                <ListItemText
+                  primary={
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column'
+                      }}
+                    >
+                      <span>{c.name}</span>
+                      <Typography variant='caption' color='text.secondary'>
+                        {c.region_detail?.name},{c.district_detail?.name}
+                      </Typography>
+                    </Box>
+                  }
+                />
+                <Typography variant='caption' sx={{ marginLeft: 'auto', color: 'text.disabled' }}>
+                  CODE: {c.code}
+                </Typography>
               </MenuItem>
             ))
           : companiesIds.map((id: number) => (
               <MenuItem key={id} selected={id === selectedId} onClick={() => choose(id)}>
-                <ListItemIcon>
-                  <Icon icon='tabler:building' />
-                </ListItemIcon>
                 <ListItemText primary={`Company ${id}`} />
               </MenuItem>
             ))}
