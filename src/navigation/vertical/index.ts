@@ -11,13 +11,7 @@ const navigation = (): VerticalNavItemsType => {
       path: '/dashboards'
     },
     {
-      sectionTitle: 'Apps & Pages'
-    },
-
-    {
-      title: 'Foydalanuvchilar',
-      icon: 'tabler:users',
-      path: '/users'
+      sectionTitle: 'Asosiy'
     },
     {
       title: 'Calendar',
@@ -35,14 +29,35 @@ const navigation = (): VerticalNavItemsType => {
       path: '/reply-letter'
     },
     {
-      title: 'Hududlar',
-      icon: 'tabler:map-pin',
-      path: '/locations'
+      title: 'Hujjatlar',
+      icon: 'tabler:folder',
+      path: '/documents/all',
+      children: [
+        { title: 'All', path: '/documents/all' },
+        { title: 'In Progress', path: '/documents/in-progress' },
+        { title: 'Accepted', path: '/documents/accepted' },
+        { title: 'Cancelled', path: '/documents/cancelled' },
+        { title: 'Completed', path: '/documents/completed' },
+        { title: 'Returned', path: '/documents/returned' }
+      ]
+    },
+    {
+      sectionTitle: 'Kataloglar'
+    },
+    {
+      title: 'Foydalanuvchilar',
+      icon: 'tabler:users',
+      path: '/users'
     },
     {
       title: 'Bo‘lim/Lavozim',
       icon: 'tabler:users-group',
       path: '/org'
+    },
+    {
+      title: 'Hududlar',
+      icon: 'tabler:map-pin',
+      path: '/locations'
     },
     {
       title: 'Kompaniyalar',

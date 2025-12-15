@@ -18,5 +18,6 @@ import './apps/permissions'
 import './pages/help-center'
 import './server-side-menu/vertical'
 import './server-side-menu/horizontal'
+import './documents'
 
 mock.onAny().passThrough()

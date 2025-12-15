@@ -8,25 +8,14 @@ import Typography from '@mui/material/Typography'
 import Icon from 'src/@core/components/icon'
 
 // ** Third Party Components
-import toast from 'react-hot-toast'
+import useThemedToast from 'src/@core/hooks/useThemedToast'
 
 const ToastThemed = () => {
-  // ** Hook
+  // ** Hooks
   const theme = useTheme()
+  const toast = useThemedToast()
 
-  const handleClick = () => {
-    return toast.success('Look at me, I have brand styles.', {
-      style: {
-        padding: '16px',
-        color: theme.palette.primary.main,
-        border: `1px solid ${theme.palette.primary.main}`
-      },
-      iconTheme: {
-        primary: theme.palette.primary.main,
-        secondary: theme.palette.primary.contrastText
-      }
-    })
-  }
+  const handleClick = () => toast.success('Look at me, I have brand styles.')
 
   return (
     <Box

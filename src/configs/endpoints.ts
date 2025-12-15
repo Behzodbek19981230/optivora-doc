@@ -50,6 +50,10 @@ const endpoints = {
   replyLetterFile: '/reply-letter-file/',
   replyLetterFileById: (id: string | number | string[] | null | undefined) => `/reply-letter-file/${normalizeId(id)}`,
 
+  // Documents
+  documents: '/documents/',
+  documentById: (id: string | number | string[] | null | undefined) => `/documents/${normalizeId(id)}`,
+
   // Org structure
   department: '/department/',
   departmentById: (id: string | number | string[] | null | undefined) => `/department/${normalizeId(id)}`,
