@@ -71,9 +71,21 @@ client.interceptors.request.use(
 
 client.interceptors.response.use(
   (response: AxiosResponse) => {
+    if (process.env.NEXT_PUBLIC_LOG_AXIOS === 'true') {
+      const cfg: any = response.config || {}
+      const took = cfg._startedAt ? `${Date.now() - cfg._startedAt}ms` : '—'
+      // eslint-disable-next-line no-console
+      console.log('[API] <-', response.status, response.config.method?.toUpperCase(), response.config.url, took)
+    }
     return response
   },
   async (error: AxiosError<ApiError>) => {
+    if (process.env.NEXT_PUBLIC_LOG_AXIOS === 'true') {
+      const res = error.response
+      const status = res?.status || 'ERR'
+      // eslint-disable-next-line no-console
+      console.warn('[API] x ', status, error.config?.method?.toUpperCase(), error.config?.url, error.message)
+    }
     const config = error.config as RequestConfig
 
     if (error.response) {

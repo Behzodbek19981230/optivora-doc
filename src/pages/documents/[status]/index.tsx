@@ -19,7 +19,7 @@ const DocumentsStatusPage = () => {
     <Card>
       <CardHeader title='Hujjatlar' />
       <CardContent>
-        <DocumentTabs currentStatus={(status as DocumentStatus) || DocumentStatus.All} />
+        <DocumentTabs currentStatus={(status as DocumentStatus) || DocumentStatus.New} />
       </CardContent>
     </Card>
   )

@@ -6,24 +6,24 @@ import { useFetchList } from 'src/hooks/useFetchList'
 import endpoints from 'src/configs/endpoints'
 
 export enum DocumentStatus {
-  All = 'all',
-  InProgress = 'in-progress',
-  Accepted = 'accepted',
+  New = 'new',
+  InProgress = 'in_progress',
+  OnReview = 'on_review',
   Cancelled = 'cancelled',
-  Completed = 'completed',
+  Done = 'done',
   Returned = 'returned'
 }
 
 const statuses: { key: DocumentStatus; label: string }[] = [
-  { key: DocumentStatus.All, label: 'All' },
+  { key: DocumentStatus.New, label: 'New' },
   { key: DocumentStatus.InProgress, label: 'In Progress' },
-  { key: DocumentStatus.Accepted, label: 'Accepted' },
+  { key: DocumentStatus.OnReview, label: 'On Review' },
   { key: DocumentStatus.Cancelled, label: 'Cancelled' },
-  { key: DocumentStatus.Completed, label: 'Completed' },
+  { key: DocumentStatus.Done, label: 'Done' },
   { key: DocumentStatus.Returned, label: 'Returned' }
 ]
 
-const normalize = (s: string): DocumentStatus => (s as DocumentStatus) || DocumentStatus.All
+const normalize = (s: string): DocumentStatus => (s as DocumentStatus) || DocumentStatus.New
 
 const DocumentTabs = ({ currentStatus }: { currentStatus: DocumentStatus }) => {
   const router = useRouter()
@@ -32,7 +32,7 @@ const DocumentTabs = ({ currentStatus }: { currentStatus: DocumentStatus }) => {
   useEffect(() => {
     // If route has no status, redirect to default
     if (!currentStatus) {
-      router.replace(`/documents/${DocumentStatus.All}`)
+      router.replace(`/documents/${DocumentStatus.New}`)
     }
   }, [currentStatus, router])
 
@@ -42,29 +42,28 @@ const DocumentTabs = ({ currentStatus }: { currentStatus: DocumentStatus }) => {
 
   // Fetch totals for badges per status (server reports pagination.total)
   const totals = {
-    [DocumentStatus.All]: useFetchList<any>(endpoints.documents, { page: 1, perPage: 1, status: DocumentStatus.All })
-      .total,
-    [DocumentStatus.InProgress]: useFetchList<any>(endpoints.documents, {
+    [DocumentStatus.New]: useFetchList(endpoints.task, { page: 1, perPage: 1, status: DocumentStatus.New }).total,
+    [DocumentStatus.InProgress]: useFetchList(endpoints.task, {
       page: 1,
       perPage: 1,
       status: DocumentStatus.InProgress
     }).total,
-    [DocumentStatus.Accepted]: useFetchList<any>(endpoints.documents, {
+    [DocumentStatus.OnReview]: useFetchList(endpoints.task, {
       page: 1,
       perPage: 1,
-      status: DocumentStatus.Accepted
+      status: DocumentStatus.OnReview
     }).total,
-    [DocumentStatus.Cancelled]: useFetchList<any>(endpoints.documents, {
+    [DocumentStatus.Cancelled]: useFetchList(endpoints.task, {
       page: 1,
       perPage: 1,
       status: DocumentStatus.Cancelled
     }).total,
-    [DocumentStatus.Completed]: useFetchList<any>(endpoints.documents, {
+    [DocumentStatus.Done]: useFetchList(endpoints.task, {
       page: 1,
       perPage: 1,
-      status: DocumentStatus.Completed
+      status: DocumentStatus.Done
     }).total,
-    [DocumentStatus.Returned]: useFetchList<any>(endpoints.documents, {
+    [DocumentStatus.Returned]: useFetchList(endpoints.task, {
       page: 1,
       perPage: 1,
       status: DocumentStatus.Returned

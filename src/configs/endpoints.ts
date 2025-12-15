@@ -62,6 +62,18 @@ const endpoints = {
   listOfMagazine: '/list-of-magazine/',
   listOfMagazineById: (id: string | number | string[] | null | undefined) => `/list-of-magazine/${normalizeId(id)}`,
 
+  // Tasks (Documents as Tasks)
+  task: '/task/',
+  taskById: (id: string | number | string[] | null | undefined) => `/task/${normalizeId(id)}`,
+  taskPart: '/task-part/',
+  taskPartById: (id: string | number | string[] | null | undefined) => `/task-part/${normalizeId(id)}`,
+  taskEvent: '/task-event/',
+  taskEventById: (id: string | number | string[] | null | undefined) => `/task-event/${normalizeId(id)}`,
+  taskComment: '/task-comment/',
+  taskCommentById: (id: string | number | string[] | null | undefined) => `/task-comment/${normalizeId(id)}`,
+  taskAttachment: '/task-attachment/',
+  taskAttachmentById: (id: string | number | string[] | null | undefined) => `/task-attachment/${normalizeId(id)}`,
+
   // Org structure
   department: '/department/',
   departmentById: (id: string | number | string[] | null | undefined) => `/department/${normalizeId(id)}`,

@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 const DocumentsIndexPage = () => {
   const router = useRouter()
   useEffect(() => {
-    router.replace('/documents/all')
+    router.replace('/documents/new')
   }, [router])
 
   return null

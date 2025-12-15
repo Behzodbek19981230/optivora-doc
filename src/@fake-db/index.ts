@@ -21,5 +21,6 @@ import './server-side-menu/horizontal'
 import './documents'
 import './document-form'
 import './list-of-magazine'
+import './tasks'
 
 mock.onAny().passThrough()

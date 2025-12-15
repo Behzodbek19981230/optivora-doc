@@ -31,13 +31,13 @@ const navigation = (): VerticalNavItemsType => {
     {
       title: 'Hujjatlar',
       icon: 'tabler:folder',
-      path: '/documents/all',
+      path: '/documents/new',
       children: [
-        { title: 'All', path: '/documents/all' },
-        { title: 'In Progress', path: '/documents/in-progress' },
-        { title: 'Accepted', path: '/documents/accepted' },
+        { title: 'New', path: '/documents/new' },
+        { title: 'In Progress', path: '/documents/in_progress' },
+        { title: 'On review', path: '/documents/on_review' },
+        { title: 'Done', path: '/documents/done' },
         { title: 'Cancelled', path: '/documents/cancelled' },
-        { title: 'Completed', path: '/documents/completed' },
         { title: 'Returned', path: '/documents/returned' }
       ]
     },
@@ -53,6 +53,11 @@ const navigation = (): VerticalNavItemsType => {
       title: 'Hujjat shakli',
       icon: 'tabler:file-description',
       path: '/document-form'
+    },
+    {
+      title: 'Vazifalar',
+      icon: 'tabler:checklist',
+      path: '/tasks'
     },
     {
       title: "Jurnallar ro'yxati",
