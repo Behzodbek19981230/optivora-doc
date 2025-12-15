@@ -1,16 +1,11 @@
 import { useState } from 'react'
 import CardHeader from '@mui/material/CardHeader'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
-import TableHead from '@mui/material/TableHead'
-import TableRow from '@mui/material/TableRow'
 import IconButton from '@mui/material/IconButton'
 import Button from '@mui/material/Button'
 import Stack from '@mui/material/Stack'
 import Tooltip from '@mui/material/Tooltip'
-import { TablePagination } from '@mui/material'
+import { CardContent } from '@mui/material'
+import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 import DeleteConfirmDialog from 'src/views/locations/dialogs/DeleteConfirmDialog'
 import Icon from 'src/@core/components/icon'
 import endpoints from 'src/configs/endpoints'
@@ -20,12 +15,16 @@ import toast from 'react-hot-toast'
 import DepartmentFormDialog from '../dialogs/DepartmentFormDialog'
 
 const DepartmentTable = () => {
-  const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(10)
+  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 })
   const [search, setSearch] = useState('')
-  const { data, total, loading, mutate } = useFetchList<any>(endpoints.department, {
-    page: page + 1,
-    perPage: rowsPerPage,
+  const {
+    data = [],
+    total,
+    loading,
+    mutate
+  } = useFetchList<any>(endpoints.department, {
+    page: paginationModel.page + 1,
+    perPage: paginationModel.pageSize,
     search
   })
   const [openForm, setOpenForm] = useState(false)
@@ -66,69 +65,47 @@ const DepartmentTable = () => {
           </Button>
         }
       />
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Nomi</TableCell>
-              <TableCell>Nomi (EN)</TableCell>
-              <TableCell>Nomi (UZ)</TableCell>
-              <TableCell>Nomi (RU)</TableCell>
-              <TableCell align='right'>Amallar</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={5} align='center'>
-                  Yuklanmoqda…
-                </TableCell>
-              </TableRow>
-            ) : data && data.length > 0 ? (
-              data.map((row: any) => (
-                <TableRow key={row.id}>
-                  <TableCell>{row.name}</TableCell>
-                  <TableCell>{row.name_en}</TableCell>
-                  <TableCell>{row.name_uz}</TableCell>
-                  <TableCell>{row.name_ru}</TableCell>
-                  <TableCell align='right'>
-                    <Stack direction='row' spacing={1} justifyContent='flex-end'>
-                      <Tooltip title='Tahrirlash'>
-                        <IconButton size='small' onClick={() => handleEdit(row)}>
-                          <Icon icon='tabler:edit' />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title='O\u2018chirish'>
-                        <IconButton size='small' color='error' onClick={() => handleDelete(row)}>
-                          <Icon icon='tabler:trash' />
-                        </IconButton>
-                      </Tooltip>
-                    </Stack>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={5} align='center'>
-                  Ma‘lumotlar yo‘q
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        component='div'
-        count={total}
-        page={page}
-        onPageChange={(_, p) => setPage(p)}
-        rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={e => {
-          setRowsPerPage(parseInt(e.target.value, 10))
-          setPage(0)
-        }}
-        rowsPerPageOptions={[5, 10, 20, 50]}
-      />
+      <>
+        <DataGrid
+          autoHeight
+          rowHeight={56}
+          rows={data}
+          columns={
+            [
+              { field: 'name', headerName: 'Nomi', flex: 0.25, minWidth: 200 },
+              { field: 'name_en', headerName: 'Nomi (EN)', flex: 0.2, minWidth: 160 },
+              { field: 'name_uz', headerName: 'Nomi (UZ)', flex: 0.2, minWidth: 160 },
+              { field: 'name_ru', headerName: 'Nomi (RU)', flex: 0.2, minWidth: 160 },
+              {
+                field: 'actions',
+                headerName: 'Amallar',
+                flex: 0.15,
+                minWidth: 140,
+                sortable: false,
+                renderCell: params => {
+                  const row = params.row as any
+                  return (
+                    <>
+                      <IconButton size='small' onClick={() => handleEdit(row)}>
+                        <Icon icon='tabler:edit' />
+                      </IconButton>
+                      <IconButton size='small' color='error' onClick={() => handleDelete(row)}>
+                        <Icon icon='tabler:trash' />
+                      </IconButton>
+                    </>
+                  )
+                }
+              }
+            ] as GridColDef[]
+          }
+          loading={loading}
+          disableRowSelectionOnClick
+          pageSizeOptions={[10, 25, 50]}
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
+          getRowId={row => (row as any).id as number}
+        />
+      </>
       <DepartmentFormDialog
         open={openForm}
         onClose={() => setOpenForm(false)}

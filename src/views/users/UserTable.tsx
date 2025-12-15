@@ -177,7 +177,7 @@ const UserTable = () => {
           </Button>
         }
       />
-      <CardContent>
+      <>
         <DataGrid
           autoHeight
           rowHeight={56}
@@ -190,7 +190,7 @@ const UserTable = () => {
           onPaginationModelChange={setPaginationModel}
           getRowId={row => (row as User).id}
         />
-      </CardContent>
+      </>
 
       {open && (
         <UserFormDialog

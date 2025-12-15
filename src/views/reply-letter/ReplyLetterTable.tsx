@@ -1,18 +1,6 @@
 import { useState } from 'react'
-import {
-  Card,
-  CardHeader,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  IconButton,
-  Button,
-  Stack,
-  TablePagination
-} from '@mui/material'
+import { Card, CardHeader, CardContent, IconButton, Button, Stack } from '@mui/material'
+import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 import Tooltip from '@mui/material/Tooltip'
 import IconifyIcon from 'src/@core/components/icon'
 import endpoints from 'src/configs/endpoints'
@@ -20,19 +8,24 @@ import { useFetchList } from 'src/hooks/useFetchList'
 import { DataService } from 'src/configs/dataService'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/router'
+import DeleteConfirmDialog from 'src/views/locations/dialogs/DeleteConfirmDialog'
 
 const AddIcon = () => <span style={{ fontWeight: 'bold' }}>＋</span>
 
 const ReplyLetterTable = () => {
   const router = useRouter()
-  const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(10)
+  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 })
   const [selected, setSelected] = useState<any | null>(null)
   const [openDelete, setOpenDelete] = useState(false)
 
-  const { data, total, loading, mutate } = useFetchList(endpoints.replyLetter, {
-    page: page + 1,
-    perPage: rowsPerPage
+  const {
+    data = [],
+    total,
+    loading,
+    mutate
+  } = useFetchList(endpoints.replyLetter, {
+    page: paginationModel.page + 1,
+    perPage: paginationModel.pageSize
   })
 
   const handleEdit = (item: any) => {
@@ -52,87 +45,79 @@ const ReplyLetterTable = () => {
     toast.success('Javob xati o‘chirildi')
   }
 
+  const columns: GridColDef[] = [
+    { field: 'letter_number', headerName: 'Hujjat raqami', flex: 0.18, minWidth: 140 },
+    { field: 'basis', headerName: 'Asos', flex: 0.3, minWidth: 220 },
+    {
+      field: 'responsible_person',
+      headerName: "Mas'ul",
+      flex: 0.2,
+      minWidth: 160,
+      valueGetter: params =>
+        params.row.responsible_person_detail ? params.row.responsible_person_detail.name : params.row.responsible_person
+    },
+    {
+      field: 'company_detail',
+      headerName: 'Tashkilot',
+      flex: 0.2,
+      minWidth: 160,
+      valueGetter: params => (params.row.company_detail ? params.row.company_detail.name : '')
+    },
+    { field: 'created_time', headerName: 'Yaratilgan', flex: 0.18, minWidth: 150 },
+    {
+      field: 'actions',
+      headerName: 'Amallar',
+      flex: 0.18,
+      minWidth: 160,
+      sortable: false,
+      renderCell: params => {
+        const row = params.row as any
+        return (
+          <>
+            <IconButton size='small' aria-label='edit' onClick={() => handleEdit(row)}>
+              <IconifyIcon icon='tabler:edit' />
+            </IconButton>
+            <IconButton size='small' aria-label='delete' color='error' onClick={() => handleDelete(row)}>
+              <IconifyIcon icon='tabler:trash' />
+            </IconButton>
+          </>
+        )
+      }
+    }
+  ]
+
   return (
     <Card>
       <CardHeader
         title='Javob xatlari'
         action={
-          <Button variant='contained' startIcon={<AddIcon />} onClick={() => router.push('/reply-letter/create')}>
+          <Button variant='contained' onClick={() => router.push('/reply-letter/create')}>
             Yangi javob xati
           </Button>
         }
       />
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Hujjat raqami</TableCell>
-              <TableCell>Asos</TableCell>
-              <TableCell>Mas'ul</TableCell>
-              <TableCell>Tashkilot</TableCell>
-              <TableCell>Yaratilgan</TableCell>
-              <TableCell align='right'>Amallar</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={6} align='center'>
-                  Yuklanmoqda…
-                </TableCell>
-              </TableRow>
-            ) : data && data.length > 0 ? (
-              data.map((row: any) => (
-                <TableRow key={row.id}>
-                  <TableCell>{row.letter_number}</TableCell>
-                  <TableCell>{row.basis}</TableCell>
-                  <TableCell>
-                    {row.responsible_person_detail ? row.responsible_person_detail.name : row.responsible_person}
-                  </TableCell>
-                  <TableCell>{row.company_detail ? row.company_detail.name : ''}</TableCell>
-                  <TableCell>{row.created_time}</TableCell>
-                  <TableCell align='right'>
-                    <Stack direction='row' spacing={1} justifyContent='flex-end'>
-                      <Tooltip title='Tahrirlash'>
-                        <IconButton size='small' onClick={() => handleEdit(row)}>
-                          <IconifyIcon icon='tabler:edit' />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title='O‘chirish'>
-                        <IconButton size='small' color='error' onClick={() => handleDelete(row)}>
-                          <IconifyIcon icon='tabler:trash' />
-                        </IconButton>
-                      </Tooltip>
-                    </Stack>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={6} align='center'>
-                  Ma‘lumotlar yo‘q
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <>
+        <DataGrid
+          autoHeight
+          rowHeight={56}
+          rows={data as any[]}
+          columns={columns}
+          loading={loading}
+          disableRowSelectionOnClick
+          pageSizeOptions={[10, 25, 50]}
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
+          getRowId={row => (row as any).id as number}
+        />
+      </>
 
-      <TablePagination
-        component='div'
-        count={total}
-        page={page}
-        onPageChange={(_, p) => setPage(p)}
-        rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={e => {
-          setRowsPerPage(parseInt(e.target.value, 10))
-          setPage(0)
-        }}
-        rowsPerPageOptions={[5, 10, 20, 50]}
+      <DeleteConfirmDialog
+        open={openDelete}
+        onClose={() => setOpenDelete(false)}
+        onConfirm={handleDeleteConfirm}
+        title='Javob xatini o‘chirishni tasdiqlang'
+        description={selected ? `ID: ${selected.id}` : undefined}
       />
-
-      {/* Simple delete confirm */}
-      {openDelete && <div style={{ display: 'none' }} />}
     </Card>
   )
 }

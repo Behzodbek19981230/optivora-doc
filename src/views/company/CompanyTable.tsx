@@ -64,16 +64,42 @@ const CompanyTable = () => {
       valueGetter: params => (params.row.is_active ? 'Ha' : 'Yo‘q')
     },
     { field: 'phone', headerName: 'Telefon', flex: 0.2, minWidth: 160 },
-    { field: 'region', headerName: 'Viloyat', flex: 0.1, minWidth: 100 },
-    { field: 'district', headerName: 'Tuman', flex: 0.1, minWidth: 100 },
+    {
+      field: 'region',
+      headerName: 'Viloyat',
+      flex: 0.12,
+      minWidth: 120,
+      valueGetter: params => (params.row as any).region_detail?.name_uz || params.row.region
+    },
+    {
+      field: 'district',
+      headerName: 'Tuman',
+      flex: 0.12,
+      minWidth: 120,
+      valueGetter: params => (params.row as any).district_detail?.name_uz || params.row.district
+    },
     { field: 'address', headerName: 'Manzil', flex: 0.3, minWidth: 220 },
     {
       field: 'logo',
       headerName: 'Logo',
-      flex: 0.2,
-      minWidth: 160,
+      flex: 0.15,
+      minWidth: 140,
       renderCell: params => {
-        return <img src={params.value} alt='Logo' style={{ width: 100, height: 50, objectFit: 'contain' }} />
+        const row = params.row as Company
+        return (
+          <CustomAvatar
+            src={row.logo}
+            variant='circular'
+            sx={{
+              width: 38,
+              height: 38,
+              borderRadius: '50%',
+              '& img': { width: '100%', height: '100%', objectFit: 'cover' }
+            }}
+          >
+            {getInitials(row.name)}
+          </CustomAvatar>
+        )
       }
     },
     {
@@ -110,7 +136,7 @@ const CompanyTable = () => {
           </Button>
         }
       />
-      <CardContent>
+      <>
         <DataGrid
           autoHeight
           rowHeight={56}
@@ -123,7 +149,7 @@ const CompanyTable = () => {
           onPaginationModelChange={setPaginationModel}
           getRowId={row => (row as Company).id}
         />
-      </CardContent>
+      </>
 
       {open && (
         <CompanyFormDialog
