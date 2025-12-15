@@ -119,7 +119,7 @@ const ChooseCompanyPage = () => {
                     }
                   >
                     <ListItemAvatar>
-                      <Avatar src={process.env.NEXT_PUBLIC_FILE_URL + c.logo || undefined}>
+                      <Avatar src={`${process.env.NEXT_PUBLIC_FILE_URL}${c.logo}` || undefined}>
                         {c.name ? c.name.charAt(0).toUpperCase() : '?'}
                       </Avatar>
                     </ListItemAvatar>
