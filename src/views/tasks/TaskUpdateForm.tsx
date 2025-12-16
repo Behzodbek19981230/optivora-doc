@@ -23,7 +23,8 @@ import {
   TableRow,
   Paper,
   IconButton,
-  Typography
+  Typography,
+  Chip
 } from '@mui/material'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -92,8 +93,13 @@ const buildSchema = (t: (key: string, options?: any) => any): yup.ObjectSchema<T
     task_form: yup
       .number()
       .typeError(String(t('errors.select')))
+      .moreThan(0, String(t('errors.select')))
       .required(String(t('errors.required'))),
-    sending_org: yup.number().required(String(t('errors.required'))),
+    sending_org: yup
+      .number()
+      .typeError(String(t('errors.select')))
+      .moreThan(0, String(t('errors.select')))
+      .required(String(t('errors.required'))),
     input_doc_number: yup.string().required(String(t('errors.required'))),
     output_doc_number: yup.string().required(String(t('errors.required'))),
     start_date: yup.string().required(String(t('errors.required'))),
@@ -111,10 +117,22 @@ const buildSchema = (t: (key: string, options?: any) => any): yup.ObjectSchema<T
       .string()
       .oneOf(['ordinary', 'orgently'])
       .required(String(t('errors.required'))),
-    department: yup.number().required(String(t('errors.required'))),
+    department: yup
+      .number()
+      .typeError(String(t('errors.select')))
+      .moreThan(0, String(t('errors.select')))
+      .required(String(t('errors.required'))),
     note: yup.string().required(String(t('errors.required'))),
-    list_of_magazine: yup.number().required(String(t('errors.required'))),
-    signed_by: yup.number().required(String(t('errors.required')))
+    list_of_magazine: yup
+      .number()
+      .typeError(String(t('errors.select')))
+      .moreThan(0, String(t('errors.select')))
+      .required(String(t('errors.required'))),
+    signed_by: yup
+      .number()
+      .typeError(String(t('errors.select')))
+      .moreThan(0, String(t('errors.select')))
+      .required(String(t('errors.required')))
   }) as yup.ObjectSchema<TaskPayload>
 
 type TaskPartPayload = {
@@ -179,7 +197,8 @@ const TaskUpdateForm = () => {
     perPage: 100
   })
   const safeMsg = (msg: any) => (typeof msg === 'string' ? msg : undefined)
-
+  const [attachFile, setAttachFile] = useState<File | null>(null)
+  const [saving, setSaving] = useState(false)
   useEffect(() => {
     const fetchTask = async () => {
       if (!id || Array.isArray(id)) return
@@ -192,6 +211,7 @@ const TaskUpdateForm = () => {
         ...data,
 
         // Normalize numeric selects to numbers with fallback
+        priority: data.priority || 'ordinary',
         task_form: typeof data.task_form === 'number' ? data.task_form : 0,
         sending_org: data.sending_org || 0,
         department: typeof data.department === 'number' ? data.department : 0,
@@ -320,6 +340,7 @@ const TaskUpdateForm = () => {
   const onSubmit = async (values: TaskPayload) => {
     try {
       if (!id || Array.isArray(id)) return
+      if (attachFile) await submitAttachment()
       await DataService.put(endpoints.taskById(id), { ...values, company: user?.company_id })
       toast.success(String(t('tasks.toast.updated')))
       router.push(`/tasks/view/${id}`)
@@ -327,331 +348,542 @@ const TaskUpdateForm = () => {
       toast.error(e?.message || String(t('tasks.toast.updateError')))
     }
   }
+  const submitAttachment = async () => {
+    if (!id) return
+    if (!attachFile) {
+      toast.error('Fayl tanlang')
+      return
+    }
+
+    try {
+      setSaving(true)
+      const formData = new FormData()
+      formData.append('file', attachFile)
+      formData.append('title', attachFile.name)
+      formData.append('task', id.toString())
+      await DataService.postForm(endpoints.taskAttachment, formData)
+
+      toast.success('Fayl biriktirildi')
+    } catch (e) {
+      console.error('Failed to create attachment', e)
+      toast.error('Fayl biriktirishda xatolik')
+      return
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
-    <Card>
-      <CardContent>
-        <DatePickerWrapper>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Grid container spacing={4}>
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='type'
-                  control={control}
-                  render={({ field }) => (
-                    <CustomTextField select fullWidth label={String(t('tasks.form.type'))} {...field}>
-                      <MenuItem value='task'>{String(t('tasks.type.task'))}</MenuItem>
-                      <MenuItem value='application'>{String(t('tasks.type.application'))}</MenuItem>
-                    </CustomTextField>
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='priority'
-                  control={control}
-                  render={({ field }) => (
-                    <CustomTextField select fullWidth label={String(t('tasks.form.priority'))} {...field}>
-                      <MenuItem value='ordinary'>{String(t('tasks.priority.ordinary'))}</MenuItem>
-                      <MenuItem value='orgently'>{String(t('tasks.priority.urgently'))}</MenuItem>
-                    </CustomTextField>
-                  )}
-                />
-              </Grid>
+    <Stack spacing={4}>
+      {/* Main form (top) */}
+      <DatePickerWrapper>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={4}>
+            <Grid item xs={12} md={6}>
+              <Card variant='outlined'>
+                <CardContent>
+                  <Grid container spacing={4}>
+                    <Grid item xs={12} sm={6}>
+                      <Controller
+                        name='type'
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <CustomTextField
+                            select
+                            fullWidth
+                            label={String(t('tasks.form.type'))}
+                            {...field}
+                            error={!!fieldState.error}
+                            helperText={safeMsg(fieldState.error?.message)}
+                          >
+                            <MenuItem value='task'>{String(t('tasks.type.task'))}</MenuItem>
+                            <MenuItem value='application'>{String(t('tasks.type.application'))}</MenuItem>
+                          </CustomTextField>
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Controller
+                        name='priority'
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <FormControl error={!!fieldState.error}>
+                            <FormLabel>{String(t('tasks.form.priority'))}</FormLabel>
+                            <RadioGroup row {...field} value={field.value || 'ordinary'}>
+                              <FormControlLabel
+                                value='ordinary'
+                                control={<Radio />}
+                                label={String(t('tasks.priority.ordinary'))}
+                              />
+                              <FormControlLabel
+                                value='orgently'
+                                control={<Radio />}
+                                label={String(t('tasks.priority.urgently'))}
+                              />
+                            </RadioGroup>
+                            {!!fieldState.error && (
+                              <Typography variant='caption' color='error'>
+                                {safeMsg(fieldState.error?.message)}
+                              </Typography>
+                            )}
+                          </FormControl>
+                        )}
+                      />
+                    </Grid>
 
-              <Grid item xs={12}>
-                <Controller
-                  name='name'
-                  control={control}
-                  rules={{ required: String(t('errors.required')) }}
-                  render={({ field, fieldState }) => (
-                    <CustomTextField
-                      fullWidth
-                      label={String(t('tasks.form.name'))}
-                      {...field}
-                      error={!!fieldState.error}
-                      helperText={safeMsg(fieldState.error?.message)}
-                    />
-                  )}
-                />
-              </Grid>
+                    <Grid item xs={12}>
+                      <Controller
+                        name='name'
+                        control={control}
+                        rules={{ required: String(t('errors.required')) }}
+                        render={({ field, fieldState }) => (
+                          <CustomTextField
+                            fullWidth
+                            label={String(t('tasks.form.name'))}
+                            {...field}
+                            error={!!fieldState.error}
+                            helperText={safeMsg(fieldState.error?.message)}
+                          />
+                        )}
+                      />
+                    </Grid>
 
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='task_form'
-                  control={control}
-                  rules={{ required: String(t('errors.required')) }}
-                  render={({ field, fieldState }) => (
-                    <CustomTextField
-                      select
-                      fullWidth
-                      label={String(t('tasks.form.taskForm'))}
-                      {...field}
-                      error={!!fieldState.error}
-                      helperText={safeMsg(fieldState.error?.message)}
-                    >
-                      <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
-                      {(docForms || []).map(f => (
-                        <MenuItem key={f.id} value={f.id}>
-                          {f.name}
-                        </MenuItem>
-                      ))}
-                    </CustomTextField>
-                  )}
-                />
-              </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Controller
+                        name='task_form'
+                        control={control}
+                        rules={{ required: String(t('errors.required')) }}
+                        render={({ field, fieldState }) => (
+                          <CustomTextField
+                            select
+                            fullWidth
+                            label={String(t('tasks.form.taskForm'))}
+                            {...field}
+                            error={!!fieldState.error}
+                            helperText={safeMsg(fieldState.error?.message)}
+                          >
+                            <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
+                            {(docForms || []).map(f => (
+                              <MenuItem key={f.id} value={f.id}>
+                                {f.name}
+                              </MenuItem>
+                            ))}
+                          </CustomTextField>
+                        )}
+                      />
+                    </Grid>
 
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='sending_org'
-                  control={control}
-                  rules={{ required: true }}
-                  render={({ field, fieldState }) => (
-                    <CustomTextField
-                      fullWidth
-                      select
-                      label={String(t('tasks.form.sendingOrg'))}
-                      {...field}
-                      error={!!fieldState.error}
-                      helperText={fieldState.error?.message}
-                    >
-                      <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
-                      {(companies || []).map(c => (
-                        <MenuItem key={c.id} value={c.id}>
-                          {c.name}
-                        </MenuItem>
-                      ))}
-                    </CustomTextField>
-                  )}
-                />
-              </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Controller
+                        name='sending_org'
+                        control={control}
+                        rules={{ required: true }}
+                        render={({ field, fieldState }) => (
+                          <CustomTextField
+                            fullWidth
+                            select
+                            label={String(t('tasks.form.sendingOrg'))}
+                            {...field}
+                            error={!!fieldState.error}
+                            helperText={safeMsg(fieldState.error?.message)}
+                          >
+                            <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
+                            {(companies || []).map(c => (
+                              <MenuItem key={c.id} value={c.id}>
+                                {c.name}
+                              </MenuItem>
+                            ))}
+                          </CustomTextField>
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Button
+                        component='label'
+                        variant='outlined'
+                        disabled={saving}
+                        startIcon={<Icon icon='mdi:file-upload' />}
+                      >
+                        Fayl tanlash
+                        <input hidden type='file' onChange={e => setAttachFile(e.target.files?.[0] || null)} />
+                      </Button>
 
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='input_doc_number'
-                  control={control}
-                  rules={{ required: String(t('errors.required')) }}
-                  render={({ field, fieldState }) => (
-                    <CustomTextField
-                      fullWidth
-                      label={String(t('tasks.form.inputDocNumber'))}
-                      {...field}
-                      error={!!fieldState.error}
-                      helperText={safeMsg(fieldState.error?.message)}
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='output_doc_number'
-                  control={control}
-                  rules={{ required: String(t('errors.required')) }}
-                  render={({ field, fieldState }) => (
-                    <CustomTextField
-                      fullWidth
-                      label={String(t('tasks.form.outputDocNumber'))}
-                      {...field}
-                      error={!!fieldState.error}
-                      helperText={safeMsg(fieldState.error?.message)}
-                    />
-                  )}
-                />
-              </Grid>
+                      {attachFile ? (
+                        <Stack direction='row' spacing={1} alignItems='center'>
+                          <Chip
+                            icon={<Icon icon='mdi:file' />}
+                            label={attachFile.name}
+                            variant='outlined'
+                            onDelete={saving ? undefined : () => setAttachFile(null)}
+                          />
+                        </Stack>
+                      ) : null}
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Controller
+                        name='list_of_magazine'
+                        control={control}
+                        rules={{ required: String(t('errors.required')) }}
+                        render={({ field, fieldState }) => (
+                          <CustomTextField
+                            select
+                            fullWidth
+                            label={String(t('tasks.form.magazine'))}
+                            {...field}
+                            error={!!fieldState.error}
+                            helperText={safeMsg(fieldState.error?.message)}
+                          >
+                            <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
+                            {(magData || []).map(m => (
+                              <MenuItem key={m.id} value={m.id}>
+                                {m.name}
+                              </MenuItem>
+                            ))}
+                          </CustomTextField>
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Controller
+                        name='output_doc_number'
+                        control={control}
+                        rules={{ required: String(t('errors.required')) }}
+                        render={({ field, fieldState }) => (
+                          <CustomTextField
+                            fullWidth
+                            label={String(t('tasks.form.outputDocNumber'))}
+                            {...field}
+                            error={!!fieldState.error}
+                            helperText={safeMsg(fieldState.error?.message)}
+                          />
+                        )}
+                      />
+                    </Grid>
 
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='start_date'
-                  control={control}
-                  rules={{ required: String(t('errors.required')) }}
-                  render={({ field, fieldState }) => {
-                    const selectedDate = field.value ? new Date(field.value) : null
+                    <Grid item xs={12} sm={6}>
+                      <Controller
+                        name='input_doc_number'
+                        control={control}
+                        rules={{ required: String(t('errors.required')) }}
+                        render={({ field, fieldState }) => (
+                          <CustomTextField
+                            fullWidth
+                            label={String(t('tasks.form.inputDocNumber'))}
+                            {...field}
+                            error={!!fieldState.error}
+                            helperText={safeMsg(fieldState.error?.message)}
+                          />
+                        )}
+                      />
+                    </Grid>
 
-                    return (
-                      <div>
-                        <DatePicker
-                          selected={selectedDate}
-                          onChange={(date: Date | null) => field.onChange(date ? date.toISOString().slice(0, 10) : '')}
-                          dateFormat='yyyy-MM-dd'
-                          customInput={
-                            <CustomTextField
-                              label={String(t('tasks.form.startDate'))}
-                              fullWidth
-                              error={!!fieldState.error}
-                              helperText={safeMsg(fieldState.error?.message)}
-                            />
-                          }
-                          showPopperArrow
-                          isClearable
-                        />
-                      </div>
-                    )
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='end_date'
-                  control={control}
-                  rules={{ required: String(t('errors.required')) }}
-                  render={({ field, fieldState }) => {
-                    const selectedDate = field.value ? new Date(field.value) : null
+                    <Grid item xs={12} sm={6}>
+                      <Controller
+                        name='start_date'
+                        control={control}
+                        rules={{ required: String(t('errors.required')) }}
+                        render={({ field, fieldState }) => {
+                          const selectedDate = field.value ? new Date(field.value) : null
 
-                    return (
-                      <div>
-                        <DatePicker
-                          selected={selectedDate}
-                          onChange={(date: Date | null) => field.onChange(date ? date.toISOString().slice(0, 10) : '')}
-                          dateFormat='yyyy-MM-dd'
-                          customInput={
-                            <CustomTextField
-                              label={String(t('tasks.form.endDate'))}
-                              fullWidth
-                              error={!!fieldState.error}
-                              helperText={safeMsg(fieldState.error?.message)}
-                            />
-                          }
-                          showPopperArrow
-                          isClearable
-                        />
-                      </div>
-                    )
-                  }}
-                />
-              </Grid>
+                          return (
+                            <div>
+                              <DatePicker
+                                selected={selectedDate}
+                                onChange={(date: Date | null) =>
+                                  field.onChange(date ? date.toISOString().slice(0, 10) : '')
+                                }
+                                dateFormat='yyyy-MM-dd'
+                                customInput={
+                                  <CustomTextField
+                                    label={String(t('tasks.form.startDate'))}
+                                    fullWidth
+                                    error={!!fieldState.error}
+                                    helperText={safeMsg(fieldState.error?.message)}
+                                  />
+                                }
+                                showPopperArrow
+                                isClearable
+                              />
+                            </div>
+                          )
+                        }}
+                      />
+                    </Grid>
 
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='department'
-                  control={control}
-                  rules={{ required: String(t('errors.required')) }}
-                  render={({ field, fieldState }) => (
-                    <CustomTextField
-                      select
-                      fullWidth
-                      label={String(t('tasks.form.department'))}
-                      {...field}
-                      error={!!fieldState.error}
-                      helperText={fieldState.error?.message}
-                    >
-                      <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
-                      {(departments || []).map(d => (
-                        <MenuItem key={d.id} value={d.id}>
-                          {d.name}
-                        </MenuItem>
-                      ))}
-                    </CustomTextField>
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='signed_by'
-                  control={control}
-                  rules={{ required: String(t('errors.required')) }}
-                  render={({ field, fieldState }) => (
-                    <CustomTextField
-                      select
-                      fullWidth
-                      label={String(t('tasks.form.signedBy'))}
-                      {...field}
-                      error={!!fieldState.error}
-                      helperText={fieldState.error?.message}
-                    >
-                      <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
-                      {(users || []).map(u => (
-                        <MenuItem key={u.id} value={u.id}>
-                          {u.fullname}
-                        </MenuItem>
-                      ))}
-                    </CustomTextField>
-                  )}
-                />
-              </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Controller
+                        name='end_date'
+                        control={control}
+                        rules={{ required: String(t('errors.required')) }}
+                        render={({ field, fieldState }) => {
+                          const selectedDate = field.value ? new Date(field.value) : null
 
-              <Grid item xs={12}>
-                <Controller
-                  name='note'
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <CustomTextField
-                      fullWidth
-                      multiline
-                      rows={3}
-                      label={String(t('tasks.form.note'))}
-                      {...field}
-                      error={!!fieldState.error}
-                      helperText={safeMsg(fieldState.error?.message)}
-                    />
-                  )}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <Controller
-                  name='list_of_magazine'
-                  control={control}
-                  rules={{ required: String(t('errors.required')) }}
-                  render={({ field, fieldState }) => (
-                    <CustomTextField
-                      select
-                      fullWidth
-                      label={String(t('tasks.form.magazine'))}
-                      {...field}
-                      error={!!fieldState.error}
-                      helperText={fieldState.error?.message}
-                    >
-                      <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
-                      {(magData || []).map(m => (
-                        <MenuItem key={m.id} value={m.id}>
-                          {m.name}
-                        </MenuItem>
-                      ))}
-                    </CustomTextField>
-                  )}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <Stack direction='row' spacing={2} justifyContent='flex-end'>
-                  <Button type='button' variant='outlined' onClick={() => router.back()}>
-                    {String(t('common.cancel'))}
-                  </Button>
-                  <Button type='submit' variant='contained'>
-                    {String(t('common.save'))}
-                  </Button>
-                </Stack>
-              </Grid>
+                          return (
+                            <div>
+                              <DatePicker
+                                selected={selectedDate}
+                                onChange={(date: Date | null) =>
+                                  field.onChange(date ? date.toISOString().slice(0, 10) : '')
+                                }
+                                dateFormat='yyyy-MM-dd'
+                                customInput={
+                                  <CustomTextField
+                                    label={String(t('tasks.form.endDate'))}
+                                    fullWidth
+                                    error={!!fieldState.error}
+                                    helperText={safeMsg(fieldState.error?.message)}
+                                  />
+                                }
+                                showPopperArrow
+                                isClearable
+                              />
+                            </div>
+                          )
+                        }}
+                      />
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
             </Grid>
-          </form>
-        </DatePickerWrapper>
-      </CardContent>
+
+            <Grid item xs={12} md={6}>
+              <Card variant='outlined'>
+                <CardContent>
+                  <Grid container spacing={4}>
+                    <Grid item xs={12}>
+                      <Controller
+                        name='department'
+                        control={control}
+                        rules={{ required: true }}
+                        render={({ field, fieldState }) => (
+                          <CustomTextField
+                            select
+                            fullWidth
+                            label={String(t('tasks.form.department'))}
+                            {...field}
+                            error={!!fieldState.error}
+                            helperText={safeMsg(fieldState.error?.message)}
+                          >
+                            <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
+                            {(departments || []).map(d => (
+                              <MenuItem key={d.id} value={d.id}>
+                                {d.name}
+                              </MenuItem>
+                            ))}
+                          </CustomTextField>
+                        )}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12}>
+                      <Controller
+                        name='signed_by'
+                        control={control}
+                        rules={{ required: true }}
+                        render={({ field, fieldState }) => (
+                          <CustomTextField
+                            select
+                            fullWidth
+                            label={String(t('tasks.form.signedBy'))}
+                            {...field}
+                            error={!!fieldState.error}
+                            helperText={safeMsg(fieldState.error?.message)}
+                          >
+                            <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
+                            {(users || []).map(u => (
+                              <MenuItem key={u.id} value={u.id}>
+                                {u.fullname}
+                              </MenuItem>
+                            ))}
+                          </CustomTextField>
+                        )}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12} sm={12}>
+                      <Controller
+                        name='note'
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <CustomTextField
+                            fullWidth
+                            multiline
+                            rows={3}
+                            label={String(t('tasks.form.note'))}
+                            {...field}
+                            error={!!fieldState.error}
+                            helperText={safeMsg(fieldState.error?.message)}
+                          />
+                        )}
+                      />
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            <Grid item xs={12}>
+              <Stack direction='row' spacing={2} justifyContent='flex-end'>
+                <Button type='button' variant='outlined' onClick={() => router.back()}>
+                  {String(t('common.cancel'))}
+                </Button>
+                <Button type='submit' variant='contained'>
+                  {String(t('common.save'))}
+                </Button>
+              </Stack>
+            </Grid>
+          </Grid>
+        </form>
+      </DatePickerWrapper>
 
       {/* Assignment Section */}
-      <CardContent>
-        <FormControl component='fieldset'>
-          <FormLabel component='legend'>{String(t('tasks.assignment.method'))}</FormLabel>
-          <RadioGroup
-            row
-            value={assignmentMode}
-            onChange={e => setAssignmentMode(e.target.value as 'simple' | 'split')}
-          >
-            <FormControlLabel value='simple' control={<Radio />} label={String(t('tasks.assignment.simple'))} />
-            <FormControlLabel value='split' control={<Radio />} label={String(t('tasks.assignment.split'))} />
-          </RadioGroup>
-        </FormControl>
+      <Card>
+        <CardContent>
+          <FormControl component='fieldset'>
+            <FormLabel component='legend'>{String(t('tasks.assignment.method'))}</FormLabel>
+            <RadioGroup
+              row
+              value={assignmentMode}
+              onChange={e => setAssignmentMode(e.target.value as 'simple' | 'split')}
+            >
+              <FormControlLabel value='simple' control={<Radio />} label={String(t('tasks.assignment.simple'))} />
+              <FormControlLabel value='split' control={<Radio />} label={String(t('tasks.assignment.split'))} />
+            </RadioGroup>
+          </FormControl>
 
-        {assignmentMode === 'simple' ? (
-          <Stack spacing={2} sx={{ mt: 3 }}>
-            <Typography variant='subtitle2'>{String(t('tasks.assignment.chooseAssignee'))}</Typography>
-            <Grid container spacing={2} alignItems='end'>
-              <Grid item xs={12} sm={8}>
+          {assignmentMode === 'simple' ? (
+            <Stack spacing={2} sx={{ mt: 3 }}>
+              <Typography variant='subtitle2'>{String(t('tasks.assignment.chooseAssignee'))}</Typography>
+              <Grid container spacing={2} alignItems='end'>
+                <Grid item xs={12} sm={8}>
+                  <CustomTextField
+                    select
+                    fullWidth
+                    label={String(t('tasks.assignment.assignee'))}
+                    value={simpleAssignee}
+                    onChange={e => setSimpleAssignee(Number(e.target.value))}
+                  >
+                    <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
+                    {(users || []).map(u => (
+                      <MenuItem key={u.id} value={u.id}>
+                        {u.fullname}
+                      </MenuItem>
+                    ))}
+                  </CustomTextField>
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                  <Button
+                    variant='contained'
+                    fullWidth
+                    onClick={handleCreateSimpleAssignment}
+                    disabled={!simpleAssignee}
+                  >
+                    {String(t('tasks.assignment.attach'))}
+                  </Button>
+                </Grid>
+              </Grid>
+            </Stack>
+          ) : (
+            <Stack spacing={2} sx={{ mt: 3 }}>
+              <Stack direction='row' justifyContent='space-between' alignItems='center'>
+                <Typography variant='subtitle2'>{String(t('tasks.parts.title'))}</Typography>
+                <Button
+                  variant='contained'
+                  size='small'
+                  startIcon={<Icon icon='mdi:plus' />}
+                  onClick={handleOpenDialog}
+                >
+                  {String(t('common.add'))}
+                </Button>
+              </Stack>
+
+              {taskParts.length > 0 ? (
+                <TableContainer component={Paper}>
+                  <Table size='small'>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>{String(t('tasks.parts.table.title'))}</TableCell>
+                        <TableCell>{String(t('tasks.parts.table.department'))}</TableCell>
+                        <TableCell>{String(t('tasks.parts.table.assignee'))}</TableCell>
+                        <TableCell>{String(t('tasks.parts.table.start'))}</TableCell>
+                        <TableCell>{String(t('tasks.parts.table.end'))}</TableCell>
+                        <TableCell>{String(t('tasks.parts.table.note'))}</TableCell>
+                        <TableCell align='right'>{String(t('common.actions'))}</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {taskParts.map(part => (
+                        <TableRow key={part.id}>
+                          <TableCell>{part.title}</TableCell>
+                          <TableCell>
+                            {departments?.find(d => d.id === part.department)?.name || part.department}
+                          </TableCell>
+                          <TableCell>{users?.find(u => u.id === part.assignee)?.fullname || part.assignee}</TableCell>
+                          <TableCell>{part.start_date}</TableCell>
+                          <TableCell>{part.end_date}</TableCell>
+                          <TableCell>{part.note}</TableCell>
+                          <TableCell align='right'>
+                            <IconButton size='small' color='error' onClick={() => handleDeleteTaskPart(part.id)}>
+                              <Icon icon='mdi:delete' />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              ) : (
+                <Typography variant='body2' color='text.secondary'>
+                  {String(t('tasks.parts.empty'))}
+                </Typography>
+              )}
+            </Stack>
+          )}
+        </CardContent>
+
+        {/* Dialog for adding task parts */}
+        <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth='sm' fullWidth>
+          <DialogTitle>{String(t('tasks.parts.dialog.title'))}</DialogTitle>
+          <DialogContent>
+            <Grid container spacing={3} sx={{ mt: 1 }}>
+              <Grid item xs={12}>
+                <CustomTextField
+                  fullWidth
+                  label={String(t('tasks.parts.form.title'))}
+                  value={partForm.title}
+                  onChange={e => setPartForm({ ...partForm, title: e.target.value })}
+                  error={!!partErrors.title}
+                  helperText={partErrors.title}
+                />
+              </Grid>
+              <Grid item xs={12}>
                 <CustomTextField
                   select
                   fullWidth
-                  label={String(t('tasks.assignment.assignee'))}
-                  value={simpleAssignee}
-                  onChange={e => setSimpleAssignee(Number(e.target.value))}
+                  label={String(t('tasks.parts.form.department'))}
+                  value={partForm.department}
+                  onChange={e => setPartForm({ ...partForm, department: Number(e.target.value) })}
+                  error={!!partErrors.department}
+                  helperText={partErrors.department}
+                >
+                  <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
+                  {(departments || []).map(d => (
+                    <MenuItem key={d.id} value={d.id}>
+                      {d.name}
+                    </MenuItem>
+                  ))}
+                </CustomTextField>
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  select
+                  fullWidth
+                  label={String(t('tasks.parts.form.assignee'))}
+                  value={partForm.assignee}
+                  onChange={e => setPartForm({ ...partForm, assignee: Number(e.target.value) })}
+                  error={!!partErrors.assignee}
+                  helperText={partErrors.assignee}
                 >
                   <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
                   {(users || []).map(u => (
@@ -661,163 +893,53 @@ const TaskUpdateForm = () => {
                   ))}
                 </CustomTextField>
               </Grid>
-              <Grid item xs={12} sm={4}>
-                <Button variant='contained' fullWidth onClick={handleCreateSimpleAssignment} disabled={!simpleAssignee}>
-                  {String(t('tasks.assignment.attach'))}
-                </Button>
+              <Grid item xs={12} sm={6}>
+                <CustomTextField
+                  fullWidth
+                  type='date'
+                  label={String(t('tasks.parts.form.startDate'))}
+                  value={partForm.start_date}
+                  onChange={e => setPartForm({ ...partForm, start_date: e.target.value })}
+                  InputLabelProps={{ shrink: true }}
+                  error={!!partErrors.start_date}
+                  helperText={partErrors.start_date}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <CustomTextField
+                  fullWidth
+                  type='date'
+                  label={String(t('tasks.parts.form.endDate'))}
+                  value={partForm.end_date}
+                  onChange={e => setPartForm({ ...partForm, end_date: e.target.value })}
+                  InputLabelProps={{ shrink: true }}
+                  error={!!partErrors.end_date}
+                  helperText={partErrors.end_date}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <CustomTextField
+                  fullWidth
+                  multiline
+                  rows={3}
+                  label={String(t('tasks.parts.form.note'))}
+                  value={partForm.note}
+                  onChange={e => setPartForm({ ...partForm, note: e.target.value })}
+                  error={!!partErrors.note}
+                  helperText={partErrors.note}
+                />
               </Grid>
             </Grid>
-          </Stack>
-        ) : (
-          <Stack spacing={2} sx={{ mt: 3 }}>
-            <Stack direction='row' justifyContent='space-between' alignItems='center'>
-              <Typography variant='subtitle2'>{String(t('tasks.parts.title'))}</Typography>
-              <Button variant='contained' size='small' startIcon={<Icon icon='mdi:plus' />} onClick={handleOpenDialog}>
-                {String(t('common.add'))}
-              </Button>
-            </Stack>
-
-            {taskParts.length > 0 ? (
-              <TableContainer component={Paper}>
-                <Table size='small'>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>{String(t('tasks.parts.table.title'))}</TableCell>
-                      <TableCell>{String(t('tasks.parts.table.department'))}</TableCell>
-                      <TableCell>{String(t('tasks.parts.table.assignee'))}</TableCell>
-                      <TableCell>{String(t('tasks.parts.table.start'))}</TableCell>
-                      <TableCell>{String(t('tasks.parts.table.end'))}</TableCell>
-                      <TableCell>{String(t('tasks.parts.table.note'))}</TableCell>
-                      <TableCell align='right'>{String(t('common.actions'))}</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {taskParts.map(part => (
-                      <TableRow key={part.id}>
-                        <TableCell>{part.title}</TableCell>
-                        <TableCell>
-                          {departments?.find(d => d.id === part.department)?.name || part.department}
-                        </TableCell>
-                        <TableCell>{users?.find(u => u.id === part.assignee)?.fullname || part.assignee}</TableCell>
-                        <TableCell>{part.start_date}</TableCell>
-                        <TableCell>{part.end_date}</TableCell>
-                        <TableCell>{part.note}</TableCell>
-                        <TableCell align='right'>
-                          <IconButton size='small' color='error' onClick={() => handleDeleteTaskPart(part.id)}>
-                            <Icon icon='mdi:delete' />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            ) : (
-              <Typography variant='body2' color='text.secondary'>
-                {String(t('tasks.parts.empty'))}
-              </Typography>
-            )}
-          </Stack>
-        )}
-      </CardContent>
-
-      {/* Dialog for adding task parts */}
-      <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth='sm' fullWidth>
-        <DialogTitle>{String(t('tasks.parts.dialog.title'))}</DialogTitle>
-        <DialogContent>
-          <Grid container spacing={3} sx={{ mt: 1 }}>
-            <Grid item xs={12}>
-              <CustomTextField
-                fullWidth
-                label={String(t('tasks.parts.form.title'))}
-                value={partForm.title}
-                onChange={e => setPartForm({ ...partForm, title: e.target.value })}
-                error={!!partErrors.title}
-                helperText={partErrors.title}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                select
-                fullWidth
-                label={String(t('tasks.parts.form.department'))}
-                value={partForm.department}
-                onChange={e => setPartForm({ ...partForm, department: Number(e.target.value) })}
-                error={!!partErrors.department}
-                helperText={partErrors.department}
-              >
-                <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
-                {(departments || []).map(d => (
-                  <MenuItem key={d.id} value={d.id}>
-                    {d.name}
-                  </MenuItem>
-                ))}
-              </CustomTextField>
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                select
-                fullWidth
-                label={String(t('tasks.parts.form.assignee'))}
-                value={partForm.assignee}
-                onChange={e => setPartForm({ ...partForm, assignee: Number(e.target.value) })}
-                error={!!partErrors.assignee}
-                helperText={partErrors.assignee}
-              >
-                <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
-                {(users || []).map(u => (
-                  <MenuItem key={u.id} value={u.id}>
-                    {u.fullname}
-                  </MenuItem>
-                ))}
-              </CustomTextField>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <CustomTextField
-                fullWidth
-                type='date'
-                label={String(t('tasks.parts.form.startDate'))}
-                value={partForm.start_date}
-                onChange={e => setPartForm({ ...partForm, start_date: e.target.value })}
-                InputLabelProps={{ shrink: true }}
-                error={!!partErrors.start_date}
-                helperText={partErrors.start_date}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <CustomTextField
-                fullWidth
-                type='date'
-                label={String(t('tasks.parts.form.endDate'))}
-                value={partForm.end_date}
-                onChange={e => setPartForm({ ...partForm, end_date: e.target.value })}
-                InputLabelProps={{ shrink: true }}
-                error={!!partErrors.end_date}
-                helperText={partErrors.end_date}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <CustomTextField
-                fullWidth
-                multiline
-                rows={3}
-                label={String(t('tasks.parts.form.note'))}
-                value={partForm.note}
-                onChange={e => setPartForm({ ...partForm, note: e.target.value })}
-                error={!!partErrors.note}
-                helperText={partErrors.note}
-              />
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>{String(t('common.cancel'))}</Button>
-          <Button variant='contained' onClick={handleSaveTaskPart}>
-            {String(t('common.save'))}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Card>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog}>{String(t('common.cancel'))}</Button>
+            <Button variant='contained' onClick={handleSaveTaskPart}>
+              {String(t('common.save'))}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Card>
+    </Stack>
   )
 }
 
