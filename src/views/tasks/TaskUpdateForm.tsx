@@ -197,7 +197,7 @@ const TaskUpdateForm = () => {
     perPage: 100
   })
   const safeMsg = (msg: any) => (typeof msg === 'string' ? msg : undefined)
-  const [attachFile, setAttachFile] = useState<File | null>(null)
+  const [attachFiles, setAttachFiles] = useState<File[]>([])
   const [saving, setSaving] = useState(false)
   useEffect(() => {
     const fetchTask = async () => {
@@ -340,7 +340,7 @@ const TaskUpdateForm = () => {
   const onSubmit = async (values: TaskPayload) => {
     try {
       if (!id || Array.isArray(id)) return
-      if (attachFile) await submitAttachment()
+      if (attachFiles.length) await submitAttachment()
       await DataService.put(endpoints.taskById(id), { ...values, company: user?.company_id })
       toast.success(String(t('tasks.toast.updated')))
       router.push(`/tasks/view/${id}`)
@@ -350,23 +350,26 @@ const TaskUpdateForm = () => {
   }
   const submitAttachment = async () => {
     if (!id) return
-    if (!attachFile) {
-      toast.error('Fayl tanlang')
+    if (!attachFiles.length) {
+      toast.error(String(t('tasks.attachments.fileRequired')))
       return
     }
 
     try {
       setSaving(true)
-      const formData = new FormData()
-      formData.append('file', attachFile)
-      formData.append('title', attachFile.name)
-      formData.append('task', id.toString())
-      await DataService.postForm(endpoints.taskAttachment, formData)
+      for (const fileItem of attachFiles) {
+        const formData = new FormData()
+        formData.append('file', fileItem)
+        formData.append('title', fileItem.name)
+        formData.append('task', id.toString())
+        await DataService.postForm(endpoints.taskAttachment, formData)
+      }
 
-      toast.success('Fayl biriktirildi')
+      toast.success(String(t('tasks.attachments.attached')))
+      setAttachFiles([])
     } catch (e) {
       console.error('Failed to create attachment', e)
-      toast.error('Fayl biriktirishda xatolik')
+      toast.error(String(t('tasks.attachments.attachError')))
       return
     } finally {
       setSaving(false)
@@ -504,18 +507,49 @@ const TaskUpdateForm = () => {
                         disabled={saving}
                         startIcon={<Icon icon='mdi:file-upload' />}
                       >
-                        Fayl tanlash
-                        <input hidden type='file' onChange={e => setAttachFile(e.target.files?.[0] || null)} />
+                        {String(t('tasks.attachments.chooseFiles'))}
+                        <input
+                          hidden
+                          type='file'
+                          multiple
+                          onChange={e => {
+                            const files = Array.from(e.target.files || [])
+                            if (!files.length) return
+                            setAttachFiles(prev => {
+                              const map = new Map<string, File>()
+                              for (const f of prev) map.set(`${f.name}-${f.size}-${f.lastModified}`, f)
+                              for (const f of files) map.set(`${f.name}-${f.size}-${f.lastModified}`, f)
+
+                              return Array.from(map.values())
+                            })
+                            // allow choosing same file again later
+                            e.target.value = ''
+                          }}
+                        />
                       </Button>
 
-                      {attachFile ? (
-                        <Stack direction='row' spacing={1} alignItems='center'>
-                          <Chip
-                            icon={<Icon icon='mdi:file' />}
-                            label={attachFile.name}
-                            variant='outlined'
-                            onDelete={saving ? undefined : () => setAttachFile(null)}
-                          />
+                      {attachFiles.length ? (
+                        <Stack direction='row' spacing={1} alignItems='center' flexWrap='wrap' useFlexGap marginTop={5}>
+                          {attachFiles.map(file => {
+                            const key = `${file.name}-${file.size}-${file.lastModified}`
+
+                            return (
+                              <Chip
+                                key={key}
+                                icon={<Icon icon='mdi:file' />}
+                                label={file.name}
+                                variant='outlined'
+                                onDelete={
+                                  saving
+                                    ? undefined
+                                    : () =>
+                                        setAttachFiles(prev =>
+                                          prev.filter(f => `${f.name}-${f.size}-${f.lastModified}` !== key)
+                                        )
+                                }
+                              />
+                            )
+                          })}
                         </Stack>
                       ) : null}
                     </Grid>

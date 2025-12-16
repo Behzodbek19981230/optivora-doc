@@ -8,6 +8,7 @@ import endpoints from 'src/configs/endpoints'
 import TaskAttachment from './TaskAttachment'
 import TaskComments from './TaskComments'
 import { useTranslation } from 'react-i18next'
+import moment from 'moment'
 
 export default function DocumentTab({
   task,
@@ -212,10 +213,16 @@ export default function DocumentTab({
             </Typography>
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <Item label={String(t('tasks.view.document.fields.createdAt'))} value={task.created_time} />
+                <Item
+                  label={String(t('tasks.view.document.fields.createdAt'))}
+                  value={moment(task.created_time).format('DD.MM.YYYY HH:mm')}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Item label={String(t('tasks.view.document.fields.updatedAt'))} value={task.updated_time} />
+                <Item
+                  label={String(t('tasks.view.document.fields.updatedAt'))}
+                  value={moment(task.updated_time).format('DD.MM.YYYY HH:mm')}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Item label={String(t('tasks.view.document.fields.createdBy'))} value={task.created_by} />
