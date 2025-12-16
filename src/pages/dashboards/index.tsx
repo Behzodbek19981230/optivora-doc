@@ -4,16 +4,8 @@ import Grid from '@mui/material/Grid'
 // ** Custom Component Import
 import ApexChartWrapper from 'src/@core/styles/libs/react-apexcharts'
 import EcommerceCongratulationsJohn from 'src/views/dashboards/EcommerceCongratulationsJohn'
-import EcommerceEarningReports from 'src/views/dashboards/EcommerceEarningReports'
-import EcommerceExpenses from 'src/views/dashboards/EcommerceExpenses'
-import EcommerceGeneratedLeads from 'src/views/dashboards/EcommerceGeneratedLeads'
-import EcommerceInvoiceTable from 'src/views/dashboards/EcommerceInvoiceTable'
-import EcommerceOrders from 'src/views/dashboards/EcommerceOrders'
-import EcommercePopularProducts from 'src/views/dashboards/EcommercePopularProducts'
-import EcommerceProfit from 'src/views/dashboards/EcommerceProfit'
-import EcommerceRevenueReport from 'src/views/dashboards/EcommerceRevenueReport'
+
 import EcommerceStatistics from 'src/views/dashboards/EcommerceStatistics'
-import EcommerceTransactions from 'src/views/dashboards/EcommerceTransactions'
 
 const EcommerceDashboard = () => {
   return (
@@ -25,7 +17,7 @@ const EcommerceDashboard = () => {
         <Grid item xs={12} md={8}>
           <EcommerceStatistics />
         </Grid>
-        <Grid item xs={12} lg={4}>
+        {/* <Grid item xs={12} lg={4}>
           <Grid container spacing={6}>
             <Grid item xs={6} md={3} lg={6}>
               <EcommerceExpenses />
@@ -55,7 +47,7 @@ const EcommerceDashboard = () => {
         </Grid>
         <Grid item xs={12} lg={8}>
           <EcommerceInvoiceTable />
-        </Grid>
+        </Grid> */}
       </Grid>
     </ApexChartWrapper>
   )
