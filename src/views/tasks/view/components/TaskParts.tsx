@@ -15,6 +15,7 @@ import {
 } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import { TaskPartType } from 'src/types/task'
+import { useTranslation } from 'react-i18next'
 
 export default function TaskParts({
   parts,
@@ -25,6 +26,7 @@ export default function TaskParts({
   selectedPartId: number | undefined
   setSelectedPartId: (id: number) => void
 }) {
+  const { t } = useTranslation()
   const statusColor = (status?: string) => {
     switch (status) {
       case 'new':
@@ -49,9 +51,9 @@ export default function TaskParts({
       <>
         <CardContent>
           <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 2 }}>
-            <Typography variant='subtitle2'>Qismlar (TaskPart)</Typography>
+            <Typography variant='subtitle2'>{String(t('tasks.view.parts.title'))}</Typography>
             <Typography variant='caption' color='text.secondary'>
-              {parts.length} ta
+              {String(t('tasks.view.parts.count', { count: parts.length }))}
             </Typography>
           </Stack>
         </CardContent>
@@ -59,20 +61,20 @@ export default function TaskParts({
         {!parts.length ? (
           <CardContent>
             <Typography variant='body2' color='text.secondary'>
-              Qismlar mavjud emas
+              {String(t('tasks.view.parts.empty'))}
             </Typography>
           </CardContent>
         ) : (
           <Table size='small' sx={{ '& .MuiTableCell-root': { py: 1 } }}>
             <TableHead>
               <TableRow>
-                <TableCell>Qism nomi</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Bo‘lim</TableCell>
-                <TableCell>Ijrochi</TableCell>
-                <TableCell>Boshlanish</TableCell>
-                <TableCell>Tugash</TableCell>
-                <TableCell align='right'>Amallar</TableCell>
+                <TableCell>{String(t('tasks.view.parts.table.title'))}</TableCell>
+                <TableCell>{String(t('tasks.view.parts.table.status'))}</TableCell>
+                <TableCell>{String(t('tasks.view.parts.table.department'))}</TableCell>
+                <TableCell>{String(t('tasks.view.parts.table.assignee'))}</TableCell>
+                <TableCell>{String(t('tasks.view.parts.table.start'))}</TableCell>
+                <TableCell>{String(t('tasks.view.parts.table.end'))}</TableCell>
+                <TableCell align='right'>{String(t('common.actions'))}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -90,7 +92,7 @@ export default function TaskParts({
                       <Stack direction='row' spacing={1} alignItems='center'>
                         <Icon icon='mdi:subdirectory-arrow-right' />
                         <Typography variant='body2' sx={{ fontWeight: 600 }}>
-                          {p.title || `Qism #${p.id}`}
+                          {p.title || String(t('tasks.view.parts.partFallbackTitle', { id: p.id }))}
                         </Typography>
                       </Stack>
                       {!!p.note && (
@@ -107,7 +109,7 @@ export default function TaskParts({
                     <TableCell>{p.start_date || '—'}</TableCell>
                     <TableCell>{p.end_date || '—'}</TableCell>
                     <TableCell align='right' onClick={e => e.stopPropagation()}>
-                      <Tooltip title='Oʻchirish'>
+                      <Tooltip title={String(t('common.delete'))}>
                         <IconButton size='small'>
                           <Icon icon='mdi:delete' />
                         </IconButton>

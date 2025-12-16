@@ -11,6 +11,7 @@ import TimelineDot from '@mui/lab/TimelineDot'
 import TimelineConnector from '@mui/lab/TimelineConnector'
 import { Card, CardContent } from '@mui/material'
 import { TaskEventType } from 'src/types/task'
+import { useTranslation } from 'react-i18next'
 const Timeline = styled(MuiTimeline)({
   '& .MuiTimelineItem-root': {
     width: '100%',
@@ -48,6 +49,7 @@ const getDotColor = (eventType: string) => {
 }
 
 export default function TaskHistoryTab({ id }: { id: string }) {
+  const { t } = useTranslation()
   const { data: events = [], isLoading } = useQuery<TaskEventType[]>({
     queryKey: ['task-events', id],
     queryFn: async (): Promise<TaskEventType[]> => {
@@ -61,7 +63,7 @@ export default function TaskHistoryTab({ id }: { id: string }) {
     <Card>
       <CardContent>
         <Typography variant='subtitle2' sx={{ mb: 2 }}>
-          Amalga oshirish jarayoni
+          {String(t('tasks.view.history.title'))}
         </Typography>
         {isLoading ? (
           <Stack spacing={2}>
@@ -101,7 +103,7 @@ export default function TaskHistoryTab({ id }: { id: string }) {
           </Timeline>
         ) : (
           <Typography variant='body2' color='text.secondary'>
-            Hech qanday jarayon elementi yoʻq
+            {String(t('tasks.view.history.empty'))}
           </Typography>
         )}
       </CardContent>

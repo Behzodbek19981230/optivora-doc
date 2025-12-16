@@ -19,6 +19,7 @@ import Icon from 'src/@core/components/icon'
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
 import { UserDetailType } from 'src/types/task'
+import { useTranslation } from 'react-i18next'
 
 type TaskCommentType = {
   id: number
@@ -43,6 +44,7 @@ const getInitials = (value: string) => {
 }
 
 export default function TaskComments({ taskId, partId }: { taskId: string | number; partId?: string | number }) {
+  const { t } = useTranslation()
   const { data, isLoading, isError } = useQuery<{ results: TaskCommentType[] }>({
     queryKey: ['task-comments', taskId, partId ?? null],
     queryFn: async () => {
@@ -74,7 +76,7 @@ export default function TaskComments({ taskId, partId }: { taskId: string | numb
   if (isError) {
     return (
       <Typography variant='body2' color='error'>
-        Kommentlarni yuklashda xatolik yuz berdi
+        {String(t('tasks.view.comments.loadError'))}
       </Typography>
     )
   }
@@ -84,7 +86,7 @@ export default function TaskComments({ taskId, partId }: { taskId: string | numb
       <Card>
         <CardContent>
           <Typography variant='body2' color='text.secondary'>
-            Hozircha komment yo‘q
+            {String(t('tasks.view.comments.empty'))}
           </Typography>
         </CardContent>
       </Card>
@@ -95,15 +97,14 @@ export default function TaskComments({ taskId, partId }: { taskId: string | numb
     <Card>
       <CardContent>
         <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
-          <Typography variant='subtitle2'>Kommentariyalar</Typography>
-          <Chip size='small' color='info' label={`${comments.length} ta`} />
+          <Typography variant='subtitle2'>{String(t('tasks.view.comments.title'))}</Typography>
+          <Chip size='small' color='info' label={String(t('tasks.view.comments.count', { count: comments.length }))} />
         </Box>
 
         <List disablePadding>
           {comments.map((c, idx) => {
             const created = c.created_at ? new Date(c.created_at).toLocaleString() : ''
-            // API’da author detail yo‘q, shuning uchun hozircha ID ko‘rsatamiz
-            const authorLabel = c.is_system ? 'System' : `${c.author_detail?.fullname}`
+            const authorLabel = c.is_system ? String(t('tasks.view.comments.system')) : `${c.author_detail?.fullname}`
 
             return (
               <React.Fragment key={c.id ?? idx}>
@@ -136,8 +137,12 @@ export default function TaskComments({ taskId, partId }: { taskId: string | numb
                         <Typography variant='subtitle2' sx={{ fontWeight: 700 }}>
                           {authorLabel}
                         </Typography>
-                        {c.is_system ? <Chip size='small' color='default' variant='outlined' label='System' /> : null}
-                        {c.part ? <Chip size='small' variant='outlined' label={`Qism #${c.part}`} /> : null}
+                        {c.is_system ? (
+                          <Chip size='small' color='default' variant='outlined' label={String(t('tasks.view.comments.system'))} />
+                        ) : null}
+                        {c.part ? (
+                          <Chip size='small' variant='outlined' label={String(t('tasks.view.comments.partLabel', { id: c.part }))} />
+                        ) : null}
                         {created ? (
                           <Typography variant='caption' sx={{ color: 'text.disabled' }}>
                             • {created}

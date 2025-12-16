@@ -21,6 +21,7 @@ import { useQuery } from '@tanstack/react-query'
 import Icon from 'src/@core/components/icon'
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
+import { useTranslation } from 'react-i18next'
 
 type TaskAttachmentType = {
   id: number
@@ -83,6 +84,7 @@ const getFileIcon = (ext: string) => {
 }
 
 export default function TaskAttachment({ taskId, partId }: { taskId: string | number; partId?: string | number }) {
+  const { t } = useTranslation()
   const { data, isLoading, isError } = useQuery<{ results: TaskAttachmentType[] }>({
     queryKey: ['task-attachments', taskId, partId ?? null],
     queryFn: async () => {
@@ -114,7 +116,7 @@ export default function TaskAttachment({ taskId, partId }: { taskId: string | nu
   if (isError) {
     return (
       <Typography variant='body2' color='error'>
-        Fayllarni yuklashda xatolik yuz berdi
+        {String(t('tasks.view.attachments.loadError'))}
       </Typography>
     )
   }
@@ -125,7 +127,7 @@ export default function TaskAttachment({ taskId, partId }: { taskId: string | nu
         <CardContent>
           <Box sx={{ py: 2 }}>
             <Typography variant='body2' color='text.secondary'>
-              Biriktirilgan fayllar yo‘q
+              {String(t('tasks.view.attachments.empty'))}
             </Typography>
           </Box>
         </CardContent>
@@ -137,8 +139,8 @@ export default function TaskAttachment({ taskId, partId }: { taskId: string | nu
     <Card>
       <CardContent>
         <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
-          <Typography variant='subtitle2'>Biriktirilgan fayllar</Typography>
-          <Chip size='small' color='info' label={`${attachments.length} ta`} />
+          <Typography variant='subtitle2'>{String(t('tasks.view.attachments.title'))}</Typography>
+          <Chip size='small' color='info' label={String(t('tasks.view.attachments.count', { count: attachments.length }))} />
         </Box>
 
         <List disablePadding>
@@ -155,7 +157,7 @@ export default function TaskAttachment({ taskId, partId }: { taskId: string | nu
                   disableGutters
                   secondaryAction={
                     href && href !== '#' ? (
-                      <Tooltip title='Ochish / yuklab olish'>
+                      <Tooltip title={String(t('tasks.view.attachments.openOrDownload'))}>
                         <IconButton component='a' href={href} target='_blank' rel='noreferrer'>
                           <Icon icon='tabler:download' />
                         </IconButton>
@@ -199,7 +201,9 @@ export default function TaskAttachment({ taskId, partId }: { taskId: string | nu
                         )}
 
                         {ext ? <Chip size='small' variant='outlined' label={ext.toUpperCase()} /> : null}
-                        {a.part ? <Chip size='small' variant='outlined' label={`Qism #${a.part}`} /> : null}
+                        {a.part ? (
+                          <Chip size='small' variant='outlined' label={String(t('tasks.view.attachments.partLabel', { id: a.part }))} />
+                        ) : null}
                       </Stack>
                     }
                     secondary={
@@ -211,7 +215,7 @@ export default function TaskAttachment({ taskId, partId }: { taskId: string | nu
                         ) : null}
                         {typeof a.uploaded_by === 'number' ? (
                           <Typography variant='caption' color='text.secondary'>
-                            • Yuklovchi: #{a.uploaded_by}
+                            {String(t('tasks.view.attachments.uploader', { id: a.uploaded_by }))}
                           </Typography>
                         ) : null}
                       </Stack>

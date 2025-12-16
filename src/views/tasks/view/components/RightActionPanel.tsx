@@ -21,8 +21,10 @@ import toast from 'react-hot-toast'
 import { useQueryClient } from '@tanstack/react-query'
 import CustomTextField from 'src/@core/components/mui/text-field'
 import { useAuth } from 'src/hooks/useAuth'
+import { useTranslation } from 'react-i18next'
 
 const RightActionsPanel = ({ task, part }: { task?: TaskType; part?: TaskPartType }) => {
+  const { t } = useTranslation()
   const qc = useQueryClient()
   const { user } = useAuth()
   const [commentOpen, setCommentOpen] = React.useState(false)
@@ -35,7 +37,11 @@ const RightActionsPanel = ({ task, part }: { task?: TaskType; part?: TaskPartTyp
   const taskId = task?.id
   const partId = part?.id
 
-  const contentLabel = partId ? `Qism #${partId}` : taskId ? `Task #${taskId}` : '—'
+  const contentLabel = partId
+    ? String(t('tasks.view.actions.selectedPartLabel', { id: partId }))
+    : taskId
+      ? String(t('tasks.view.actions.selectedTaskLabel', { id: taskId }))
+      : '—'
 
   const resetComment = () => {
     setCommentText('')
@@ -60,7 +66,7 @@ const RightActionsPanel = ({ task, part }: { task?: TaskType; part?: TaskPartTyp
     if (!taskId) return
     const text = commentText.trim()
     if (!text) {
-      toast.error('Izoh matnini kiriting')
+      toast.error(String(t('tasks.view.actions.toasts.commentRequired')))
       return
     }
 
@@ -74,13 +80,13 @@ const RightActionsPanel = ({ task, part }: { task?: TaskType; part?: TaskPartTyp
         text
       })
 
-      toast.success('Izoh qo‘shildi')
+      toast.success(String(t('tasks.view.actions.toasts.commentAdded')))
       setCommentOpen(false)
       resetComment()
       await refreshComments()
     } catch (e) {
       console.error('Failed to create comment', e)
-      toast.error('Izoh qo‘shishda xatolik')
+      toast.error(String(t('tasks.view.actions.toasts.commentAddError')))
     } finally {
       setSaving(false)
     }
@@ -89,7 +95,7 @@ const RightActionsPanel = ({ task, part }: { task?: TaskType; part?: TaskPartTyp
   const submitAttachment = async () => {
     if (!taskId) return
     if (!attachFile) {
-      toast.error('Fayl tanlang')
+      toast.error(String(t('tasks.view.actions.toasts.fileRequired')))
       return
     }
 
@@ -102,13 +108,13 @@ const RightActionsPanel = ({ task, part }: { task?: TaskType; part?: TaskPartTyp
       formData.append('part', partId ? partId.toString() : '')
       await DataService.postForm(endpoints.taskAttachment, formData)
 
-      toast.success('Fayl biriktirildi')
+      toast.success(String(t('tasks.view.actions.toasts.fileAttached')))
       setAttachOpen(false)
       resetAttach()
       await refreshAttachments()
     } catch (e) {
       console.error('Failed to create attachment', e)
-      toast.error('Fayl biriktirishda xatolik')
+      toast.error(String(t('tasks.view.actions.toasts.fileAttachError')))
     } finally {
       setSaving(false)
     }
@@ -118,12 +124,12 @@ const RightActionsPanel = ({ task, part }: { task?: TaskType; part?: TaskPartTyp
     <Card sx={{ position: { md: 'sticky' }, top: { md: 24 } }}>
       <CardContent>
         <Stack spacing={2}>
-          <Typography variant='subtitle1'>Amallar</Typography>
+          <Typography variant='subtitle1'>{String(t('tasks.view.actions.title'))}</Typography>
 
           <Divider />
           <Stack spacing={1}>
             <Typography variant='caption' color='text.secondary'>
-              Tanlangan qism
+              {String(t('tasks.view.actions.selectedSection'))}
             </Typography>
 
             {partId ? (
@@ -132,21 +138,21 @@ const RightActionsPanel = ({ task, part }: { task?: TaskType; part?: TaskPartTyp
                   <Chip
                     size='small'
                     icon={<Icon icon='mdi:subdirectory-arrow-right' />}
-                    label={`Qism #${partId}`}
+                      label={String(t('tasks.view.actions.selectedPartLabel', { id: partId }))}
                     variant='outlined'
                   />
                   {part?.title ? <Chip size='small' label={part.title} variant='outlined' /> : null}
                   {part?.status ? <Chip size='small' label={part.status} color='info' variant='outlined' /> : null}
                 </Stack>
                 <Typography variant='body2' color='text.secondary'>
-                  Izoh va fayllar shu qismga qo‘shiladi.
+                  {String(t('tasks.view.actions.attachmentsApplyToPart'))}
                 </Typography>
               </Stack>
             ) : (
               <Stack spacing={0.5}>
-                <Typography variant='body2'>Qism tanlanmagan</Typography>
+                <Typography variant='body2'>{String(t('tasks.view.actions.noPartSelected'))}</Typography>
                 <Typography variant='body2' color='text.secondary'>
-                  Izoh va fayllar task’ning o‘ziga qo‘shiladi.
+                  {String(t('tasks.view.actions.attachmentsApplyToTask'))}
                 </Typography>
               </Stack>
             )}
@@ -154,32 +160,32 @@ const RightActionsPanel = ({ task, part }: { task?: TaskType; part?: TaskPartTyp
           <Divider />
           <Stack spacing={1}>
             <Typography variant='caption' color='text.secondary'>
-              Muddat
+              {String(t('tasks.view.actions.deadline'))}
             </Typography>
             <Stack direction='row' spacing={1} alignItems='center'>
               <Icon icon='mdi:calendar' />
-              <Typography variant='body2'>{task?.end_date || 'Belgilanmagan'}</Typography>
+              <Typography variant='body2'>{task?.end_date || String(t('common.notSet'))}</Typography>
             </Stack>
             <Button size='small' variant='outlined'>
-              Muddati belgilash
+              {String(t('tasks.view.actions.setDeadline'))}
             </Button>
           </Stack>
           <Divider />
           {partId && (
             <Stack spacing={1}>
               <Typography variant='caption' color='text.secondary'>
-                Qism holati
+                {String(t('tasks.view.actions.partStatus'))}
               </Typography>
               <Stack direction='row' spacing={1} alignItems='center'>
                 <Icon icon='mdi:subdirectory-arrow-right' />
-                <Typography variant='body2'>{part?.status || 'Belgilanmagan'}</Typography>
+                <Typography variant='body2'>{part?.status || String(t('common.notSet'))}</Typography>
               </Stack>
               <Stack direction='row' spacing={1}>
                 <Button size='small' variant='contained'>
-                  Boshlash
+                  {String(t('common.start'))}
                 </Button>
                 <Button size='small' variant='outlined'>
-                  Yakunlash
+                  {String(t('common.finish'))}
                 </Button>
               </Stack>
             </Stack>
@@ -187,7 +193,7 @@ const RightActionsPanel = ({ task, part }: { task?: TaskType; part?: TaskPartTyp
           <Divider />
           <Stack spacing={1}>
             <Typography variant='caption' color='text.secondary'>
-              Fayllar
+              {String(t('tasks.view.actions.files'))}
             </Typography>
             <Stack direction='row' spacing={1}>
               <Button
@@ -197,14 +203,14 @@ const RightActionsPanel = ({ task, part }: { task?: TaskType; part?: TaskPartTyp
                 disabled={!taskId}
                 onClick={() => setAttachOpen(true)}
               >
-                Fayl qo'shish
+                {String(t('tasks.view.actions.addFile'))}
               </Button>
             </Stack>
           </Stack>
           <Divider />
           <Stack spacing={1}>
             <Typography variant='caption' color='text.secondary'>
-              Izohlar
+              {String(t('tasks.view.actions.comments'))}
             </Typography>
             <Button
               size='small'
@@ -213,7 +219,7 @@ const RightActionsPanel = ({ task, part }: { task?: TaskType; part?: TaskPartTyp
               disabled={!taskId}
               onClick={() => setCommentOpen(true)}
             >
-              Izoh qo'shish
+              {String(t('tasks.view.actions.addComment'))}
             </Button>
           </Stack>
         </Stack>
@@ -222,7 +228,7 @@ const RightActionsPanel = ({ task, part }: { task?: TaskType; part?: TaskPartTyp
         <Dialog open={commentOpen} onClose={saving ? undefined : () => setCommentOpen(false)} fullWidth maxWidth='sm'>
           <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Icon icon='mdi:comment' />
-            Izoh qo‘shish ({contentLabel})
+            {String(t('tasks.view.actions.commentDialog.title', { target: contentLabel }))}
           </DialogTitle>
           <DialogContent>
             <CustomTextField
@@ -230,8 +236,8 @@ const RightActionsPanel = ({ task, part }: { task?: TaskType; part?: TaskPartTyp
               fullWidth
               minRows={4}
               multiline
-              label='Xabar'
-              placeholder='Izoh… yozing'
+              label={String(t('tasks.view.actions.commentDialog.messageLabel'))}
+              placeholder={String(t('tasks.view.actions.commentDialog.messagePlaceholder'))}
               value={commentText}
               onChange={e => setCommentText(e.target.value)}
               disabled={saving}
@@ -248,10 +254,10 @@ const RightActionsPanel = ({ task, part }: { task?: TaskType; part?: TaskPartTyp
                 resetComment()
               }}
             >
-              Bekor qilish
+              {String(t('common.cancel'))}
             </Button>
             <Button variant='contained' disabled={saving} onClick={submitComment}>
-              Yuborish
+              {String(t('common.send'))}
             </Button>
           </DialogActions>
         </Dialog>
@@ -260,13 +266,13 @@ const RightActionsPanel = ({ task, part }: { task?: TaskType; part?: TaskPartTyp
         <Dialog open={attachOpen} onClose={saving ? undefined : () => setAttachOpen(false)} fullWidth maxWidth='sm'>
           <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Icon icon='mdi:paperclip' />
-            Fayl biriktirish ({contentLabel})
+            {String(t('tasks.view.actions.attachmentDialog.title', { target: contentLabel }))}
           </DialogTitle>
           <DialogContent>
             <Stack spacing={2} sx={{ mt: 1 }}>
               <CustomTextField
                 fullWidth
-                label='Sarlavha (ixtiyoriy)'
+                label={String(t('tasks.view.actions.attachmentDialog.titleLabel'))}
                 value={attachTitle}
                 onChange={e => setAttachTitle(e.target.value)}
                 disabled={saving}
@@ -278,7 +284,7 @@ const RightActionsPanel = ({ task, part }: { task?: TaskType; part?: TaskPartTyp
                 disabled={saving}
                 startIcon={<Icon icon='mdi:file-upload' />}
               >
-                Fayl tanlash
+                {String(t('tasks.view.actions.attachmentDialog.chooseFile'))}
                 <input hidden type='file' onChange={e => setAttachFile(e.target.files?.[0] || null)} />
               </Button>
 
@@ -304,10 +310,10 @@ const RightActionsPanel = ({ task, part }: { task?: TaskType; part?: TaskPartTyp
                 resetAttach()
               }}
             >
-              Bekor qilish
+              {String(t('common.cancel'))}
             </Button>
             <Button variant='contained' disabled={saving} onClick={submitAttachment}>
-              Biriktirish
+              {String(t('tasks.view.actions.attachmentDialog.attach'))}
             </Button>
           </DialogActions>
         </Dialog>

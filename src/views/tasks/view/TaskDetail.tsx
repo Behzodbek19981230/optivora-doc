@@ -10,8 +10,10 @@ import RightActionsPanel from './components/RightActionPanel'
 import TaskHistoryTab from './components/TaskHistoryTab'
 import TaskProccessTab from './components/TaskProccessTab'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 
 const TaskViewDetail = () => {
+  const { t } = useTranslation()
   const router = useRouter()
   const { id } = router.query
   const [tab, setTab] = useState(0)
@@ -46,17 +48,19 @@ const TaskViewDetail = () => {
           <Card>
             <CardContent>
               <Stack direction='row' alignItems='center' justifyContent='space-between'>
-                <Typography variant='h6'>{task ? `Task: #${task.id} | ${task.name}` : 'Task'}</Typography>
+                <Typography variant='h6'>
+                  {task ? String(t('tasks.view.header.titleWithId', { id: task.id, name: task.name })) : String(t('tasks.view.header.title'))}
+                </Typography>
                 <Stack direction='row' spacing={1}>
-                  <Chip label={`Status: ${task?.status || '—'}`} size='small' />
-                  <Chip label={`Prioritet: ${task?.priority || '—'}`} size='small' />
-                  {task?.end_date && <Chip label={`Muddat: ${task.end_date}`} size='small' />}
+                  <Chip label={String(t('tasks.view.header.status', { value: task?.status || '—' }))} size='small' />
+                  <Chip label={String(t('tasks.view.header.priority', { value: task?.priority || '—' }))} size='small' />
+                  {task?.end_date && <Chip label={String(t('tasks.view.header.deadline', { value: task.end_date }))} size='small' />}
                 </Stack>
               </Stack>
               <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mt: 2 }} variant='scrollable' scrollButtons='auto'>
-                <Tab label='Hujjat' />
-                <Tab label='Vazifalar tarixi' />
-                <Tab label='Amalga oshirish jarayoni' />
+                <Tab label={String(t('tasks.view.tabs.document'))} />
+                <Tab label={String(t('tasks.view.tabs.history'))} />
+                <Tab label={String(t('tasks.view.tabs.process'))} />
               </Tabs>
             </CardContent>
           </Card>

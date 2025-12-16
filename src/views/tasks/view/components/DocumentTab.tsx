@@ -7,6 +7,7 @@ import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
 import TaskAttachment from './TaskAttachment'
 import TaskComments from './TaskComments'
+import { useTranslation } from 'react-i18next'
 
 export default function DocumentTab({
   task,
@@ -17,6 +18,7 @@ export default function DocumentTab({
   selectedPartId: number | undefined
   setSelectedPartId: (id: number) => void
 }) {
+  const { t } = useTranslation()
   const theme = useTheme()
 
   // NOTE: Hooks must be called unconditionally on every render.
@@ -39,7 +41,7 @@ export default function DocumentTab({
       <Card>
         <CardContent>
           <Typography variant='body2' color='text.secondary'>
-            Task ma’lumotlari topilmadi.
+            {String(t('tasks.view.document.notFound'))}
           </Typography>
         </CardContent>
       </Card>
@@ -95,13 +97,13 @@ export default function DocumentTab({
             <Stack direction='row' justifyContent='space-between' alignItems='flex-start' spacing={3}>
               <Box sx={{ minWidth: 0 }}>
                 <Typography variant='overline' color='text.secondary'>
-                  Hujjat (Task)
+                  {String(t('tasks.view.document.header.overline'))}
                 </Typography>
                 <Typography variant='h6' sx={{ mt: 0.5, lineHeight: 1.35 }}>
-                  {task.name || `Task #${task.id}`}
+                  {task.name || String(t('tasks.view.document.header.fallbackTitle', { id: task.id }))}
                 </Typography>
                 <Typography variant='body2' color='text.secondary' sx={{ mt: 1 }}>
-                  ID: {task.id}
+                  {String(t('common.id'))}: {task.id}
                 </Typography>
               </Box>
 
@@ -123,13 +125,13 @@ export default function DocumentTab({
 
             <Grid container spacing={3}>
               <Grid item xs={12} md={4}>
-                <Item label='Kirish raqami' value={task.input_doc_number} />
+                  <Item label={String(t('tasks.view.document.fields.inputDocNumber'))} value={task.input_doc_number} />
               </Grid>
               <Grid item xs={12} md={4}>
-                <Item label='Chiqish raqami' value={task.output_doc_number} />
+                  <Item label={String(t('tasks.view.document.fields.outputDocNumber'))} value={task.output_doc_number} />
               </Grid>
               <Grid item xs={12} md={4}>
-                <Item label='Yuboruvchi tashkilot' value={task.sending_org} />
+                  <Item label={String(t('tasks.view.document.fields.sendingOrg'))} value={task.sending_org} />
               </Grid>
             </Grid>
           </CardContent>
@@ -140,29 +142,29 @@ export default function DocumentTab({
         <Card>
           <CardContent>
             <Typography variant='subtitle1' sx={{ mb: 2 }}>
-              Asosiy ma’lumotlar
+              {String(t('tasks.view.document.sections.main'))}
             </Typography>
 
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <Item label='Kompaniya' value={task.company_detail?.name || task.company} />
+                <Item label={String(t('tasks.view.document.fields.company'))} value={task.company_detail?.name || task.company} />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Item label='Bo‘lim' value={task.department_detail?.name || task.department} />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <Item label='Hujjat shakli' value={task.task_form_detail?.name || task.task_form} />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Item label='Jurnal' value={task.list_of_magazine_detail?.name || task.list_of_magazine} />
+                <Item label={String(t('tasks.view.document.fields.department'))} value={task.department_detail?.name || task.department} />
               </Grid>
 
               <Grid item xs={12} sm={6}>
-                <Item label='Imzolovchi' value={task.signed_by_detail?.fullname || task.signed_by} />
+                <Item label={String(t('tasks.view.document.fields.taskForm'))} value={task.task_form_detail?.name || task.task_form} />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Item label='Mas’ul shaxs' value={task.sending_respon_person ?? '—'} />
+                <Item label={String(t('tasks.view.document.fields.magazine'))} value={task.list_of_magazine_detail?.name || task.list_of_magazine} />
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <Item label={String(t('tasks.view.document.fields.signedBy'))} value={task.signed_by_detail?.fullname || task.signed_by} />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Item label={String(t('tasks.view.document.fields.responsiblePerson'))} value={task.sending_respon_person ?? '—'} />
               </Grid>
             </Grid>
           </CardContent>
@@ -173,35 +175,35 @@ export default function DocumentTab({
         <Card>
           <CardContent>
             <Typography variant='subtitle1' sx={{ mb: 2 }}>
-              Muddatlar
+              {String(t('tasks.view.document.sections.dates'))}
             </Typography>
 
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <Item label='Boshlanish sanasi' value={task.start_date} />
+                <Item label={String(t('tasks.view.document.fields.startDate'))} value={task.start_date} />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Item label='Tugash sanasi' value={task.end_date} />
+                <Item label={String(t('tasks.view.document.fields.endDate'))} value={task.end_date} />
               </Grid>
             </Grid>
 
             <Divider sx={{ my: 3 }} />
 
             <Typography variant='subtitle1' sx={{ mb: 2 }}>
-              Tizim ma’lumotlari
+              {String(t('tasks.view.document.sections.system'))}
             </Typography>
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <Item label='Yaratilgan vaqt' value={task.created_time} />
+                <Item label={String(t('tasks.view.document.fields.createdAt'))} value={task.created_time} />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Item label='Yangilangan vaqt' value={task.updated_time} />
+                <Item label={String(t('tasks.view.document.fields.updatedAt'))} value={task.updated_time} />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Item label='Yaratgan (created_by)' value={task.created_by} />
+                <Item label={String(t('tasks.view.document.fields.createdBy'))} value={task.created_by} />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Item label='Yangilagan (updated_by)' value={task.updated_by ?? '—'} />
+                <Item label={String(t('tasks.view.document.fields.updatedBy'))} value={task.updated_by ?? '—'} />
               </Grid>
             </Grid>
           </CardContent>
@@ -212,7 +214,7 @@ export default function DocumentTab({
         <Card>
           <CardContent>
             <Typography variant='subtitle1' sx={{ mb: 2 }}>
-              Izoh
+              {String(t('tasks.view.document.sections.note'))}
             </Typography>
             <Box
               sx={{

@@ -24,6 +24,7 @@ import { useQuery } from '@tanstack/react-query'
 import { TaskEventType } from 'src/types/task'
 import endpoints from 'src/configs/endpoints'
 import { Card, CardContent } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 
 // Styled Timeline component
 const Timeline = styled(MuiTimeline)<TimelineProps>(({ theme }) => ({
@@ -100,6 +101,7 @@ const getEventIcon = (eventType: string) => {
 }
 
 const TaskProccessTab = ({ id }: { id: string }) => {
+  const { t } = useTranslation()
   const { data: events = [], isLoading } = useQuery<TaskEventType[]>({
     queryKey: ['task-events', id],
     queryFn: async (): Promise<TaskEventType[]> => {
@@ -180,7 +182,7 @@ const TaskProccessTab = ({ id }: { id: string }) => {
           ) : (
             <Box sx={{ py: 2 }}>
               <Typography variant='body2' color='text.secondary'>
-                Hech qanday jarayon elementi yoʻq
+                {String(t('tasks.view.process.empty'))}
               </Typography>
             </Box>
           )}
