@@ -220,7 +220,10 @@ class DataService {
     headers: OptionalHeaders = {}
   ) {
     return client.get<T>(path, {
-      params,
+      params: {
+        ...params,
+        company: params.company || JSON.parse(window.localStorage.getItem('userData') || '{}').company_id || undefined
+      },
       headers: { ...getAuthHeader(), ...headers }
     })
   }

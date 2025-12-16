@@ -1,0 +1,229 @@
+import React from 'react'
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+  IconButton,
+  Link,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Skeleton,
+  Stack,
+  Tooltip,
+  Typography
+} from '@mui/material'
+import Avatar from '@mui/material/Avatar'
+import { useQuery } from '@tanstack/react-query'
+import Icon from 'src/@core/components/icon'
+import { DataService } from 'src/configs/dataService'
+import endpoints from 'src/configs/endpoints'
+
+type TaskAttachmentType = {
+  id: number
+  task: number
+  part: number | null
+  title: string
+  file: string
+  uploaded_by: number
+  created_by: number
+  updated_by: number
+  created_at?: string
+}
+
+const getFileLabel = (a: TaskAttachmentType) => {
+  const name = (a.title || '').trim()
+  if (name) return name
+  const file = (a.file || '').trim()
+  if (!file) return `Fayl #${a.id}`
+  try {
+    const base = file.split('?')[0]
+    const parts = base.split('/')
+    return decodeURIComponent(parts[parts.length - 1] || base)
+  } catch {
+    return file
+  }
+}
+
+const getExt = (fileOrTitle: string) => {
+  const v = (fileOrTitle || '').toLowerCase().split('?')[0]
+  const last = v.split('.').pop()
+  return last && last !== v ? last : ''
+}
+
+const getFileIcon = (ext: string) => {
+  switch (ext) {
+    case 'pdf':
+      return 'tabler:file-type-pdf'
+    case 'doc':
+    case 'docx':
+      return 'tabler:file-type-doc'
+    case 'xls':
+    case 'xlsx':
+      return 'tabler:file-type-xls'
+    case 'ppt':
+    case 'pptx':
+      return 'tabler:file-type-ppt'
+    case 'png':
+    case 'jpg':
+    case 'jpeg':
+    case 'webp':
+    case 'gif':
+      return 'tabler:photo'
+    case 'zip':
+    case 'rar':
+    case '7z':
+      return 'tabler:archive'
+    default:
+      return 'tabler:file'
+  }
+}
+
+export default function TaskAttachment({ taskId, partId }: { taskId: string | number; partId?: string | number }) {
+  const { data, isLoading, isError } = useQuery<{ results: TaskAttachmentType[] }>({
+    queryKey: ['task-attachments', taskId, partId ?? null],
+    queryFn: async () => {
+      const params = {
+        task: taskId,
+        perPage: 50,
+        ...(partId != null ? { part: partId } : {})
+      }
+      const res = await DataService.get<{ results: TaskAttachmentType[] }>(endpoints.taskAttachment, params)
+      return res.data || { results: [] }
+    },
+    enabled: !!taskId,
+    staleTime: 10_000
+  })
+
+  const attachments = (data?.results || []) as TaskAttachmentType[]
+
+  if (isLoading) {
+    return (
+      <Stack spacing={2}>
+        <Skeleton variant='text' width='30%' />
+        <Skeleton variant='rectangular' height={64} sx={{ borderRadius: 2 }} />
+        <Skeleton variant='rectangular' height={64} sx={{ borderRadius: 2 }} />
+        <Skeleton variant='rectangular' height={64} sx={{ borderRadius: 2 }} />
+      </Stack>
+    )
+  }
+
+  if (isError) {
+    return (
+      <Typography variant='body2' color='error'>
+        Fayllarni yuklashda xatolik yuz berdi
+      </Typography>
+    )
+  }
+
+  if (!attachments.length) {
+    return (
+      <Card>
+        <CardContent>
+          <Box sx={{ py: 2 }}>
+            <Typography variant='body2' color='text.secondary'>
+              Biriktirilgan fayllar yo‘q
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card>
+      <CardContent>
+        <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
+          <Typography variant='subtitle2'>Biriktirilgan fayllar</Typography>
+          <Chip size='small' color='info' label={`${attachments.length} ta`} />
+        </Box>
+
+        <List disablePadding>
+          {attachments.map((a, idx) => {
+            const label = getFileLabel(a)
+            const ext = getExt(a.file || a.title)
+            const icon = getFileIcon(ext)
+            const created = a.created_at ? new Date(a.created_at).toLocaleString() : ''
+            const href = a.file || '#'
+
+            return (
+              <React.Fragment key={a.id ?? idx}>
+                <ListItem
+                  disableGutters
+                  secondaryAction={
+                    href && href !== '#' ? (
+                      <Tooltip title='Ochish / yuklab olish'>
+                        <IconButton component='a' href={href} target='_blank' rel='noreferrer'>
+                          <Icon icon='tabler:download' />
+                        </IconButton>
+                      </Tooltip>
+                    ) : null
+                  }
+                  sx={{
+                    py: 1.25,
+                    px: 1,
+                    borderRadius: 2,
+                    '&:hover': { backgroundColor: theme => theme.palette.action.hover }
+                  }}
+                >
+                  <ListItemAvatar>
+                    <Avatar
+                      variant='rounded'
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        bgcolor: theme => theme.palette.action.selected,
+                        color: 'text.primary'
+                      }}
+                    >
+                      <Icon icon={icon} />
+                    </Avatar>
+                  </ListItemAvatar>
+
+                  <ListItemText
+                    primary={
+                      <Stack direction='row' spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap', rowGap: 1 }}>
+                        {href && href !== '#' ? (
+                          <Link href={href} target='_blank' rel='noreferrer' underline='hover' color='inherit'>
+                            <Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
+                              {label}
+                            </Typography>
+                          </Link>
+                        ) : (
+                          <Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
+                            {label}
+                          </Typography>
+                        )}
+
+                        {ext ? <Chip size='small' variant='outlined' label={ext.toUpperCase()} /> : null}
+                        {a.part ? <Chip size='small' variant='outlined' label={`Qism #${a.part}`} /> : null}
+                      </Stack>
+                    }
+                    secondary={
+                      <Stack direction='row' spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap', rowGap: 0.5 }}>
+                        {created ? (
+                          <Typography variant='caption' color='text.secondary'>
+                            {created}
+                          </Typography>
+                        ) : null}
+                        {typeof a.uploaded_by === 'number' ? (
+                          <Typography variant='caption' color='text.secondary'>
+                            • Yuklovchi: #{a.uploaded_by}
+                          </Typography>
+                        ) : null}
+                      </Stack>
+                    }
+                  />
+                </ListItem>
+                {idx < attachments.length - 1 ? <Divider sx={{ my: 1 }} /> : null}
+              </React.Fragment>
+            )
+          })}
+        </List>
+      </CardContent>
+    </Card>
+  )
+}

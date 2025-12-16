@@ -6,6 +6,7 @@ import IconifyIcon from 'src/@core/components/icon'
 import { useFetchList } from 'src/hooks/useFetchList'
 import endpoints from 'src/configs/endpoints'
 import { DocumentStatus } from './DocumentTabs'
+import Link from 'next/link'
 
 export type DocumentRow = {
   company: number
@@ -47,38 +48,33 @@ const DocumentTable = ({ status }: Props) => {
 
   const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 90 },
-    { field: 'input_doc_number', headerName: 'Input Doc No', flex: 0.2, minWidth: 160 },
-    { field: 'output_doc_number', headerName: 'Output Doc No', flex: 0.2, minWidth: 160 },
-    { field: 'name', headerName: 'Title', flex: 0.35, minWidth: 240 },
-    { field: 'status', headerName: 'Status', flex: 0.16, minWidth: 130 },
-    { field: 'type', headerName: 'Type', flex: 0.14, minWidth: 120 },
-    { field: 'priority', headerName: 'Priority', flex: 0.14, minWidth: 120 },
-    { field: 'company', headerName: 'Company', flex: 0.16, minWidth: 130 },
-    { field: 'department', headerName: 'Department', flex: 0.16, minWidth: 130 },
-    { field: 'task_form', headerName: 'Task Form', flex: 0.16, minWidth: 130 },
-    { field: 'list_of_magazine', headerName: 'Magazine', flex: 0.16, minWidth: 130 },
-    { field: 'sending_org', headerName: 'Sending Org', flex: 0.22, minWidth: 180 },
-    { field: 'sending_respon_person', headerName: 'Sender Person', flex: 0.22, minWidth: 180 },
-    { field: 'signed_by', headerName: 'Signed By', flex: 0.14, minWidth: 120 },
-    { field: 'start_date', headerName: 'Start Date', flex: 0.16, minWidth: 150 },
-    { field: 'end_date', headerName: 'End Date', flex: 0.16, minWidth: 150 },
-    { field: 'created_by', headerName: 'Created By', flex: 0.14, minWidth: 120 },
-    { field: 'updated_by', headerName: 'Updated By', flex: 0.14, minWidth: 120 },
-    { field: 'note', headerName: 'Note', flex: 0.4, minWidth: 240 },
+    { field: 'name', headerName: 'Name', flex: 0.3, minWidth: 180 },
+    { field: 'status', headerName: 'Status', flex: 0.2, minWidth: 140 },
+    { field: 'type', headerName: 'Type', flex: 0.15, minWidth: 120 },
+    { field: 'priority', headerName: 'Priority', flex: 0.15, minWidth: 120 },
+    { field: 'start_date', headerName: 'Start', flex: 0.15, minWidth: 130 },
+    { field: 'end_date', headerName: 'End', flex: 0.15, minWidth: 130 },
     {
       field: 'actions',
       headerName: 'Actions',
-      flex: 0.18,
-      minWidth: 130,
+      width: 120,
       sortable: false,
       renderCell: params => {
-        const row = params.row as any
+        const id = (params.row as any).id
+
         return (
-          <Tooltip title='View'>
-            <IconButton size='small' onClick={() => router.push(`/tasks/view/${row.id}`)}>
-              <IconifyIcon icon='tabler:eye' />
-            </IconButton>
-          </Tooltip>
+          <Stack direction='row' spacing={1}>
+            <Tooltip title='View'>
+              <IconButton size='small' component={Link} href={`/tasks/view/${id}`}>
+                <IconifyIcon icon='tabler:eye' />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title='Edit'>
+              <IconButton size='small' component={Link} href={`/tasks/update/${id}`}>
+                <IconifyIcon icon='tabler:pencil' />
+              </IconButton>
+            </Tooltip>
+          </Stack>
         )
       }
     }

@@ -1,154 +1,88 @@
 import { useEffect, useState } from 'react'
-import { Tabs, Tab, Box, Grid, Chip, Stack, Typography, Divider } from '@mui/material'
-import { DataService } from 'src/configs/dataService'
+import { useRouter } from 'next/router'
+import { Box, Card, CardContent, Grid, Stack, Tabs, Tab, Typography, Chip } from '@mui/material'
+
 import endpoints from 'src/configs/endpoints'
-import TaskPartPanel from './TaskPartPanel'
+import { DataService } from 'src/configs/dataService'
+import DocumentTab from './components/DocumentTab'
+import { TaskPartType, TaskType } from 'src/types/task'
+import RightActionsPanel from './components/RightActionPanel'
+import TaskHistoryTab from './components/TaskHistoryTab'
+import TaskProccessTab from './components/TaskProccessTab'
+import { useQuery } from '@tanstack/react-query'
 
-type Props = {
-  id: string
-}
-
-type Task = {
-  id: number
-  name: string
-  status: string
-  type: string
-  priority: string
-  start_date: string
-  end_date: string
-  sending_org: string
-  input_doc_number: string
-  output_doc_number: string
-}
-
-type EventItem = { id: number; created_at?: string; event_type: string; message: string }
-
-type CommentItem = { id: number; text: string; is_system: boolean }
-
-type AttachmentItem = { id: number; title: string; file: string }
-
-const TaskDetail = ({ id }: Props) => {
+const TaskViewDetail = () => {
+  const router = useRouter()
+  const { id } = router.query
   const [tab, setTab] = useState(0)
-  const [task, setTask] = useState<Task | null>(null)
-  const [events, setEvents] = useState<EventItem[]>([])
-  const [comments, setComments] = useState<CommentItem[]>([])
-  const [attachments, setAttachments] = useState<AttachmentItem[]>([])
+  const [task, setTask] = useState<TaskType>()
+  const [selectedPartId, setSelectedPartId] = useState<number | undefined>(undefined)
 
   useEffect(() => {
-    const fetchAll = async () => {
-      const [t, e, c, a] = await Promise.all([
-        DataService.get<Task>(endpoints.taskById(id)),
-        DataService.get<any>(endpoints.taskEvent, { task: id, perPage: 50 }),
-        DataService.get<any>(endpoints.taskComment, { task: id, perPage: 50 }),
-        DataService.get<any>(endpoints.taskAttachment, { task: id, perPage: 50 })
-      ])
-      setTask(t.data as any)
-      setEvents((e.data?.results || []) as EventItem[])
-      setComments((c.data?.results || []) as CommentItem[])
-      setAttachments((a.data?.results || []) as AttachmentItem[])
-    }
-    if (id) fetchAll()
+    if (!id || Array.isArray(id)) return
+    ;(async () => {
+      try {
+        const res = await DataService.get<TaskType>(endpoints.taskById(id))
+        setTask(res.data as TaskType)
+      } catch (e) {
+        console.error('Failed to fetch task', e)
+      }
+    })()
   }, [id])
 
+  const { data: selectedPart } = useQuery<TaskPartType>({
+    queryKey: ['task-part', selectedPartId],
+    enabled: !!selectedPartId,
+    queryFn: async (): Promise<TaskPartType> => {
+      const res = await DataService.get<TaskPartType>(endpoints.taskPartById(selectedPartId as number))
+      return res.data as TaskPartType
+    }
+  })
+
   return (
-    <Grid container spacing={6}>
-      <Grid item xs={12} md={4} lg={3}>
-        <TaskPartPanel taskId={id} />
-      </Grid>
-      <Grid item xs={12} md={8} lg={9}>
-        <Box sx={{ mb: 3 }}>
-          <Stack direction='row' spacing={2} alignItems='center'>
-            <Typography variant='h6'>{task?.name || `Task #${id}`}</Typography>
-            {task?.status && <Chip label={task.status} color='primary' size='small' />}
-            {task?.priority && <Chip label={task.priority} color='warning' size='small' />}
-            {task?.type && <Chip label={task.type} color='info' size='small' />}
-          </Stack>
-          <Typography variant='body2' sx={{ mt: 1 }}>
-            {task?.sending_org && `Yuboruvchi: ${task.sending_org}`}
-          </Typography>
-          <Typography variant='body2'>
-            {task?.input_doc_number && `Kirish raqami: ${task.input_doc_number}`}
-            {task?.output_doc_number && ` | Chiqish raqami: ${task.output_doc_number}`}
-          </Typography>
-        </Box>
-
-        <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 4 }}>
-          <Tab label='Hujjat' />
-          <Tab label='Vazifalar tarixi' />
-          <Tab label='Amalga oshirish jarayoni' />
-        </Tabs>
-
-        {tab === 0 && (
-          <Box>
-            <Typography variant='subtitle1' sx={{ mb: 2 }}>
-              Izohlar (Chip/Tag)
-            </Typography>
-            <Stack direction='row' spacing={1} flexWrap='wrap' sx={{ mb: 4 }}>
-              {comments.map(c => (
-                <Chip key={c.id} label={c.text} color={c.is_system ? 'default' : 'secondary'} variant='outlined' />
-              ))}
-            </Stack>
-            <Divider sx={{ my: 2 }} />
-            <Typography variant='subtitle1' sx={{ mb: 2 }}>
-              Fayllar (Attachments)
-            </Typography>
-            <Stack direction='column' spacing={1}>
-              {attachments.map(a => (
-                <Stack key={a.id} direction='row' spacing={2} alignItems='center'>
-                  <Typography variant='body2'>{a.title}</Typography>
-                  <a href={a.file} download>
-                    download
-                  </a>
+    <Box sx={{ p: 4 }}>
+      <Grid container spacing={4}>
+        <Grid item xs={12} md={8} lg={9}>
+          <Card>
+            <CardContent>
+              <Stack direction='row' alignItems='center' justifyContent='space-between'>
+                <Typography variant='h6'>{task ? `Task: #${task.id} | ${task.name}` : 'Task'}</Typography>
+                <Stack direction='row' spacing={1}>
+                  <Chip label={`Status: ${task?.status || '—'}`} size='small' />
+                  <Chip label={`Prioritet: ${task?.priority || '—'}`} size='small' />
+                  {task?.end_date && <Chip label={`Muddat: ${task.end_date}`} size='small' />}
                 </Stack>
-              ))}
-            </Stack>
-          </Box>
-        )}
+              </Stack>
+              <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mt: 2 }} variant='scrollable' scrollButtons='auto'>
+                <Tab label='Hujjat' />
+                <Tab label='Vazifalar tarixi' />
+                <Tab label='Amalga oshirish jarayoni' />
+              </Tabs>
+            </CardContent>
+          </Card>
 
-        {tab === 1 && (
-          <Box>
-            <Typography variant='subtitle1' sx={{ mb: 2 }}>
-              Vazifalar tarixi (TaskEvent list)
-            </Typography>
-            <Stack spacing={2}>
-              {events.map(e => (
-                <Box
-                  key={e.id}
-                  sx={{
-                    p: 2,
-                    border: theme => `1px solid rgba(${theme.palette.customColors.main}, 0.2)`,
-                    borderRadius: 2
-                  }}
-                >
-                  <Typography variant='caption'>{e.created_at}</Typography>
-                  <Typography variant='body2'>
-                    [{e.event_type}] {e.message}
-                  </Typography>
-                </Box>
-              ))}
-            </Stack>
-          </Box>
-        )}
+          {/* Tab content */}
+          <Box sx={{ mt: 3 }}>
+            {tab === 0 && (
+              <DocumentTab
+                task={task}
+                selectedPartId={selectedPartId ?? undefined}
+                setSelectedPartId={setSelectedPartId}
+              />
+            )}
 
-        {tab === 2 && (
-          <Box>
-            <Typography variant='subtitle1' sx={{ mb: 2 }}>
-              Amalga oshirish jarayoni (Timeline)
-            </Typography>
-            <Stack spacing={2}>
-              {events.map(e => (
-                <Stack key={e.id} direction='row' spacing={2} alignItems='center'>
-                  <Chip label={e.event_type} size='small' />
-                  <Typography variant='body2'>{e.message}</Typography>
-                  <Typography variant='caption'>{e.created_at}</Typography>
-                </Stack>
-              ))}
-            </Stack>
+            {tab === 1 && <TaskHistoryTab id={id as string} />}
+
+            {tab === 2 && <TaskProccessTab id={id as string} />}
           </Box>
-        )}
+        </Grid>
+
+        {/* Right actions panel */}
+        <Grid item xs={12} md={4} lg={3}>
+          <RightActionsPanel task={task} part={selectedPart} />
+        </Grid>
       </Grid>
-    </Grid>
+    </Box>
   )
 }
-
-export default TaskDetail
+export default TaskViewDetail
