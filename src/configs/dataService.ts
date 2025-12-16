@@ -35,6 +35,13 @@ const getAuthHeader = (): { Authorization: string } | {} => {
   return token ? { Authorization: `Bearer ${token}` } : {}
 }
 
+const getAcceptLanguageHeader = (): { 'Accept-Language': string } | {} => {
+  if (typeof window === 'undefined') return {}
+
+  const lang = window.localStorage.getItem('i18nextLng') || 'en'
+  return { 'Accept-Language': lang }
+}
+
 const API_CONFIG = {
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   timeout: 30000,
@@ -62,6 +69,10 @@ client.interceptors.request.use(
       config.headers.Authorization = (authHeader as { Authorization: string }).Authorization
     }
 
+    const acceptLanguageHeader = getAcceptLanguageHeader()
+    if (acceptLanguageHeader && Object.keys(acceptLanguageHeader).length > 0) {
+      config.headers['Accept-Language'] = (acceptLanguageHeader as { 'Accept-Language': string })['Accept-Language']
+    }
     return config
   },
   (error: AxiosError) => {

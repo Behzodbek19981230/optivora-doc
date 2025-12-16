@@ -39,6 +39,7 @@ import { useFetchList } from 'src/hooks/useFetchList'
 import DatePicker from 'react-datepicker'
 import { useAuth } from 'src/hooks/useAuth'
 import Icon from 'src/@core/components/icon'
+import { useTranslation } from 'react-i18next'
 
 export type TaskPayload = {
   status?: string
@@ -78,31 +79,43 @@ const defaults: TaskPayload = {
   list_of_magazine: 0
 }
 
-// Yup validation schema
-const schema: yup.ObjectSchema<TaskPayload> = yup.object({
-  type: yup.string().oneOf(['task', 'application']).required('Majburiy maydon'),
-  name: yup.string().min(2, 'Kamida 2 ta belgi').required('Majburiy maydon'),
-  task_form: yup.number().typeError('Tanlang').required('Majburiy maydon'),
-  sending_org: yup.number().required('Majburiy maydon'),
-  input_doc_number: yup.string().required('Majburiy maydon'),
-  output_doc_number: yup.string().required('Majburiy maydon'),
-  start_date: yup.string().required('Majburiy maydon'),
-  end_date: yup
-    .string()
-    .optional()
-    .default('')
-    .test('end-after-start', 'Tugash sanasi boshlanishdan keyin bo‘lsin', function (value) {
-      const { start_date } = this.parent as TaskPayload
-      if (!start_date || !value) return true
+const buildSchema = (t: (key: string, options?: any) => any): yup.ObjectSchema<TaskPayload> =>
+  yup.object({
+    type: yup
+      .string()
+      .oneOf(['task', 'application'])
+      .required(String(t('errors.required'))),
+    name: yup
+      .string()
+      .min(2, String(t('errors.minChars', { count: 2 })))
+      .required(String(t('errors.required'))),
+    task_form: yup
+      .number()
+      .typeError(String(t('errors.select')))
+      .required(String(t('errors.required'))),
+    sending_org: yup.number().required(String(t('errors.required'))),
+    input_doc_number: yup.string().required(String(t('errors.required'))),
+    output_doc_number: yup.string().required(String(t('errors.required'))),
+    start_date: yup.string().required(String(t('errors.required'))),
+    end_date: yup
+      .string()
+      .optional()
+      .default('')
+      .test('end-after-start', String(t('errors.endAfterStart')), function (value) {
+        const { start_date } = this.parent as TaskPayload
+        if (!start_date || !value) return true
 
-      return new Date(value) >= new Date(start_date)
-    }),
-  priority: yup.string().oneOf(['ordinary', 'orgently']).required('Majburiy maydon'),
-  department: yup.number().required('Majburiy maydon'),
-  note: yup.string().required('Majburiy maydon'),
-  list_of_magazine: yup.number().required('Majburiy maydon'),
-  signed_by: yup.number().required('Majburiy maydon')
-}) as yup.ObjectSchema<TaskPayload>
+        return new Date(value) >= new Date(start_date)
+      }),
+    priority: yup
+      .string()
+      .oneOf(['ordinary', 'orgently'])
+      .required(String(t('errors.required'))),
+    department: yup.number().required(String(t('errors.required'))),
+    note: yup.string().required(String(t('errors.required'))),
+    list_of_magazine: yup.number().required(String(t('errors.required'))),
+    signed_by: yup.number().required(String(t('errors.required')))
+  }) as yup.ObjectSchema<TaskPayload>
 
 type TaskPartPayload = {
   task: number
@@ -117,6 +130,8 @@ type TaskPartPayload = {
 type TaskPartItem = TaskPartPayload & { id: number; status: string }
 
 const TaskUpdateForm = () => {
+  const { t } = useTranslation()
+  const schema = buildSchema(t)
   const { control, handleSubmit, reset } = useForm<TaskPayload>({
     defaultValues: defaults,
     resolver: yupResolver(schema)
@@ -209,7 +224,7 @@ const TaskUpdateForm = () => {
     try {
       await DataService.post(endpoints.taskPart, {
         task: Number(id),
-        title: 'Oddiy topshiriq',
+        title: String(t('tasks.parts.simpleTitle')),
         department: 0,
         assignee: simpleAssignee,
         start_date: '',
@@ -219,13 +234,13 @@ const TaskUpdateForm = () => {
         created_by: user?.id || 1,
         updated_by: user?.id || 1
       })
-      toast.success('Ijrochi biriktirildi')
+      toast.success(String(t('tasks.toast.assigneeAssigned')))
 
       // Refresh task parts
       const res = await DataService.get<any>(endpoints.taskPart, { task: id, perPage: 50 })
       setTaskParts((res.data?.results || []) as TaskPartItem[])
     } catch (e: any) {
-      toast.error(e?.message || 'Xatolik yuz berdi')
+      toast.error(e?.message || String(t('errors.somethingWentWrong')))
     }
   }
 
@@ -251,27 +266,27 @@ const TaskUpdateForm = () => {
 
     // Validate required fields
     const errors: { [K in keyof TaskPartPayload]?: string } = {}
-    if (!partForm.title || !partForm.title.trim()) errors.title = 'Majburiy maydon'
-    if (!partForm.department || Number(partForm.department) <= 0) errors.department = 'Majburiy maydon'
-    if (!partForm.assignee || Number(partForm.assignee) <= 0) errors.assignee = 'Majburiy maydon'
-    if (!partForm.start_date) errors.start_date = 'Majburiy maydon'
-    if (!partForm.end_date) errors.end_date = 'Majburiy maydon'
+    if (!partForm.title || !partForm.title.trim()) errors.title = String(t('errors.required'))
+    if (!partForm.department || Number(partForm.department) <= 0) errors.department = String(t('errors.required'))
+    if (!partForm.assignee || Number(partForm.assignee) <= 0) errors.assignee = String(t('errors.required'))
+    if (!partForm.start_date) errors.start_date = String(t('errors.required'))
+    if (!partForm.end_date) errors.end_date = String(t('errors.required'))
     if (partForm.start_date && partForm.end_date) {
       const s = new Date(partForm.start_date)
       const e = new Date(partForm.end_date)
-      if (e < s) errors.end_date = 'Tugash sanasi boshlanishdan keyin bo‘lsin'
+      if (e < s) errors.end_date = String(t('errors.endAfterStart'))
     }
-    if (!partForm.note || !String(partForm.note).trim()) errors.note = 'Majburiy maydon'
+    if (!partForm.note || !String(partForm.note).trim()) errors.note = String(t('errors.required'))
     setPartErrors(errors)
     if (Object.keys(errors).length > 0) {
-      toast.error('Qismlar formasi to‘ldirilishi shart')
+      toast.error(String(t('tasks.toast.partFormRequired')))
 
       return
     }
     try {
       await DataService.post(endpoints.taskPart, {
         task: Number(id),
-        title: partForm.title || 'Yangi qism',
+        title: partForm.title || String(t('tasks.parts.newTitleFallback')),
         department: partForm.department || 0,
         assignee: partForm.assignee || 0,
         start_date: partForm.start_date || '',
@@ -281,24 +296,24 @@ const TaskUpdateForm = () => {
         created_by: user?.id || 1,
         updated_by: user?.id || 1
       })
-      toast.success('Task part yaratildi')
+      toast.success(String(t('tasks.toast.partCreated')))
       setDialogOpen(false)
 
       // Refresh task parts
       const res = await DataService.get<any>(endpoints.taskPart, { task: id, perPage: 50 })
       setTaskParts((res.data?.results || []) as TaskPartItem[])
     } catch (e: any) {
-      toast.error(e?.message || 'Xatolik yuz berdi')
+      toast.error(e?.message || String(t('errors.somethingWentWrong')))
     }
   }
 
   const handleDeleteTaskPart = async (partId: number) => {
     try {
       await DataService.delete(endpoints.taskPartById(partId))
-      toast.success("Task part o'chirildi")
+      toast.success(String(t('tasks.toast.partDeleted')))
       setTaskParts(taskParts.filter(p => p.id !== partId))
     } catch (e: any) {
-      toast.error(e?.message || 'Xatolik yuz berdi')
+      toast.error(e?.message || String(t('errors.somethingWentWrong')))
     }
   }
 
@@ -306,10 +321,10 @@ const TaskUpdateForm = () => {
     try {
       if (!id || Array.isArray(id)) return
       await DataService.put(endpoints.taskById(id), { ...values, company: user?.company_id })
-      toast.success('Task updated')
+      toast.success(String(t('tasks.toast.updated')))
       router.push(`/tasks/view/${id}`)
     } catch (e: any) {
-      toast.error(e?.message || 'Error creating task')
+      toast.error(e?.message || String(t('tasks.toast.updateError')))
     }
   }
 
@@ -324,9 +339,9 @@ const TaskUpdateForm = () => {
                   name='type'
                   control={control}
                   render={({ field }) => (
-                    <CustomTextField select fullWidth label='Tip (Type)' {...field}>
-                      <MenuItem value='task'>Task</MenuItem>
-                      <MenuItem value='application'>Application</MenuItem>
+                    <CustomTextField select fullWidth label={String(t('tasks.form.type'))} {...field}>
+                      <MenuItem value='task'>{String(t('tasks.type.task'))}</MenuItem>
+                      <MenuItem value='application'>{String(t('tasks.type.application'))}</MenuItem>
                     </CustomTextField>
                   )}
                 />
@@ -336,9 +351,9 @@ const TaskUpdateForm = () => {
                   name='priority'
                   control={control}
                   render={({ field }) => (
-                    <CustomTextField select fullWidth label='Prioritet (Priority)' {...field}>
-                      <MenuItem value='ordinary'>Ordinary</MenuItem>
-                      <MenuItem value='orgently'>Urgently</MenuItem>
+                    <CustomTextField select fullWidth label={String(t('tasks.form.priority'))} {...field}>
+                      <MenuItem value='ordinary'>{String(t('tasks.priority.ordinary'))}</MenuItem>
+                      <MenuItem value='orgently'>{String(t('tasks.priority.urgently'))}</MenuItem>
                     </CustomTextField>
                   )}
                 />
@@ -348,11 +363,11 @@ const TaskUpdateForm = () => {
                 <Controller
                   name='name'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => (
                     <CustomTextField
                       fullWidth
-                      label='Task raqami/nomi'
+                      label={String(t('tasks.form.name'))}
                       {...field}
                       error={!!fieldState.error}
                       helperText={safeMsg(fieldState.error?.message)}
@@ -365,17 +380,17 @@ const TaskUpdateForm = () => {
                 <Controller
                   name='task_form'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => (
                     <CustomTextField
                       select
                       fullWidth
-                      label='Hujjat shakli'
+                      label={String(t('tasks.form.taskForm'))}
                       {...field}
                       error={!!fieldState.error}
                       helperText={safeMsg(fieldState.error?.message)}
                     >
-                      <MenuItem value={0}>---</MenuItem>
+                      <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
                       {(docForms || []).map(f => (
                         <MenuItem key={f.id} value={f.id}>
                           {f.name}
@@ -395,12 +410,12 @@ const TaskUpdateForm = () => {
                     <CustomTextField
                       fullWidth
                       select
-                      label='Yuboruvchi (sending_org)'
+                      label={String(t('tasks.form.sendingOrg'))}
                       {...field}
                       error={!!fieldState.error}
                       helperText={fieldState.error?.message}
                     >
-                      <MenuItem value={0}>---</MenuItem>
+                      <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
                       {(companies || []).map(c => (
                         <MenuItem key={c.id} value={c.id}>
                           {c.name}
@@ -415,11 +430,11 @@ const TaskUpdateForm = () => {
                 <Controller
                   name='input_doc_number'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => (
                     <CustomTextField
                       fullWidth
-                      label='Kirish raqami (input_doc_number)'
+                      label={String(t('tasks.form.inputDocNumber'))}
                       {...field}
                       error={!!fieldState.error}
                       helperText={safeMsg(fieldState.error?.message)}
@@ -431,11 +446,11 @@ const TaskUpdateForm = () => {
                 <Controller
                   name='output_doc_number'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => (
                     <CustomTextField
                       fullWidth
-                      label='Chiqish raqami (output_doc_number)'
+                      label={String(t('tasks.form.outputDocNumber'))}
                       {...field}
                       error={!!fieldState.error}
                       helperText={safeMsg(fieldState.error?.message)}
@@ -448,7 +463,7 @@ const TaskUpdateForm = () => {
                 <Controller
                   name='start_date'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => {
                     const selectedDate = field.value ? new Date(field.value) : null
 
@@ -460,7 +475,7 @@ const TaskUpdateForm = () => {
                           dateFormat='yyyy-MM-dd'
                           customInput={
                             <CustomTextField
-                              label='Boshlanish sanasi'
+                              label={String(t('tasks.form.startDate'))}
                               fullWidth
                               error={!!fieldState.error}
                               helperText={safeMsg(fieldState.error?.message)}
@@ -478,7 +493,7 @@ const TaskUpdateForm = () => {
                 <Controller
                   name='end_date'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => {
                     const selectedDate = field.value ? new Date(field.value) : null
 
@@ -490,7 +505,7 @@ const TaskUpdateForm = () => {
                           dateFormat='yyyy-MM-dd'
                           customInput={
                             <CustomTextField
-                              label='Tugash sanasi'
+                              label={String(t('tasks.form.endDate'))}
                               fullWidth
                               error={!!fieldState.error}
                               helperText={safeMsg(fieldState.error?.message)}
@@ -509,17 +524,17 @@ const TaskUpdateForm = () => {
                 <Controller
                   name='department'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => (
                     <CustomTextField
                       select
                       fullWidth
-                      label="Bo'lim (department)"
+                      label={String(t('tasks.form.department'))}
                       {...field}
                       error={!!fieldState.error}
                       helperText={fieldState.error?.message}
                     >
-                      <MenuItem value={0}>---</MenuItem>
+                      <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
                       {(departments || []).map(d => (
                         <MenuItem key={d.id} value={d.id}>
                           {d.name}
@@ -533,17 +548,17 @@ const TaskUpdateForm = () => {
                 <Controller
                   name='signed_by'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => (
                     <CustomTextField
                       select
                       fullWidth
-                      label='Imzolovchi (signed_by)'
+                      label={String(t('tasks.form.signedBy'))}
                       {...field}
                       error={!!fieldState.error}
                       helperText={fieldState.error?.message}
                     >
-                      <MenuItem value={0}>---</MenuItem>
+                      <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
                       {(users || []).map(u => (
                         <MenuItem key={u.id} value={u.id}>
                           {u.fullname}
@@ -563,7 +578,7 @@ const TaskUpdateForm = () => {
                       fullWidth
                       multiline
                       rows={3}
-                      label='Izoh (note)'
+                      label={String(t('tasks.form.note'))}
                       {...field}
                       error={!!fieldState.error}
                       helperText={safeMsg(fieldState.error?.message)}
@@ -576,17 +591,17 @@ const TaskUpdateForm = () => {
                 <Controller
                   name='list_of_magazine'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => (
                     <CustomTextField
                       select
                       fullWidth
-                      label='Jurnal (List of Magazine)'
+                      label={String(t('tasks.form.magazine'))}
                       {...field}
                       error={!!fieldState.error}
                       helperText={fieldState.error?.message}
                     >
-                      <MenuItem value={0}>---</MenuItem>
+                      <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
                       {(magData || []).map(m => (
                         <MenuItem key={m.id} value={m.id}>
                           {m.name}
@@ -600,10 +615,10 @@ const TaskUpdateForm = () => {
               <Grid item xs={12}>
                 <Stack direction='row' spacing={2} justifyContent='flex-end'>
                   <Button type='button' variant='outlined' onClick={() => router.back()}>
-                    Bekor qilish
+                    {String(t('common.cancel'))}
                   </Button>
                   <Button type='submit' variant='contained'>
-                    Saqlash
+                    {String(t('common.save'))}
                   </Button>
                 </Stack>
               </Grid>
@@ -615,30 +630,30 @@ const TaskUpdateForm = () => {
       {/* Assignment Section */}
       <CardContent>
         <FormControl component='fieldset'>
-          <FormLabel component='legend'>Ijrochi biriktiruvi usuli</FormLabel>
+          <FormLabel component='legend'>{String(t('tasks.assignment.method'))}</FormLabel>
           <RadioGroup
             row
             value={assignmentMode}
             onChange={e => setAssignmentMode(e.target.value as 'simple' | 'split')}
           >
-            <FormControlLabel value='simple' control={<Radio />} label='Oddiy biriktirish' />
-            <FormControlLabel value='split' control={<Radio />} label="Qismlarga bo'lish" />
+            <FormControlLabel value='simple' control={<Radio />} label={String(t('tasks.assignment.simple'))} />
+            <FormControlLabel value='split' control={<Radio />} label={String(t('tasks.assignment.split'))} />
           </RadioGroup>
         </FormControl>
 
         {assignmentMode === 'simple' ? (
           <Stack spacing={2} sx={{ mt: 3 }}>
-            <Typography variant='subtitle2'>Bitta ijrochi tanlang:</Typography>
+            <Typography variant='subtitle2'>{String(t('tasks.assignment.chooseAssignee'))}</Typography>
             <Grid container spacing={2} alignItems='end'>
               <Grid item xs={12} sm={8}>
                 <CustomTextField
                   select
                   fullWidth
-                  label='Ijrochi'
+                  label={String(t('tasks.assignment.assignee'))}
                   value={simpleAssignee}
                   onChange={e => setSimpleAssignee(Number(e.target.value))}
                 >
-                  <MenuItem value={0}>---</MenuItem>
+                  <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
                   {(users || []).map(u => (
                     <MenuItem key={u.id} value={u.id}>
                       {u.fullname}
@@ -648,7 +663,7 @@ const TaskUpdateForm = () => {
               </Grid>
               <Grid item xs={12} sm={4}>
                 <Button variant='contained' fullWidth onClick={handleCreateSimpleAssignment} disabled={!simpleAssignee}>
-                  Biriktirish
+                  {String(t('tasks.assignment.attach'))}
                 </Button>
               </Grid>
             </Grid>
@@ -656,9 +671,9 @@ const TaskUpdateForm = () => {
         ) : (
           <Stack spacing={2} sx={{ mt: 3 }}>
             <Stack direction='row' justifyContent='space-between' alignItems='center'>
-              <Typography variant='subtitle2'>Task qismlari:</Typography>
+              <Typography variant='subtitle2'>{String(t('tasks.parts.title'))}</Typography>
               <Button variant='contained' size='small' startIcon={<Icon icon='mdi:plus' />} onClick={handleOpenDialog}>
-                Qo'shish
+                {String(t('common.add'))}
               </Button>
             </Stack>
 
@@ -667,13 +682,13 @@ const TaskUpdateForm = () => {
                 <Table size='small'>
                   <TableHead>
                     <TableRow>
-                      <TableCell>Sarlavha</TableCell>
-                      <TableCell>Bo'lim</TableCell>
-                      <TableCell>Ijrochi</TableCell>
-                      <TableCell>Bosh. sanasi</TableCell>
-                      <TableCell>Tug. sanasi</TableCell>
-                      <TableCell>Izoh</TableCell>
-                      <TableCell align='right'>Amal</TableCell>
+                      <TableCell>{String(t('tasks.parts.table.title'))}</TableCell>
+                      <TableCell>{String(t('tasks.parts.table.department'))}</TableCell>
+                      <TableCell>{String(t('tasks.parts.table.assignee'))}</TableCell>
+                      <TableCell>{String(t('tasks.parts.table.start'))}</TableCell>
+                      <TableCell>{String(t('tasks.parts.table.end'))}</TableCell>
+                      <TableCell>{String(t('tasks.parts.table.note'))}</TableCell>
+                      <TableCell align='right'>{String(t('common.actions'))}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -699,7 +714,7 @@ const TaskUpdateForm = () => {
               </TableContainer>
             ) : (
               <Typography variant='body2' color='text.secondary'>
-                Hali qismlar qo'shilmagan
+                {String(t('tasks.parts.empty'))}
               </Typography>
             )}
           </Stack>
@@ -708,13 +723,13 @@ const TaskUpdateForm = () => {
 
       {/* Dialog for adding task parts */}
       <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth='sm' fullWidth>
-        <DialogTitle>Task part qo'shish</DialogTitle>
+        <DialogTitle>{String(t('tasks.parts.dialog.title'))}</DialogTitle>
         <DialogContent>
           <Grid container spacing={3} sx={{ mt: 1 }}>
             <Grid item xs={12}>
               <CustomTextField
                 fullWidth
-                label='Sarlavha'
+                label={String(t('tasks.parts.form.title'))}
                 value={partForm.title}
                 onChange={e => setPartForm({ ...partForm, title: e.target.value })}
                 error={!!partErrors.title}
@@ -725,13 +740,13 @@ const TaskUpdateForm = () => {
               <CustomTextField
                 select
                 fullWidth
-                label="Bo'lim"
+                label={String(t('tasks.parts.form.department'))}
                 value={partForm.department}
                 onChange={e => setPartForm({ ...partForm, department: Number(e.target.value) })}
                 error={!!partErrors.department}
                 helperText={partErrors.department}
               >
-                <MenuItem value={0}>---</MenuItem>
+                <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
                 {(departments || []).map(d => (
                   <MenuItem key={d.id} value={d.id}>
                     {d.name}
@@ -743,13 +758,13 @@ const TaskUpdateForm = () => {
               <CustomTextField
                 select
                 fullWidth
-                label='Ijrochi'
+                label={String(t('tasks.parts.form.assignee'))}
                 value={partForm.assignee}
                 onChange={e => setPartForm({ ...partForm, assignee: Number(e.target.value) })}
                 error={!!partErrors.assignee}
                 helperText={partErrors.assignee}
               >
-                <MenuItem value={0}>---</MenuItem>
+                <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
                 {(users || []).map(u => (
                   <MenuItem key={u.id} value={u.id}>
                     {u.fullname}
@@ -761,7 +776,7 @@ const TaskUpdateForm = () => {
               <CustomTextField
                 fullWidth
                 type='date'
-                label='Boshlanish sanasi'
+                label={String(t('tasks.parts.form.startDate'))}
                 value={partForm.start_date}
                 onChange={e => setPartForm({ ...partForm, start_date: e.target.value })}
                 InputLabelProps={{ shrink: true }}
@@ -773,7 +788,7 @@ const TaskUpdateForm = () => {
               <CustomTextField
                 fullWidth
                 type='date'
-                label='Tugash sanasi'
+                label={String(t('tasks.parts.form.endDate'))}
                 value={partForm.end_date}
                 onChange={e => setPartForm({ ...partForm, end_date: e.target.value })}
                 InputLabelProps={{ shrink: true }}
@@ -786,7 +801,7 @@ const TaskUpdateForm = () => {
                 fullWidth
                 multiline
                 rows={3}
-                label='Izoh'
+                label={String(t('tasks.parts.form.note'))}
                 value={partForm.note}
                 onChange={e => setPartForm({ ...partForm, note: e.target.value })}
                 error={!!partErrors.note}
@@ -796,9 +811,9 @@ const TaskUpdateForm = () => {
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Bekor qilish</Button>
+          <Button onClick={handleCloseDialog}>{String(t('common.cancel'))}</Button>
           <Button variant='contained' onClick={handleSaveTaskPart}>
-            Saqlash
+            {String(t('common.save'))}
           </Button>
         </DialogActions>
       </Dialog>

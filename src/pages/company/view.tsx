@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, Grid, Typography, CircularProgress, Box } from '@mui/material'
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
+import { useTranslation } from 'react-i18next'
 
 interface Company {
   id: number
@@ -18,6 +19,7 @@ interface Company {
 }
 
 const CompanyViewPage = () => {
+  const { t } = useTranslation()
   const router = useRouter()
   const { id } = router.query
   const [company, setCompany] = useState<Company | null>(null)
@@ -41,7 +43,7 @@ const CompanyViewPage = () => {
 
   return (
     <Card sx={{ mt: 6 }}>
-      <CardHeader title='Kompaniya maʼlumotlari' />
+      <CardHeader title={String(t('company.view.title'))} />
       <CardContent>
         {loading ? (
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 8 }}>
@@ -50,19 +52,34 @@ const CompanyViewPage = () => {
         ) : company ? (
           <Grid container spacing={4}>
             <Grid item xs={12} md={6}>
-              <Typography>Kod: {company.code}</Typography>
-              <Typography>Nomi: {company.name}</Typography>
-              <Typography>Faol: {company.is_active ? 'Ha' : 'Yo‘q'}</Typography>
-              <Typography>Telefon: {company.phone}</Typography>
+              <Typography>
+                {String(t('company.form.code'))}: {company.code}
+              </Typography>
+              <Typography>
+                {String(t('company.form.name'))}: {company.name}
+              </Typography>
+              <Typography>
+                {String(t('company.form.active'))}:{' '}
+                {company.is_active ? String(t('common.yes')) : String(t('common.no'))}
+              </Typography>
+              <Typography>
+                {String(t('company.form.phone'))}: {company.phone}
+              </Typography>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Typography>Viloyat: {company.region}</Typography>
-              <Typography>Tuman: {company.district}</Typography>
-              <Typography>Manzil: {company.address}</Typography>
+              <Typography>
+                {String(t('company.form.region'))}: {company.region}
+              </Typography>
+              <Typography>
+                {String(t('company.form.district'))}: {company.district}
+              </Typography>
+              <Typography>
+                {String(t('company.form.address'))}: {company.address}
+              </Typography>
             </Grid>
           </Grid>
         ) : (
-          <Typography color='text.secondary'>Maʼlumot topilmadi</Typography>
+          <Typography color='text.secondary'>{String(t('common.notFound'))}</Typography>
         )}
       </CardContent>
     </Card>

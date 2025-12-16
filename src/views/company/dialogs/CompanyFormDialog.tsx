@@ -14,6 +14,7 @@ import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
 import toast from 'react-hot-toast'
 import { useFetchList } from 'src/hooks/useFetchList'
+import { useTranslation } from 'react-i18next'
 
 type CompanyForm = {
   id?: number
@@ -49,6 +50,7 @@ const defaultValues: CompanyForm = {
 }
 
 const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
+  const { t } = useTranslation()
   const {
     control,
     handleSubmit,
@@ -106,18 +108,20 @@ const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
           await DataService.postForm(endpoints.companyById(item.id), form)
         }
       }
-      toast.success('Kompaniya saqlandi')
+      toast.success(String(t('company.toast.saved')))
       onSaved()
       onClose()
     } catch (error) {
       console.error('Failed to save company:', error)
-      toast.error('Saqlashda xato')
+      toast.error(String(t('company.toast.saveError')))
     }
   }
 
   return (
     <Dialog open={open} onClose={isSubmitting ? undefined : onClose} fullWidth maxWidth='md'>
-      <DialogTitle>{mode === 'create' ? 'Kompaniya qo‘shish' : 'Kompaniyani tahrirlash'}</DialogTitle>
+      <DialogTitle>
+        {mode === 'create' ? String(t('company.create.title')) : String(t('company.edit.title'))}
+      </DialogTitle>
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent>
           <Grid container spacing={4}>
@@ -128,7 +132,7 @@ const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                 render={({ field }) => (
                   <FormControlLabel
                     control={<Switch checked={!!field.value} onChange={(_, v) => field.onChange(v)} />}
-                    label='Faol'
+                    label={String(t('company.form.active'))}
                   />
                 )}
               />
@@ -137,11 +141,11 @@ const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
               <Controller
                 name='code'
                 control={control}
-                rules={{ required: 'Majburiy maydon' }}
+                rules={{ required: String(t('errors.required')) }}
                 render={({ field }) => (
                   <CustomTextField
                     fullWidth
-                    label='Kod'
+                    label={String(t('company.form.code'))}
                     {...field}
                     error={!!errors.code}
                     helperText={errors.code?.message}
@@ -153,11 +157,11 @@ const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
               <Controller
                 name='name'
                 control={control}
-                rules={{ required: 'Majburiy maydon' }}
+                rules={{ required: String(t('errors.required')) }}
                 render={({ field }) => (
                   <CustomTextField
                     fullWidth
-                    label='Nomi'
+                    label={String(t('company.form.name'))}
                     {...field}
                     error={!!errors.name}
                     helperText={errors.name?.message}
@@ -169,26 +173,28 @@ const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
               <Controller
                 name='phone'
                 control={control}
-                render={({ field }) => <CustomTextField fullWidth label='Telefon' {...field} />}
+                render={({ field }) => <CustomTextField fullWidth label={String(t('company.form.phone'))} {...field} />}
               />
             </Grid>
             <Grid item xs={12} md={6}>
               <Controller
                 name='address'
                 control={control}
-                render={({ field }) => <CustomTextField fullWidth label='Manzil' {...field} />}
+                render={({ field }) => (
+                  <CustomTextField fullWidth label={String(t('company.form.address'))} {...field} />
+                )}
               />
             </Grid>
             <Grid item xs={12} md={6}>
               <Controller
                 name='region'
                 control={control}
-                rules={{ required: 'Majburiy maydon' }}
+                rules={{ required: String(t('errors.required')) }}
                 render={({ field }) => (
                   <CustomTextField
                     select
                     fullWidth
-                    label='Viloyat'
+                    label={String(t('company.form.region'))}
                     {...field}
                     error={!!errors.region}
                     helperText={errors.region?.message}
@@ -206,12 +212,12 @@ const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
               <Controller
                 name='district'
                 control={control}
-                rules={{ required: 'Majburiy maydon' }}
+                rules={{ required: String(t('errors.required')) }}
                 render={({ field }) => (
                   <CustomTextField
                     select
                     fullWidth
-                    label='Tuman'
+                    label={String(t('company.form.district'))}
                     {...field}
                     error={!!errors.district}
                     helperText={errors.district?.message}
@@ -232,10 +238,10 @@ const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
         </DialogContent>
         <DialogActions>
           <Button type='button' variant='tonal' color='secondary' onClick={onClose} disabled={isSubmitting}>
-            Bekor qilish
+            {String(t('common.cancel'))}
           </Button>
           <Button type='submit' disabled={isSubmitting}>
-            {isSubmitting ? 'Saqlanmoqda…' : 'Saqlash'}
+            {isSubmitting ? String(t('common.saving')) : String(t('common.save'))}
           </Button>
         </DialogActions>
       </form>

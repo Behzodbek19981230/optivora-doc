@@ -25,6 +25,7 @@ import { useFetchList } from 'src/hooks/useFetchList'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { useAuth } from 'src/hooks/useAuth'
 import { getInitials } from 'src/@core/utils/get-initials'
+import { useTranslation } from 'react-i18next'
 
 export type UserForm = {
   id?: number
@@ -70,6 +71,7 @@ const defaultValues: UserForm = {
 }
 
 const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
+  const { t } = useTranslation()
   const {
     control,
     handleSubmit,
@@ -145,18 +147,18 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
 
         await DataService.putForm(endpoints.userById(item.id), form)
       }
-      toast.success('Foydalanuvchi saqlandi')
+      toast.success(String(t('users.toast.saved')))
       onSaved()
       onClose()
     } catch (error) {
       console.error('Failed to save user:', error)
-      toast.error('Saqlashda xato')
+      toast.error(String(t('users.toast.saveError')))
     }
   }
 
   return (
     <Dialog open={open} onClose={isSubmitting ? undefined : onClose} fullWidth maxWidth='md'>
-      <DialogTitle>{mode === 'create' ? 'Foydalanuvchi qo‘shish' : 'Foydalanuvchini tahrirlash'}</DialogTitle>
+      <DialogTitle>{mode === 'create' ? String(t('users.create.title')) : String(t('users.edit.title'))}</DialogTitle>
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent>
           <DatePickerWrapper>
@@ -165,11 +167,11 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                 <Controller
                   name='username'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field }) => (
                     <CustomTextField
                       fullWidth
-                      label='Login'
+                      label={String(t('users.form.username'))}
                       {...field}
                       error={!!errors.username}
                       helperText={errors.username?.message}
@@ -181,11 +183,11 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                 <Controller
                   name='fullname'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field }) => (
                     <CustomTextField
                       fullWidth
-                      label='F.I.Sh'
+                      label={String(t('users.form.fullname'))}
                       {...field}
                       error={!!errors.fullname}
                       helperText={errors.fullname?.message}
@@ -200,7 +202,7 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                   render={({ field }) => (
                     <FormControlLabel
                       control={<Switch checked={!!field.value} onChange={(_, v) => field.onChange(v)} />}
-                      label='Faol'
+                      label={String(t('users.form.active'))}
                     />
                   )}
                 />
@@ -209,12 +211,12 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                 <Controller
                   name='email'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field }) => (
                     <CustomTextField
                       fullWidth
                       type='email'
-                      label='Email'
+                      label={String(t('users.form.email'))}
                       {...field}
                       error={!!errors.email}
                       helperText={errors.email?.message}
@@ -226,7 +228,7 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                 <Controller
                   name='phone_number'
                   control={control}
-                  render={({ field }) => <CustomTextField fullWidth label='Telefon' {...field} />}
+                  render={({ field }) => <CustomTextField fullWidth label={String(t('users.form.phone'))} {...field} />}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -241,7 +243,7 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                           selected={selectedDate}
                           onChange={(date: Date | null) => field.onChange(date ? date.toISOString().slice(0, 10) : '')}
                           dateFormat='yyyy-MM-dd'
-                          customInput={<CustomTextField label='Tug‘ilgan sana' fullWidth />}
+                          customInput={<CustomTextField label={String(t('users.form.birthDate'))} fullWidth />}
                           showPopperArrow
                           isClearable
                         />
@@ -254,13 +256,13 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                 <Controller
                   name='gender'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field }) => (
                     <FormControl error={!!errors.gender}>
-                      <FormLabel>Jinsi</FormLabel>
+                      <FormLabel>{String(t('users.form.gender'))}</FormLabel>
                       <RadioGroup row {...field}>
-                        <FormControlLabel value='male' control={<Radio />} label='Erkak' />
-                        <FormControlLabel value='female' control={<Radio />} label='Ayol' />
+                        <FormControlLabel value='male' control={<Radio />} label={String(t('users.gender.male'))} />
+                        <FormControlLabel value='female' control={<Radio />} label={String(t('users.gender.female'))} />
                       </RadioGroup>
                       {errors.gender && <FormHelperText>{errors.gender.message as string}</FormHelperText>}
                     </FormControl>
@@ -271,19 +273,19 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                 <Controller
                   name='role'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field }) => (
                     <CustomTextField
                       select
                       fullWidth
-                      label='Rol'
+                      label={String(t('users.form.role'))}
                       {...field}
                       error={!!errors.role}
                       helperText={errors.role?.message}
                     >
-                      <MenuItem value='1'>Admin</MenuItem>
-                      <MenuItem value='2'>Manager</MenuItem>
-                      <MenuItem value='3'>User</MenuItem>
+                      <MenuItem value='1'>{String(t('users.roles.admin'))}</MenuItem>
+                      <MenuItem value='2'>{String(t('users.roles.manager'))}</MenuItem>
+                      <MenuItem value='3'>{String(t('users.roles.user'))}</MenuItem>
                     </CustomTextField>
                   )}
                 />
@@ -292,19 +294,21 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                 <Controller
                   name='password'
                   control={control}
-                  render={({ field }) => <CustomTextField fullWidth type='password' label='Parol' {...field} />}
+                  render={({ field }) => (
+                    <CustomTextField fullWidth type='password' label={String(t('users.form.password'))} {...field} />
+                  )}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
                 <Controller
                   name='region'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field }) => (
                     <CustomTextField
                       select
                       fullWidth
-                      label='Viloyat'
+                      label={String(t('users.form.region'))}
                       {...field}
                       error={!!errors.region}
                       helperText={errors.region?.message}
@@ -322,12 +326,12 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                 <Controller
                   name='district'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field }) => (
                     <CustomTextField
                       select
                       fullWidth
-                      label='Tuman'
+                      label={String(t('users.form.district'))}
                       {...field}
                       error={!!errors.district}
                       helperText={errors.district?.message}
@@ -345,7 +349,9 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                 <Controller
                   name='address'
                   control={control}
-                  render={({ field }) => <CustomTextField fullWidth label='Manzil' {...field} />}
+                  render={({ field }) => (
+                    <CustomTextField fullWidth label={String(t('users.form.address'))} {...field} />
+                  )}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -353,7 +359,13 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                   name='companies'
                   control={control}
                   render={({ field }) => (
-                    <CustomTextField select fullWidth label='Kompaniyalar' {...field} SelectProps={{ multiple: true }}>
+                    <CustomTextField
+                      select
+                      fullWidth
+                      label={String(t('users.form.companies'))}
+                      {...field}
+                      SelectProps={{ multiple: true }}
+                    >
                       {companies.map((c: any) => (
                         <MenuItem key={c.id} value={c.id}>
                           {c.name}
@@ -388,7 +400,7 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                     {getInitials(watch('fullname') || watch('username') || 'U')}
                   </CustomAvatar>
                   <Button variant='outlined' onClick={() => fileInputRef.current?.click()}>
-                    Rasmni yuklash
+                    {String(t('users.form.uploadAvatar'))}
                   </Button>
                   {previewUrl && (
                     <Button
@@ -399,7 +411,7 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                         setPreviewUrl(item?.avatar || '')
                       }}
                     >
-                      Bekor qilish
+                      {String(t('common.cancel'))}
                     </Button>
                   )}
                 </div>
@@ -409,10 +421,10 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
         </DialogContent>
         <DialogActions>
           <Button type='button' variant='tonal' color='secondary' onClick={onClose} disabled={isSubmitting}>
-            Bekor qilish
+            {String(t('common.cancel'))}
           </Button>
           <Button type='submit' disabled={isSubmitting}>
-            {isSubmitting ? 'Saqlanmoqda…' : 'Saqlash'}
+            {isSubmitting ? String(t('common.saving')) : String(t('common.save'))}
           </Button>
         </DialogActions>
       </form>

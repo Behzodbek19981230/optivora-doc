@@ -13,6 +13,7 @@ import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { useFetchList } from 'src/hooks/useFetchList'
 import DatePicker from 'react-datepicker'
 import { useAuth } from 'src/hooks/useAuth'
+import { useTranslation } from 'react-i18next'
 
 export type TaskPayload = {
   status?: string
@@ -52,32 +53,47 @@ const defaults: TaskPayload = {
   list_of_magazine: undefined
 }
 
-// Yup validation schema
-const schema: yup.ObjectSchema<TaskPayload> = yup.object({
-  type: yup.string().oneOf(['task', 'application']).required('Majburiy maydon'),
-  name: yup.string().min(2, 'Kamida 2 ta belgi').required('Majburiy maydon'),
-  task_form: yup.number().typeError('Tanlang').required('Majburiy maydon'),
-  sending_org: yup.number().required('Majburiy maydon'),
-  input_doc_number: yup.string().required('Majburiy maydon'),
-  output_doc_number: yup.string().required('Majburiy maydon'),
-  start_date: yup.string().required('Majburiy maydon'),
-  end_date: yup
-    .string()
-    .optional()
-    .default('')
-    .test('end-after-start', 'Tugash sanasi boshlanishdan keyin bo‘lsin', function (value) {
-      const { start_date } = this.parent as TaskPayload
-      if (!start_date || !value) return true
-      return new Date(value) >= new Date(start_date)
-    }),
-  priority: yup.string().oneOf(['ordinary', 'orgently']).required('Majburiy maydon'),
-  department: yup.number().required('Majburiy maydon'),
-  note: yup.string().required('Majburiy maydon'),
-  list_of_magazine: yup.number().required('Majburiy maydon'),
-  signed_by: yup.number().required('Majburiy maydon')
-}) as yup.ObjectSchema<TaskPayload>
+const buildSchema = (t: (key: string, options?: any) => any): yup.ObjectSchema<TaskPayload> =>
+  yup.object({
+    type: yup
+      .string()
+      .oneOf(['task', 'application'])
+      .required(String(t('errors.required'))),
+    name: yup
+      .string()
+      .min(2, String(t('errors.minChars', { count: 2 })))
+      .required(String(t('errors.required'))),
+    task_form: yup
+      .number()
+      .typeError(String(t('errors.select')))
+      .required(String(t('errors.required'))),
+    sending_org: yup.number().required(String(t('errors.required'))),
+    input_doc_number: yup.string().required(String(t('errors.required'))),
+    output_doc_number: yup.string().required(String(t('errors.required'))),
+    start_date: yup.string().required(String(t('errors.required'))),
+    end_date: yup
+      .string()
+      .optional()
+      .default('')
+      .test('end-after-start', String(t('errors.endAfterStart')), function (value) {
+        const { start_date } = this.parent as TaskPayload
+        if (!start_date || !value) return true
+
+        return new Date(value) >= new Date(start_date)
+      }),
+    priority: yup
+      .string()
+      .oneOf(['ordinary', 'orgently'])
+      .required(String(t('errors.required'))),
+    department: yup.number().required(String(t('errors.required'))),
+    note: yup.string().required(String(t('errors.required'))),
+    list_of_magazine: yup.number().required(String(t('errors.required'))),
+    signed_by: yup.number().required(String(t('errors.required')))
+  }) as yup.ObjectSchema<TaskPayload>
 
 const TaskCreateForm = () => {
+  const { t } = useTranslation()
+  const schema = buildSchema(t)
   const { control, handleSubmit } = useForm<TaskPayload>({
     defaultValues: defaults,
     resolver: yupResolver(schema)
@@ -114,11 +130,11 @@ const TaskCreateForm = () => {
     try {
       const res = await DataService.post(endpoints.task, { ...values, company: user?.company_id })
       const id = (res.data as any)?.id
-      toast.success('Task created')
+      toast.success(String(t('tasks.toast.created')))
       if (id) router.push(`/tasks/update/${id}`)
       else router.push('/tasks')
     } catch (e: any) {
-      toast.error(e?.message || 'Error creating task')
+      toast.error(e?.message || String(t('tasks.toast.createError')))
     }
   }
 
@@ -133,9 +149,9 @@ const TaskCreateForm = () => {
                   name='type'
                   control={control}
                   render={({ field }) => (
-                    <CustomTextField select fullWidth label='Tip (Type)' {...field}>
-                      <MenuItem value='task'>Task</MenuItem>
-                      <MenuItem value='application'>Application</MenuItem>
+                    <CustomTextField select fullWidth label={String(t('tasks.form.type'))} {...field}>
+                      <MenuItem value='task'>{String(t('tasks.type.task'))}</MenuItem>
+                      <MenuItem value='application'>{String(t('tasks.type.application'))}</MenuItem>
                     </CustomTextField>
                   )}
                 />
@@ -145,9 +161,9 @@ const TaskCreateForm = () => {
                   name='priority'
                   control={control}
                   render={({ field }) => (
-                    <CustomTextField select fullWidth label='Prioritet (Priority)' {...field}>
-                      <MenuItem value='ordinary'>Ordinary</MenuItem>
-                      <MenuItem value='orgently'>Urgently</MenuItem>
+                    <CustomTextField select fullWidth label={String(t('tasks.form.priority'))} {...field}>
+                      <MenuItem value='ordinary'>{String(t('tasks.priority.ordinary'))}</MenuItem>
+                      <MenuItem value='orgently'>{String(t('tasks.priority.urgently'))}</MenuItem>
                     </CustomTextField>
                   )}
                 />
@@ -157,11 +173,11 @@ const TaskCreateForm = () => {
                 <Controller
                   name='name'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => (
                     <CustomTextField
                       fullWidth
-                      label='Task raqami/nomi'
+                      label={String(t('tasks.form.name'))}
                       {...field}
                       error={!!fieldState.error}
                       helperText={safeMsg(fieldState.error?.message)}
@@ -174,17 +190,17 @@ const TaskCreateForm = () => {
                 <Controller
                   name='task_form'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => (
                     <CustomTextField
                       select
                       fullWidth
-                      label='Hujjat shakli'
+                      label={String(t('tasks.form.taskForm'))}
                       {...field}
                       error={!!fieldState.error}
                       helperText={safeMsg(fieldState.error?.message)}
                     >
-                      <MenuItem value={0}>---</MenuItem>
+                      <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
                       {(docForms || []).map(f => (
                         <MenuItem key={f.id} value={f.id}>
                           {f.name}
@@ -204,7 +220,7 @@ const TaskCreateForm = () => {
                     <CustomTextField
                       fullWidth
                       select
-                      label='Yuboruvchi (sending_org)'
+                      label={String(t('tasks.form.sendingOrg'))}
                       {...field}
                       error={!!fieldState.error}
                       helperText={fieldState.error?.message}
@@ -223,11 +239,11 @@ const TaskCreateForm = () => {
                 <Controller
                   name='input_doc_number'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => (
                     <CustomTextField
                       fullWidth
-                      label='Kirish raqami (input_doc_number)'
+                      label={String(t('tasks.form.inputDocNumber'))}
                       {...field}
                       error={!!fieldState.error}
                       helperText={safeMsg(fieldState.error?.message)}
@@ -239,11 +255,11 @@ const TaskCreateForm = () => {
                 <Controller
                   name='output_doc_number'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => (
                     <CustomTextField
                       fullWidth
-                      label='Chiqish raqami (output_doc_number)'
+                      label={String(t('tasks.form.outputDocNumber'))}
                       {...field}
                       error={!!fieldState.error}
                       helperText={safeMsg(fieldState.error?.message)}
@@ -256,7 +272,7 @@ const TaskCreateForm = () => {
                 <Controller
                   name='start_date'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => {
                     const selectedDate = field.value ? new Date(field.value) : null
                     return (
@@ -267,7 +283,7 @@ const TaskCreateForm = () => {
                           dateFormat='yyyy-MM-dd'
                           customInput={
                             <CustomTextField
-                              label='Boshlanish sanasi'
+                              label={String(t('tasks.form.startDate'))}
                               fullWidth
                               error={!!fieldState.error}
                               helperText={safeMsg(fieldState.error?.message)}
@@ -285,7 +301,7 @@ const TaskCreateForm = () => {
                 <Controller
                   name='end_date'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => {
                     const selectedDate = field.value ? new Date(field.value) : null
                     return (
@@ -296,7 +312,7 @@ const TaskCreateForm = () => {
                           dateFormat='yyyy-MM-dd'
                           customInput={
                             <CustomTextField
-                              label='Tugash sanasi'
+                              label={String(t('tasks.form.endDate'))}
                               fullWidth
                               error={!!fieldState.error}
                               helperText={safeMsg(fieldState.error?.message)}
@@ -315,12 +331,12 @@ const TaskCreateForm = () => {
                 <Controller
                   name='department'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => (
                     <CustomTextField
                       select
                       fullWidth
-                      label="Bo'lim (department)"
+                      label={String(t('tasks.form.department'))}
                       {...field}
                       error={!!fieldState.error}
                       helperText={fieldState.error?.message}
@@ -338,12 +354,12 @@ const TaskCreateForm = () => {
                 <Controller
                   name='signed_by'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => (
                     <CustomTextField
                       select
                       fullWidth
-                      label='Imzolovchi (signed_by)'
+                      label={String(t('tasks.form.signedBy'))}
                       {...field}
                       error={!!fieldState.error}
                       helperText={fieldState.error?.message}
@@ -367,7 +383,7 @@ const TaskCreateForm = () => {
                       fullWidth
                       multiline
                       rows={3}
-                      label='Izoh (note)'
+                      label={String(t('tasks.form.note'))}
                       {...field}
                       error={!!fieldState.error}
                       helperText={safeMsg(fieldState.error?.message)}
@@ -380,17 +396,17 @@ const TaskCreateForm = () => {
                 <Controller
                   name='list_of_magazine'
                   control={control}
-                  rules={{ required: 'Majburiy maydon' }}
+                  rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => (
                     <CustomTextField
                       select
                       fullWidth
-                      label='Jurnal (List of Magazine)'
+                      label={String(t('tasks.form.magazine'))}
                       {...field}
                       error={!!fieldState.error}
                       helperText={fieldState.error?.message}
                     >
-                      <MenuItem value={0}>---</MenuItem>
+                      <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
                       {(magData || []).map(m => (
                         <MenuItem key={m.id} value={m.id}>
                           {m.name}
@@ -404,10 +420,10 @@ const TaskCreateForm = () => {
               <Grid item xs={12}>
                 <Stack direction='row' spacing={2} justifyContent='flex-end'>
                   <Button type='button' variant='outlined' onClick={() => router.back()}>
-                    Bekor qilish
+                    {String(t('common.cancel'))}
                   </Button>
                   <Button type='submit' variant='contained'>
-                    Saqlash
+                    {String(t('common.save'))}
                   </Button>
                 </Stack>
               </Grid>

@@ -2,14 +2,8 @@ import { useState } from 'react'
 import CardHeader from '@mui/material/CardHeader'
 import IconButton from '@mui/material/IconButton'
 import Button from '@mui/material/Button'
-import Stack from '@mui/material/Stack'
-import Tooltip from '@mui/material/Tooltip'
-import { CardContent } from '@mui/material'
 import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid'
-const EditIcon = () => <span style={{ fontWeight: 'bold' }}>✏️</span>
-const DeleteIcon = () => <span style={{ fontWeight: 'bold', color: 'red' }}>🗑️</span>
 const AddIcon = () => <span style={{ fontWeight: 'bold' }}>＋</span>
-import { TablePagination } from '@mui/material'
 import DistrictFormDialog from '../dialogs/DistrictFormDialog'
 import DeleteConfirmDialog from '../dialogs/DeleteConfirmDialog'
 import IconifyIcon from 'src/@core/components/icon'
@@ -17,8 +11,10 @@ import endpoints from 'src/configs/endpoints'
 import { useFetchList } from 'src/hooks/useFetchList'
 import toast from 'react-hot-toast'
 import { DataService } from 'src/configs/dataService'
+import { useTranslation } from 'react-i18next'
 
 const DistrictTable = () => {
+  const { t } = useTranslation()
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 })
   const [search, setSearch] = useState('')
   const {
@@ -56,17 +52,17 @@ const DistrictTable = () => {
       await DataService.delete(`/district/${selected.id}`)
       mutate()
       setOpenDelete(false)
-      toast.success('Tuman muvaffaqiyatli o‘chirildi')
+      toast.success(String(t('locations.districts.toast.deleted')))
     }
   }
 
   return (
     <>
       <CardHeader
-        title='Tumanlar'
+        title={String(t('locations.districts.title'))}
         action={
           <Button variant='contained' startIcon={<AddIcon />} onClick={handleCreate}>
-            Yangi tuman
+            {String(t('locations.districts.create'))}
           </Button>
         }
       />
@@ -77,21 +73,21 @@ const DistrictTable = () => {
           rows={data}
           columns={
             [
-              { field: 'code', headerName: 'Kod', flex: 0.12, minWidth: 100 },
-              { field: 'name', headerName: 'Nomi', flex: 0.2, minWidth: 160 },
-              { field: 'name_en', headerName: 'Nomi (EN)', flex: 0.18, minWidth: 140 },
-              { field: 'name_uz', headerName: 'Nomi (UZ)', flex: 0.18, minWidth: 140 },
-              { field: 'name_ru', headerName: 'Nomi (RU)', flex: 0.18, minWidth: 140 },
+              { field: 'code', headerName: String(t('common.code')), flex: 0.12, minWidth: 100 },
+              { field: 'name', headerName: String(t('common.name')), flex: 0.2, minWidth: 160 },
+              { field: 'name_en', headerName: String(t('common.nameEn')), flex: 0.18, minWidth: 140 },
+              { field: 'name_uz', headerName: String(t('common.nameUz')), flex: 0.18, minWidth: 140 },
+              { field: 'name_ru', headerName: String(t('common.nameRu')), flex: 0.18, minWidth: 140 },
               {
                 field: 'region_detail',
-                headerName: 'Viloyat',
+                headerName: String(t('locations.districts.table.region')),
                 flex: 0.2,
                 minWidth: 160,
                 valueGetter: params => params.row.region_detail?.name_uz || params.row.region
               },
               {
                 field: 'actions',
-                headerName: 'Amallar',
+                headerName: String(t('common.actions')),
                 flex: 0.16,
                 minWidth: 140,
                 sortable: false,
@@ -130,8 +126,17 @@ const DistrictTable = () => {
         open={openDelete}
         onClose={() => setOpenDelete(false)}
         onConfirm={handleDeleteConfirm}
-        title='Tumanni o‘chirishni tasdiqlang'
-        description={selected ? `“${selected.name_uz}” tumanini o‘chirmoqchimisiz?` : undefined}
+        title={String(t('locations.districts.deleteConfirm.title'))}
+        description={
+          selected
+            ? String(
+                t('locations.districts.deleteConfirm.description', {
+                  name: selected.name_uz || selected.name,
+                  id: selected.id
+                })
+              )
+            : undefined
+        }
       />
     </>
   )

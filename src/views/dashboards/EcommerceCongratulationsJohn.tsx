@@ -5,6 +5,7 @@ import { styled } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
 import { useAuth } from 'src/hooks/useAuth'
+import { useTranslation } from 'react-i18next'
 
 const Illustration = styled('img')(({ theme }) => ({
   right: 20,
@@ -18,17 +19,18 @@ const Illustration = styled('img')(({ theme }) => ({
 
 const EcommerceCongratulationsJohn = () => {
   const { user } = useAuth()
+  const { t } = useTranslation()
   return (
     <Card sx={{ position: 'relative' }}>
       <CardContent>
         <Typography variant='h5' sx={{ mb: 0.5 }}>
-          Congratulations {user?.fullname}! 🎉
+          {String(t('dashboards.congrats.title', { name: user?.fullname || '' }))}
         </Typography>
-        <Typography sx={{ mb: 2, color: 'text.secondary' }}>Best seller of the month</Typography>
+        <Typography sx={{ mb: 2, color: 'text.secondary' }}>{String(t('dashboards.congrats.subtitle'))}</Typography>
         <Typography variant='h4' sx={{ mb: 0.75, color: 'primary.main' }}>
           $48.9k
         </Typography>
-        <Button variant='contained'>View Sales</Button>
+        <Button variant='contained'>{String(t('dashboards.congrats.cta'))}</Button>
         <Illustration width={116} alt='congratulations john' src='/images/cards/congratulations-john.png' />
       </CardContent>
     </Card>

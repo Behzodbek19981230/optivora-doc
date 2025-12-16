@@ -7,6 +7,7 @@ import { useFetchList } from 'src/hooks/useFetchList'
 import endpoints from 'src/configs/endpoints'
 import { DocumentStatus } from './DocumentTabs'
 import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 
 export type DocumentRow = {
   company: number
@@ -34,6 +35,7 @@ type Props = { status: DocumentStatus }
 
 const DocumentTable = ({ status }: Props) => {
   const router = useRouter()
+  const { t } = useTranslation()
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 })
 
   const {
@@ -47,16 +49,16 @@ const DocumentTable = ({ status }: Props) => {
   })
 
   const columns: GridColDef[] = [
-    { field: 'id', headerName: 'ID', width: 90 },
-    { field: 'name', headerName: 'Name', flex: 0.3, minWidth: 180 },
-    { field: 'status', headerName: 'Status', flex: 0.2, minWidth: 140 },
-    { field: 'type', headerName: 'Type', flex: 0.15, minWidth: 120 },
-    { field: 'priority', headerName: 'Priority', flex: 0.15, minWidth: 120 },
-    { field: 'start_date', headerName: 'Start', flex: 0.15, minWidth: 130 },
-    { field: 'end_date', headerName: 'End', flex: 0.15, minWidth: 130 },
+    { field: 'id', headerName: String(t('common.id')), width: 90 },
+    { field: 'name', headerName: String(t('documents.table.name')), flex: 0.3, minWidth: 180 },
+    { field: 'status', headerName: String(t('documents.table.status')), flex: 0.2, minWidth: 140 },
+    { field: 'type', headerName: String(t('documents.table.type')), flex: 0.15, minWidth: 120 },
+    { field: 'priority', headerName: String(t('documents.table.priority')), flex: 0.15, minWidth: 120 },
+    { field: 'start_date', headerName: String(t('documents.table.start')), flex: 0.15, minWidth: 130 },
+    { field: 'end_date', headerName: String(t('documents.table.end')), flex: 0.15, minWidth: 130 },
     {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: String(t('common.actions')),
       width: 120,
       sortable: false,
       renderCell: params => {
@@ -64,12 +66,12 @@ const DocumentTable = ({ status }: Props) => {
 
         return (
           <Stack direction='row' spacing={1}>
-            <Tooltip title='View'>
+            <Tooltip title={String(t('common.view'))}>
               <IconButton size='small' component={Link} href={`/tasks/view/${id}`}>
                 <IconifyIcon icon='tabler:eye' />
               </IconButton>
             </Tooltip>
-            <Tooltip title='Edit'>
+            <Tooltip title={String(t('common.edit'))}>
               <IconButton size='small' component={Link} href={`/tasks/update/${id}`}>
                 <IconifyIcon icon='tabler:pencil' />
               </IconButton>
@@ -85,7 +87,7 @@ const DocumentTable = ({ status }: Props) => {
       <CardContent sx={{ pb: 0 }}>
         <Stack direction='row' justifyContent='flex-end' sx={{ mb: 2 }}>
           <Button variant='contained' onClick={() => router.push('/tasks/create')}>
-            Vazifa yaratish
+            {String(t('tasks.create.title'))}
           </Button>
         </Stack>
         <DataGrid
@@ -101,7 +103,7 @@ const DocumentTable = ({ status }: Props) => {
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           getRowId={row => (row as any).id as number}
-          localeText={{ noRowsLabel: `No documents for status: "${status}"` }}
+          localeText={{ noRowsLabel: String(t('documents.table.emptyForStatus', { status })) }}
         />
       </CardContent>
     </Card>

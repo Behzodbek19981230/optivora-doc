@@ -6,6 +6,7 @@ import endpoints from 'src/configs/endpoints'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import CustomChip from 'src/@core/components/mui/chip'
 import { getInitials } from 'src/@core/utils/get-initials'
+import { useTranslation } from 'react-i18next'
 
 interface User {
   id: number
@@ -26,6 +27,7 @@ interface User {
 }
 
 const UserViewPage = () => {
+  const { t } = useTranslation()
   const router = useRouter()
   const { id } = router.query
   const [user, setUser] = useState<User | null>(null)
@@ -49,7 +51,7 @@ const UserViewPage = () => {
 
   return (
     <Card sx={{ mt: 6 }}>
-      <CardHeader title='Foydalanuvchi maʼlumotlari' />
+      <CardHeader title={String(t('users.view.title'))} />
       <CardContent>
         {loading ? (
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', py: 8 }}>
@@ -85,54 +87,72 @@ const UserViewPage = () => {
 
                 <CardContent sx={{ pt: 2 }}>
                   <Typography variant='body2' sx={{ color: 'text.disabled', textTransform: 'uppercase' }}>
-                    Tafsilotlar
+                    {String(t('users.view.details'))}
                   </Typography>
                   <Box sx={{ pt: 4 }}>
                     <Box sx={{ display: 'flex', mb: 2 }}>
-                      <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>Login:</Typography>
+                      <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>
+                        {String(t('users.form.username'))}:
+                      </Typography>
                       <Typography sx={{ color: 'text.secondary' }}>@{user.username}</Typography>
                     </Box>
                     <Box sx={{ display: 'flex', mb: 2 }}>
-                      <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>Email:</Typography>
+                      <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>
+                        {String(t('users.form.email'))}:
+                      </Typography>
                       <Typography sx={{ color: 'text.secondary' }}>{user.email}</Typography>
                     </Box>
                     <Box sx={{ display: 'flex', mb: 2, alignItems: 'center' }}>
-                      <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>Faol:</Typography>
+                      <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>
+                        {String(t('users.form.active'))}:
+                      </Typography>
                       <CustomChip
                         rounded
                         skin='light'
                         size='small'
-                        label={user.is_active ? 'Ha' : 'Yo‘q'}
+                        label={user.is_active ? String(t('common.yes')) : String(t('common.no'))}
                         color={user.is_active ? 'success' : 'secondary'}
                       />
                     </Box>
                     <Box sx={{ display: 'flex', mb: 2 }}>
-                      <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>Telefon:</Typography>
+                      <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>
+                        {String(t('users.form.phone'))}:
+                      </Typography>
                       <Typography sx={{ color: 'text.secondary' }}>{user.phone_number || '-'}</Typography>
                     </Box>
                     <Box sx={{ display: 'flex', mb: 2 }}>
-                      <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>Jinsi:</Typography>
+                      <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>
+                        {String(t('users.form.gender'))}:
+                      </Typography>
                       <Typography sx={{ color: 'text.secondary' }}>{user.gender || '-'}</Typography>
                     </Box>
                     <Box sx={{ display: 'flex', mb: 2 }}>
-                      <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>Tug‘ilgan sana:</Typography>
+                      <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>
+                        {String(t('users.form.birthDate'))}:
+                      </Typography>
                       <Typography sx={{ color: 'text.secondary' }}>{user.date_of_birthday || '-'}</Typography>
                     </Box>
                     <Box sx={{ display: 'flex', mb: 2 }}>
-                      <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>Viloyat:</Typography>
+                      <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>
+                        {String(t('users.form.region'))}:
+                      </Typography>
                       <Typography sx={{ color: 'text.secondary' }}>{user.region}</Typography>
                     </Box>
                     <Box sx={{ display: 'flex', mb: 2 }}>
-                      <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>Tuman:</Typography>
+                      <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>
+                        {String(t('users.form.district'))}:
+                      </Typography>
                       <Typography sx={{ color: 'text.secondary' }}>{user.district}</Typography>
                     </Box>
                     <Box sx={{ display: 'flex', mb: 2 }}>
-                      <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>Manzil:</Typography>
+                      <Typography sx={{ mr: 2, fontWeight: 500, color: 'text.secondary' }}>
+                        {String(t('users.form.address'))}:
+                      </Typography>
                       <Typography sx={{ color: 'text.secondary' }}>{user.address || '-'}</Typography>
                     </Box>
                     <Box sx={{ display: 'flex', mb: 1 }}>
                       <Typography sx={{ mr: 2, mt: 0.6, fontWeight: 500, color: 'text.secondary' }}>
-                        Kompaniyalar:
+                        {String(t('users.form.companies'))}:
                       </Typography>
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                         {Array.isArray(user.companies_detail) && user.companies_detail.length > 0
@@ -155,7 +175,7 @@ const UserViewPage = () => {
             </Grid>
           </Grid>
         ) : (
-          <Typography color='text.secondary'>Maʼlumot topilmadi</Typography>
+          <Typography color='text.secondary'>{String(t('common.notFound'))}</Typography>
         )}
       </CardContent>
     </Card>

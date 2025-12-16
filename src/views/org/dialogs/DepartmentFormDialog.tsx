@@ -10,6 +10,7 @@ import CustomTextField from 'src/@core/components/mui/text-field'
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
 import toast from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 
 export type Department = {
   id?: number
@@ -35,6 +36,7 @@ const defaultValues: Department = {
 }
 
 const DepartmentFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
+  const { t } = useTranslation()
   const {
     control,
     handleSubmit,
@@ -56,7 +58,7 @@ const DepartmentFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => 
       else if (mode === 'edit' && item) await DataService.put(endpoints.departmentById(item.id), values)
       onSaved()
       onClose()
-      toast.success('Bo\u2018lim muvaffaqiyatli saqlandi')
+      toast.success(String(t('org.departments.toast.saved')))
     } catch (error) {
       console.error('Failed to save department:', error)
     }
@@ -64,7 +66,9 @@ const DepartmentFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => 
 
   return (
     <Dialog open={open} onClose={isSubmitting ? undefined : onClose} fullWidth maxWidth='sm'>
-      <DialogTitle>{mode === 'create' ? 'Bo\u2018lim qo\u2018shish' : 'Bo\u2018limni tahrirlash'}</DialogTitle>
+      <DialogTitle>
+        {mode === 'create' ? String(t('org.departments.create.title')) : String(t('org.departments.edit.title'))}
+      </DialogTitle>
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent>
           <Grid container spacing={4}>
@@ -72,39 +76,41 @@ const DepartmentFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => 
               <Controller
                 name='name'
                 control={control}
-                rules={{ required: true }}
-                render={({ field }) => <CustomTextField fullWidth label='Nomi' {...field} />}
+                rules={{ required: String(t('errors.required')) }}
+                render={({ field }) => (
+                  <CustomTextField fullWidth label={String(t('org.departments.form.name'))} {...field} />
+                )}
               />
             </Grid>
             <Grid item xs={12} md={6}>
               <Controller
                 name='name_en'
                 control={control}
-                render={({ field }) => <CustomTextField fullWidth label='Nomi (EN)' {...field} />}
+                render={({ field }) => <CustomTextField fullWidth label={String(t('org.common.nameEn'))} {...field} />}
               />
             </Grid>
             <Grid item xs={12} md={6}>
               <Controller
                 name='name_uz'
                 control={control}
-                render={({ field }) => <CustomTextField fullWidth label='Nomi (UZ)' {...field} />}
+                render={({ field }) => <CustomTextField fullWidth label={String(t('org.common.nameUz'))} {...field} />}
               />
             </Grid>
             <Grid item xs={12} md={6}>
               <Controller
                 name='name_ru'
                 control={control}
-                render={({ field }) => <CustomTextField fullWidth label='Nomi (RU)' {...field} />}
+                render={({ field }) => <CustomTextField fullWidth label={String(t('org.common.nameRu'))} {...field} />}
               />
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
           <Button type='button' variant='tonal' color='secondary' onClick={onClose} disabled={isSubmitting}>
-            Bekor qilish
+            {String(t('common.cancel'))}
           </Button>
           <Button type='submit' disabled={isSubmitting}>
-            {isSubmitting ? 'Saqlanmoqda…' : 'Saqlash'}
+            {isSubmitting ? String(t('common.saving')) : String(t('common.save'))}
           </Button>
         </DialogActions>
       </form>

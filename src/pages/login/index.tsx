@@ -27,6 +27,7 @@ import Icon from 'src/@core/components/icon'
 import * as yup from 'yup'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { useTranslation } from 'react-i18next'
 
 // ** Hooks
 import { useAuth } from 'src/hooks/useAuth'
@@ -81,11 +82,6 @@ const FormControlLabel = styled(MuiFormControlLabel)<FormControlLabelProps>(({ t
   }
 }))
 
-const schema = yup.object().shape({
-  username: yup.string().required(),
-  password: yup.string().min(5).required()
-})
-
 const defaultValues = {
   username: 'admin',
   password: 'admin'
@@ -99,6 +95,16 @@ interface FormData {
 const LoginPage = () => {
   const [rememberMe, setRememberMe] = useState<boolean>(true)
   const [showPassword, setShowPassword] = useState<boolean>(false)
+
+  const { t } = useTranslation()
+
+  const schema = yup.object().shape({
+    username: yup.string().required(String(t('errors.required'))),
+    password: yup
+      .string()
+      .min(5, String(t('errors.required')))
+      .required(String(t('errors.required')))
+  })
 
   // ** Hooks
   const auth = useAuth()
@@ -126,7 +132,7 @@ const LoginPage = () => {
     auth.login({ username, password, rememberMe }, () => {
       setError('username', {
         type: 'manual',
-        message: 'Username or Password is invalid'
+        message: String(t('login.invalid'))
       })
     })
   }
@@ -166,11 +172,9 @@ const LoginPage = () => {
             <LogoIcon />
             <Box sx={{ my: 6 }}>
               <Typography variant='h3' sx={{ mb: 1.5 }}>
-                {`Welcome to ${themeConfig.templateName}! 👋🏻`}
+                {t('login.welcome', { app: themeConfig.templateName })}
               </Typography>
-              <Typography sx={{ color: 'text.secondary' }}>
-                Please sign-in to your account and start the adventure
-              </Typography>
+              <Typography sx={{ color: 'text.secondary' }}>{t('login.subtitle')}</Typography>
             </Box>
 
             <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
@@ -183,7 +187,7 @@ const LoginPage = () => {
                     <CustomTextField
                       fullWidth
                       autoFocus
-                      label='Username'
+                      label={t('login.username')}
                       value={value}
                       onBlur={onBlur}
                       onChange={onChange}
@@ -204,7 +208,7 @@ const LoginPage = () => {
                       fullWidth
                       value={value}
                       onBlur={onBlur}
-                      label='Password'
+                      label={t('login.password')}
                       onChange={onChange}
                       id='auth-login-v2-password'
                       error={Boolean(errors.password)}
@@ -237,15 +241,15 @@ const LoginPage = () => {
                 }}
               >
                 <FormControlLabel
-                  label='Remember Me'
+                  label={t('login.rememberMe')}
                   control={<Checkbox checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} />}
                 />
                 <Typography component={LinkStyled} href='/forgot-password'>
-                  Forgot Password?
+                  {t('login.forgotPassword')}
                 </Typography>
               </Box>
               <Button fullWidth type='submit' variant='contained' sx={{ mb: 4 }}>
-                Login
+                {t('login.submit')}
               </Button>
             </form>
           </Box>

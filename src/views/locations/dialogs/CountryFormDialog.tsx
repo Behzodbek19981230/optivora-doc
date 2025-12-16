@@ -10,6 +10,7 @@ import CustomTextField from 'src/@core/components/mui/text-field'
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
 import toast from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 
 export type Country = {
   id?: number
@@ -39,6 +40,7 @@ const defaultValues: Country = {
 }
 
 const CountryFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
+  const { t } = useTranslation()
   const {
     control,
     handleSubmit,
@@ -61,7 +63,7 @@ const CountryFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
       else if (mode === 'edit' && item) await DataService.put(endpoints.countryById(item.id), values)
       onSaved()
       onClose()
-      toast.success('Mamlakat muvaffaqiyatli saqlandi')
+      toast.success(String(t('locations.countries.toast.saved')))
     } catch (error) {
       console.error('Error saving country:', error)
     }
@@ -69,7 +71,11 @@ const CountryFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
 
   return (
     <Dialog open={open} onClose={isSubmitting ? undefined : onClose} fullWidth maxWidth='sm'>
-      <DialogTitle>{mode === 'create' ? 'Mamlakat qo‘shish' : 'Mamlakatni tahrirlash'}</DialogTitle>
+      <DialogTitle>
+        {mode === 'create'
+          ? String(t('locations.countries.create.title'))
+          : String(t('locations.countries.edit.title'))}
+      </DialogTitle>
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent>
           <Grid container spacing={4}>
@@ -78,7 +84,7 @@ const CountryFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                 name='code'
                 control={control}
                 rules={{ required: true }}
-                render={({ field }) => <CustomTextField fullWidth label='Kod' {...field} />}
+                render={({ field }) => <CustomTextField fullWidth label={String(t('common.code'))} {...field} />}
               />
             </Grid>
             <Grid item xs={12} md={6}>
@@ -86,45 +92,45 @@ const CountryFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                 name='name'
                 control={control}
                 rules={{ required: true }}
-                render={({ field }) => <CustomTextField fullWidth label='Nomi' {...field} />}
+                render={({ field }) => <CustomTextField fullWidth label={String(t('common.name'))} {...field} />}
               />
             </Grid>
             <Grid item xs={12} md={6}>
               <Controller
                 name='name_en'
                 control={control}
-                render={({ field }) => <CustomTextField fullWidth label='Nomi (EN)' {...field} />}
+                render={({ field }) => <CustomTextField fullWidth label={String(t('common.nameEn'))} {...field} />}
               />
             </Grid>
             <Grid item xs={12} md={6}>
               <Controller
                 name='name_uz'
                 control={control}
-                render={({ field }) => <CustomTextField fullWidth label='Nomi (UZ)' {...field} />}
+                render={({ field }) => <CustomTextField fullWidth label={String(t('common.nameUz'))} {...field} />}
               />
             </Grid>
             <Grid item xs={12} md={6}>
               <Controller
                 name='name_ru'
                 control={control}
-                render={({ field }) => <CustomTextField fullWidth label='Nomi (RU)' {...field} />}
+                render={({ field }) => <CustomTextField fullWidth label={String(t('common.nameRu'))} {...field} />}
               />
             </Grid>
             <Grid item xs={12} md={6}>
               <Controller
                 name='name_lt'
                 control={control}
-                render={({ field }) => <CustomTextField fullWidth label='Nomi (LT)' {...field} />}
+                render={({ field }) => <CustomTextField fullWidth label={String(t('common.nameLt'))} {...field} />}
               />
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
           <Button type='button' variant='tonal' color='secondary' onClick={onClose} disabled={isSubmitting}>
-            Bekor qilish
+            {String(t('common.cancel'))}
           </Button>
           <Button type='submit' disabled={isSubmitting}>
-            {isSubmitting ? 'Saqlanmoqda…' : 'Saqlash'}
+            {isSubmitting ? String(t('common.saving')) : String(t('common.save'))}
           </Button>
         </DialogActions>
       </form>

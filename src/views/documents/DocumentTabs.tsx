@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import DocumentTable from 'src/views/documents/DocumentTable'
 import { useFetchList } from 'src/hooks/useFetchList'
 import endpoints from 'src/configs/endpoints'
+import { useTranslation } from 'react-i18next'
 
 export enum DocumentStatus {
   New = 'new',
@@ -14,13 +15,13 @@ export enum DocumentStatus {
   Returned = 'returned'
 }
 
-const statuses: { key: DocumentStatus; label: string }[] = [
-  { key: DocumentStatus.New, label: 'New' },
-  { key: DocumentStatus.InProgress, label: 'In Progress' },
-  { key: DocumentStatus.OnReview, label: 'On Review' },
-  { key: DocumentStatus.Cancelled, label: 'Cancelled' },
-  { key: DocumentStatus.Done, label: 'Done' },
-  { key: DocumentStatus.Returned, label: 'Returned' }
+const statuses: { key: DocumentStatus; labelKey: string }[] = [
+  { key: DocumentStatus.New, labelKey: 'documents.status.new' },
+  { key: DocumentStatus.InProgress, labelKey: 'documents.status.inProgress' },
+  { key: DocumentStatus.OnReview, labelKey: 'documents.status.onReview' },
+  { key: DocumentStatus.Cancelled, labelKey: 'documents.status.cancelled' },
+  { key: DocumentStatus.Done, labelKey: 'documents.status.done' },
+  { key: DocumentStatus.Returned, labelKey: 'documents.status.returned' }
 ]
 
 const normalize = (s: string): DocumentStatus => (s as DocumentStatus) || DocumentStatus.New
@@ -28,6 +29,7 @@ const normalize = (s: string): DocumentStatus => (s as DocumentStatus) || Docume
 const DocumentTabs = ({ currentStatus }: { currentStatus: DocumentStatus }) => {
   const router = useRouter()
   const value = useMemo(() => normalize(currentStatus), [currentStatus])
+  const { t } = useTranslation()
 
   useEffect(() => {
     // If route has no status, redirect to default
@@ -79,7 +81,7 @@ const DocumentTabs = ({ currentStatus }: { currentStatus: DocumentStatus }) => {
             value={s.key}
             label={
               <Stack direction='row' spacing={1} alignItems='center'>
-                <span>{s.label}</span>
+                <span>{String(t(s.labelKey))}</span>
                 <Chip size='small' color='error' label={totals[s.key] ?? 0} sx={{ height: 20 }} />
               </Stack>
             }

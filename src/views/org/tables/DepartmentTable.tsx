@@ -13,8 +13,10 @@ import { useFetchList } from 'src/hooks/useFetchList'
 import { DataService } from 'src/configs/dataService'
 import toast from 'react-hot-toast'
 import DepartmentFormDialog from '../dialogs/DepartmentFormDialog'
+import { useTranslation } from 'react-i18next'
 
 const DepartmentTable = () => {
+  const { t } = useTranslation()
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 })
   const [search, setSearch] = useState('')
   const {
@@ -51,17 +53,17 @@ const DepartmentTable = () => {
       await DataService.delete(endpoints.departmentById(selected.id))
       mutate()
       setOpenDelete(false)
-      toast.success('Bo\u2018lim muvaffaqiyatli o\u2018chirildi')
+      toast.success(String(t('org.departments.toast.deleted')))
     }
   }
 
   return (
     <>
       <CardHeader
-        title="Bo'limlar"
+        title={String(t('org.departments.title'))}
         action={
           <Button variant='contained' startIcon={<Icon icon='tabler:plus' />} onClick={handleCreate}>
-            Yangi bo'lim
+            {String(t('org.departments.create.title'))}
           </Button>
         }
       />
@@ -72,13 +74,13 @@ const DepartmentTable = () => {
           rows={data}
           columns={
             [
-              { field: 'name', headerName: 'Nomi', flex: 0.25, minWidth: 200 },
-              { field: 'name_en', headerName: 'Nomi (EN)', flex: 0.2, minWidth: 160 },
-              { field: 'name_uz', headerName: 'Nomi (UZ)', flex: 0.2, minWidth: 160 },
-              { field: 'name_ru', headerName: 'Nomi (RU)', flex: 0.2, minWidth: 160 },
+              { field: 'name', headerName: String(t('org.departments.table.name')), flex: 0.25, minWidth: 200 },
+              { field: 'name_en', headerName: String(t('org.common.nameEn')), flex: 0.2, minWidth: 160 },
+              { field: 'name_uz', headerName: String(t('org.common.nameUz')), flex: 0.2, minWidth: 160 },
+              { field: 'name_ru', headerName: String(t('org.common.nameRu')), flex: 0.2, minWidth: 160 },
               {
                 field: 'actions',
-                headerName: 'Amallar',
+                headerName: String(t('common.actions')),
                 flex: 0.15,
                 minWidth: 140,
                 sortable: false,
@@ -117,8 +119,17 @@ const DepartmentTable = () => {
         open={openDelete}
         onClose={() => setOpenDelete(false)}
         onConfirm={handleDeleteConfirm}
-        title="Bo'limni ochirishni tasdiqlang"
-        description={selected ? `“${selected.name_uz || selected.name}” bo'limini ochirmoqchimisiz?` : undefined}
+        title={String(t('org.departments.deleteConfirm.title'))}
+        description={
+          selected
+            ? String(
+                t('org.departments.deleteConfirm.description', {
+                  name: selected.name_uz || selected.name,
+                  id: selected.id
+                })
+              )
+            : undefined
+        }
       />
     </>
   )

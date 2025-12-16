@@ -8,6 +8,7 @@ import endpoints from 'src/configs/endpoints'
 import toast from 'react-hot-toast'
 import { useAuth } from 'src/hooks/useAuth'
 import Icon from 'src/@core/components/icon'
+import { useTranslation } from 'react-i18next'
 
 type ReplyLetterFormType = {
   id?: number
@@ -28,6 +29,7 @@ const defaultValues: ReplyLetterFormType = {
 
 const ReplyLetterForm = () => {
   const router = useRouter()
+  const { t } = useTranslation()
   const { id } = router.query
   const mode = id ? 'edit' : 'create'
   const itemId = id ? Number(id) : null
@@ -80,15 +82,15 @@ const ReplyLetterForm = () => {
         console.log(endpoints.replyLetter)
 
         const res = await DataService.post<{ id: number }>(endpoints.replyLetter, payload)
-        toast.success('Javob xati yaratildi')
+        toast.success(String(t('replyLetter.toast.created')))
         router.push(`/reply-letter/${res.data.id}`)
       } else if (mode === 'edit' && itemId) {
         await DataService.put(endpoints.replyLetterById(itemId), payload)
-        toast.success('Saqlandi')
+        toast.success(String(t('replyLetter.toast.saved')))
       }
     } catch (e) {
       console.error(e)
-      toast.error('Saqlashda xato')
+      toast.error(String(t('replyLetter.toast.saveError')))
     }
   }
 
@@ -122,7 +124,7 @@ const ReplyLetterForm = () => {
   const uploadAttachments = async () => {
     if (!itemId) return
     const rowsToUpload = attachments.filter(r => r.file && r.title.trim().length)
-    if (!rowsToUpload.length) return toast.error('Fayl va title kiriting')
+    if (!rowsToUpload.length) return toast.error(String(t('replyLetter.attachments.validation.fileAndTitleRequired')))
     try {
       setUploading(true)
       for (const row of rowsToUpload) {
@@ -132,7 +134,7 @@ const ReplyLetterForm = () => {
         if (row.file) form.append('file', row.file)
         await DataService.postForm(endpoints.replyLetterFile, form)
       }
-      toast.success('Fayllar muvaffaqiyatli yuklandi')
+      toast.success(String(t('replyLetter.attachments.toast.uploaded')))
       setAttachments([])
       // reload files
       const res = await DataService.get(endpoints.replyLetterFile + `?reply_letter=${itemId}`)
@@ -141,7 +143,7 @@ const ReplyLetterForm = () => {
       setAttachments(rows)
     } catch (e) {
       console.error(e)
-      toast.error('Yuklashda xato yuz berdi')
+      toast.error(String(t('replyLetter.attachments.toast.uploadError')))
     } finally {
       setUploading(false)
     }
@@ -149,7 +151,9 @@ const ReplyLetterForm = () => {
 
   return (
     <Card>
-      <CardHeader title={mode === 'create' ? 'Yangi javob xati' : 'Javob xatini tahrirlash'} />
+      <CardHeader
+        title={mode === 'create' ? String(t('replyLetter.create.title')) : String(t('replyLetter.edit.title'))}
+      />
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent>
           <Grid container spacing={4}>
@@ -158,8 +162,8 @@ const ReplyLetterForm = () => {
                 name='company'
                 control={control}
                 render={({ field }) => (
-                  <CustomTextField select fullWidth label='Tashkilot' {...field}>
-                    <MenuItem value={0}>Tanlanmagan</MenuItem>
+                  <CustomTextField select fullWidth label={String(t('replyLetter.form.company'))} {...field}>
+                    <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
                     {companies.map(c => (
                       <MenuItem key={c.id} value={c.id}>
                         {c.name}
@@ -173,7 +177,9 @@ const ReplyLetterForm = () => {
               <Controller
                 name='letter_number'
                 control={control}
-                render={({ field }) => <CustomTextField fullWidth label='Hujojat raqami' {...field} />}
+                render={({ field }) => (
+                  <CustomTextField fullWidth label={String(t('replyLetter.form.letterNumber'))} {...field} />
+                )}
               />
             </Grid>
             <Grid item xs={12} md={6}>
@@ -181,8 +187,8 @@ const ReplyLetterForm = () => {
                 name='responsible_person'
                 control={control}
                 render={({ field }) => (
-                  <CustomTextField select fullWidth label="Mas'ul shaxs" {...field}>
-                    <MenuItem value={0}>Tanlanmagan</MenuItem>
+                  <CustomTextField select fullWidth label={String(t('replyLetter.form.responsiblePerson'))} {...field}>
+                    <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
                     {persons.map(p => (
                       <MenuItem key={p.id} value={p.id}>
                         {p.fullname || p.username}
@@ -196,14 +202,24 @@ const ReplyLetterForm = () => {
               <Controller
                 name='basis'
                 control={control}
-                render={({ field }) => <CustomTextField fullWidth label='Asos' {...field} />}
+                render={({ field }) => (
+                  <CustomTextField fullWidth label={String(t('replyLetter.form.basis'))} {...field} />
+                )}
               />
             </Grid>
             <Grid item xs={12}>
               <Controller
                 name='comment'
                 control={control}
-                render={({ field }) => <CustomTextField fullWidth label='Izoh' {...field} multiline rows={4} />}
+                render={({ field }) => (
+                  <CustomTextField
+                    fullWidth
+                    label={String(t('replyLetter.form.comment'))}
+                    {...field}
+                    multiline
+                    rows={4}
+                  />
+                )}
               />
             </Grid>
           </Grid>
@@ -212,8 +228,8 @@ const ReplyLetterForm = () => {
           <CardContent>
             <Card variant='outlined'>
               <CardHeader
-                title='Fayllar '
-                subheader='Title kiriting va faylni biriktiring. Bir nechta qator qo‘shish mumkin.'
+                title={String(t('replyLetter.attachments.title'))}
+                subheader={String(t('replyLetter.attachments.subtitle'))}
               />
               <CardContent>
                 <Stack spacing={3}>
@@ -224,7 +240,7 @@ const ReplyLetterForm = () => {
                           <Grid item xs={12} md={5}>
                             <CustomTextField
                               fullWidth
-                              label='Title'
+                              label={String(t('replyLetter.attachments.form.title'))}
                               value={row.title}
                               onChange={e => handleChangeAttachmentTitle(idx, e.target.value)}
                             />
@@ -232,7 +248,7 @@ const ReplyLetterForm = () => {
                           <Grid item xs={12} md={5}>
                             <Stack direction='row' spacing={2} alignItems='end'>
                               <Button variant='outlined' component='label' startIcon={<Icon icon='tabler:paperclip' />}>
-                                Fayl biriktirish
+                                {String(t('replyLetter.attachments.form.attachFile'))}
                                 <input
                                   hidden
                                   type='file'
@@ -240,7 +256,7 @@ const ReplyLetterForm = () => {
                                 />
                               </Button>
                               <span style={{ color: 'rgba(0,0,0,0.6)' }}>
-                                {row.file ? row.file.name : 'Fayl tanlanmagan'}
+                                {row.file ? row.file.name : String(t('replyLetter.attachments.form.noFileSelected'))}
                               </span>
                             </Stack>
                           </Grid>
@@ -259,10 +275,10 @@ const ReplyLetterForm = () => {
                   ))}
                   <Stack direction='row' spacing={2}>
                     <Button variant='contained' color='primary' onClick={handleAddAttachmentRow}>
-                      Qator qo‘shish
+                      {String(t('replyLetter.attachments.addRow'))}
                     </Button>
                     <Button variant='outlined' color='success' onClick={uploadAttachments} disabled={uploading}>
-                      {uploading ? 'Yuklanmoqda…' : 'Yuklash'}
+                      {uploading ? String(t('common.loading')) : String(t('replyLetter.attachments.upload'))}
                     </Button>
                   </Stack>
                 </Stack>
@@ -273,10 +289,10 @@ const ReplyLetterForm = () => {
         <CardActions>
           <Stack direction='row' spacing={2} sx={{ p: 2 }}>
             <Button type='submit' variant='contained' disabled={isSubmitting}>
-              Saqlash
+              {isSubmitting ? String(t('common.saving')) : String(t('common.save'))}
             </Button>
             <Button variant='tonal' onClick={() => router.push('/reply-letter')}>
-              Bekor qilish
+              {String(t('common.cancel'))}
             </Button>
           </Stack>
         </CardActions>

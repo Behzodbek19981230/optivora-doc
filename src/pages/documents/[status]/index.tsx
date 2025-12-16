@@ -2,10 +2,12 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { Card, CardHeader, CardContent } from '@mui/material'
 import DocumentTabs, { DocumentStatus } from 'src/views/documents/DocumentTabs'
+import { useTranslation } from 'react-i18next'
 
 const DocumentsStatusPage = () => {
   const router = useRouter()
   const { status } = router.query as { status?: string }
+  const { t } = useTranslation()
 
   useEffect(() => {
     if (!status) return
@@ -17,7 +19,7 @@ const DocumentsStatusPage = () => {
 
   return (
     <Card>
-      <CardHeader title='Hujjatlar' />
+      <CardHeader title={String(t('documents.title'))} />
       <CardContent>
         <DocumentTabs currentStatus={(status as DocumentStatus) || DocumentStatus.New} />
       </CardContent>

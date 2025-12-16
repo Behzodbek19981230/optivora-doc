@@ -23,6 +23,7 @@ import Icon from 'src/@core/components/icon'
 import authConfig from 'src/configs/auth'
 import { DataService } from 'src/configs/dataService'
 import { UserDataType } from 'src/context/types'
+import { useTranslation } from 'react-i18next'
 
 const ChooseCompanyPage = () => {
   const { user, setUser } = useAuth() as any
@@ -30,6 +31,8 @@ const ChooseCompanyPage = () => {
   const [loading, setLoading] = useState(false)
   const [query, setQuery] = useState('')
   console.log(user)
+
+  const { t } = useTranslation()
 
   const companies = useMemo(() => {
     if (!user) return []
@@ -78,22 +81,22 @@ const ChooseCompanyPage = () => {
   return (
     <Box sx={{ p: 6 }}>
       <Card>
-        <CardHeader title='Select a Company' subheader='Pick the company you want to work with' />
+        <CardHeader title={t('chooseCompany.title')} subheader={t('chooseCompany.subtitle')} />
         <CardContent>
           {loading ? (
             <Stack alignItems='center' sx={{ py: 6 }}>
               <Icon icon='tabler:loader-2' fontSize={24} className='spinner' />
-              <Typography sx={{ mt: 2 }}>Loading companies…</Typography>
+              <Typography sx={{ mt: 2 }}>{t('chooseCompany.loading')}</Typography>
             </Stack>
           ) : companies.length === 0 ? (
-            <Typography>No companies available for your account.</Typography>
+            <Typography>{t('chooseCompany.empty')}</Typography>
           ) : (
             <Box>
               <TextField
                 fullWidth
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                placeholder='Search companies by name, code or ID'
+                placeholder={String(t('chooseCompany.searchPlaceholder'))}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position='start'>
@@ -114,7 +117,7 @@ const ChooseCompanyPage = () => {
                     }}
                     secondaryAction={
                       <Button variant='contained' onClick={() => handleSelect(c.id)}>
-                        Choose
+                        {t('chooseCompany.choose')}
                       </Button>
                     }
                   >
@@ -127,18 +130,32 @@ const ChooseCompanyPage = () => {
                       primary={
                         <Stack direction='row' alignItems='center' spacing={2}>
                           <Typography variant='h6'>{c.name || `Company ${c.id}`}</Typography>
-                          {c.is_active === false ? <Chip size='small' color='warning' label='Inactive' /> : null}
+                          {c.is_active === false ? (
+                            <Chip size='small' color='warning' label={t('chooseCompany.inactive')} />
+                          ) : null}
                         </Stack>
                       }
                       secondary={
                         <Stack direction='row' spacing={3} flexWrap='wrap'>
-                          {c.code ? <Typography color='text.secondary'>Code: {c.code}</Typography> : null}
-                          {c.phone ? <Typography color='text.secondary'>Phone: {c.phone}</Typography> : null}
+                          {c.code ? (
+                            <Typography color='text.secondary'>
+                              {t('chooseCompany.code')}: {c.code}
+                            </Typography>
+                          ) : null}
+                          {c.phone ? (
+                            <Typography color='text.secondary'>
+                              {t('chooseCompany.phone')}: {c.phone}
+                            </Typography>
+                          ) : null}
                           {c.region_detail?.name ? (
-                            <Typography color='text.secondary'>Region: {c.region_detail.name}</Typography>
+                            <Typography color='text.secondary'>
+                              {t('chooseCompany.region')}: {c.region_detail.name}
+                            </Typography>
                           ) : null}
                           {c.district_detail?.name ? (
-                            <Typography color='text.secondary'>District: {c.district_detail.name}</Typography>
+                            <Typography color='text.secondary'>
+                              {t('chooseCompany.district')}: {c.district_detail.name}
+                            </Typography>
                           ) : null}
                           {c.address ? <Typography color='text.secondary'>{c.address}</Typography> : null}
                         </Stack>

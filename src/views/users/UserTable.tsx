@@ -9,6 +9,7 @@ import endpoints from 'src/configs/endpoints'
 import { DataService } from 'src/configs/dataService'
 import UserFormDialog from './dialogs/UserFormDialog'
 import { getInitials } from 'src/@core/utils/get-initials'
+import { useTranslation } from 'react-i18next'
 
 export type User = {
   id: number
@@ -30,6 +31,7 @@ export type User = {
 
 const UserTable = () => {
   const router = useRouter()
+  const { t } = useTranslation()
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 })
   const {
     data = [],
@@ -81,7 +83,7 @@ const UserTable = () => {
   const columns: GridColDef[] = [
     {
       field: 'fullname',
-      headerName: 'F.I.Sh',
+      headerName: String(t('users.table.fullname')),
       flex: 0.25,
       minWidth: 220,
       renderCell: params => {
@@ -97,19 +99,19 @@ const UserTable = () => {
         )
       }
     },
-    { field: 'username', headerName: 'Login', flex: 0.15, minWidth: 140 },
-    { field: 'role', headerName: 'Rol', flex: 0.12, minWidth: 120 },
-    { field: 'phone_number', headerName: 'Telefon', flex: 0.18, minWidth: 160 },
+    { field: 'username', headerName: String(t('users.table.username')), flex: 0.15, minWidth: 140 },
+    { field: 'role', headerName: String(t('users.table.role')), flex: 0.12, minWidth: 120 },
+    { field: 'phone_number', headerName: String(t('users.table.phone')), flex: 0.18, minWidth: 160 },
     {
       field: 'is_active',
-      headerName: 'Faol',
+      headerName: String(t('users.table.active')),
       flex: 0.1,
       minWidth: 100,
-      valueGetter: params => (params.row.is_active ? 'Ha' : 'Yo‘q')
+      valueGetter: params => (params.row.is_active ? String(t('common.yes')) : String(t('common.no')))
     },
     {
       field: 'companies_detail',
-      headerName: 'Kompaniyalar',
+      headerName: String(t('users.table.companies')),
       flex: 0.35,
       minWidth: 260,
       sortable: false,
@@ -144,7 +146,7 @@ const UserTable = () => {
     },
     {
       field: 'actions',
-      headerName: 'Amallar',
+      headerName: String(t('common.actions')),
       flex: 0.18,
       minWidth: 160,
       sortable: false,
@@ -170,10 +172,10 @@ const UserTable = () => {
   return (
     <Card>
       <CardHeader
-        title='Foydalanuvchilar'
+        title={String(t('users.title'))}
         action={
           <Button variant='contained' onClick={handleCreate}>
-            Yaratish
+            {String(t('common.create'))}
           </Button>
         }
       />

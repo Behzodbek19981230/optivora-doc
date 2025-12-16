@@ -4,6 +4,7 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
+import { useTranslation } from 'react-i18next'
 
 type Props = {
   open: boolean
@@ -15,20 +16,20 @@ type Props = {
 }
 
 const DeleteConfirmDialog = ({ open, onClose, onConfirm, confirming, title, description }: Props) => {
+  const { t } = useTranslation()
+
   return (
     <Dialog open={open} onClose={confirming ? undefined : onClose} fullWidth maxWidth='xs'>
-      <DialogTitle>{title || 'O‘chirishni tasdiqlang'}</DialogTitle>
+      <DialogTitle>{title || String(t('common.deleteConfirmTitle'))}</DialogTitle>
       <DialogContent>
-        <Typography variant='body2'>
-          {description || 'Bu amalni bekor qilib bo‘lmaydi. Haqiqatdan ham o‘chirmoqchimisiz?'}
-        </Typography>
+        <Typography variant='body2'>{description || String(t('common.deleteConfirmDescription'))}</Typography>
       </DialogContent>
       <DialogActions>
         <Button variant='tonal' color='secondary' onClick={onClose} disabled={Boolean(confirming)}>
-          Bekor qilish
+          {String(t('common.cancel'))}
         </Button>
         <Button color='error' onClick={() => onConfirm()} disabled={Boolean(confirming)}>
-          {confirming ? 'O‘chirilmoqda…' : 'O‘chirish'}
+          {confirming ? String(t('common.deleting')) : String(t('common.delete'))}
         </Button>
       </DialogActions>
     </Dialog>

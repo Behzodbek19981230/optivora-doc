@@ -7,6 +7,7 @@ import IconifyIcon from 'src/@core/components/icon'
 import { DataService } from 'src/configs/dataService'
 import useThemedToast from 'src/@core/hooks/useThemedToast'
 import MagazineListDialog from './dialogs/MagazineListDialog'
+import { useTranslation } from 'react-i18next'
 
 type Magazine = {
   id?: number
@@ -18,6 +19,7 @@ type Magazine = {
 
 const MagazineListTable = () => {
   const toast = useThemedToast()
+  const { t } = useTranslation()
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 })
   const [open, setOpen] = useState(false)
   const [editItem, setEditItem] = useState<Magazine | null>(null)
@@ -37,13 +39,13 @@ const MagazineListTable = () => {
   })
 
   const columns: GridColDef[] = [
-    { field: 'name', headerName: 'Name', flex: 0.25, minWidth: 160 },
-    { field: 'name_en', headerName: 'Name (EN)', flex: 0.2, minWidth: 140 },
-    { field: 'name_uz', headerName: 'Name (UZ)', flex: 0.2, minWidth: 140 },
-    { field: 'name_ru', headerName: 'Name (RU)', flex: 0.2, minWidth: 140 },
+    { field: 'name', headerName: String(t('common.name')), flex: 0.25, minWidth: 160 },
+    { field: 'name_en', headerName: String(t('common.nameEn')), flex: 0.2, minWidth: 140 },
+    { field: 'name_uz', headerName: String(t('common.nameUz')), flex: 0.2, minWidth: 140 },
+    { field: 'name_ru', headerName: String(t('common.nameRu')), flex: 0.2, minWidth: 140 },
     {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: String(t('common.actions')),
       flex: 0.15,
       minWidth: 130,
       sortable: false,
@@ -51,7 +53,7 @@ const MagazineListTable = () => {
         const row = params.row as Magazine
         return (
           <Stack direction='row' spacing={1}>
-            <Tooltip title='Edit'>
+            <Tooltip title={String(t('common.edit'))}>
               <IconButton
                 size='small'
                 onClick={() => {
@@ -62,13 +64,13 @@ const MagazineListTable = () => {
                 <IconifyIcon icon='tabler:edit' />
               </IconButton>
             </Tooltip>
-            <Tooltip title='Delete'>
+            <Tooltip title={String(t('common.delete'))}>
               <IconButton
                 size='small'
                 color='error'
                 onClick={async () => {
                   await DataService.delete(endpoints.listOfMagazineById(row.id as number))
-                  toast.success('Deleted')
+                  toast.success(String(t('listOfMagazine.toast.deleted')))
                   mutate()
                 }}
               >
@@ -84,10 +86,10 @@ const MagazineListTable = () => {
   return (
     <Card>
       <CardHeader
-        title='Jurnallar roʻyxati'
+        title={String(t('listOfMagazine.title'))}
         action={
           <Button variant='contained' onClick={handleCreate}>
-            Yaratish
+            {String(t('common.create'))}
           </Button>
         }
       />

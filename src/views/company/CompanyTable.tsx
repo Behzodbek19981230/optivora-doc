@@ -10,6 +10,7 @@ import Icon from 'src/@core/components/icon'
 import CompanyFormDialog from './dialogs/CompanyFormDialog'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { getInitials } from 'src/@core/utils/get-initials'
+import { useTranslation } from 'react-i18next'
 
 type Company = {
   id: number
@@ -26,6 +27,7 @@ type Company = {
 
 const CompanyTable = () => {
   const router = useRouter()
+  const { t } = useTranslation()
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 })
   const {
     data = [],
@@ -54,34 +56,34 @@ const CompanyTable = () => {
   }
 
   const columns: GridColDef[] = [
-    { field: 'code', headerName: 'Kod', flex: 0.15, minWidth: 120 },
-    { field: 'name', headerName: 'Nomi', flex: 0.25, minWidth: 180 },
+    { field: 'code', headerName: String(t('company.table.code')), flex: 0.15, minWidth: 120 },
+    { field: 'name', headerName: String(t('company.table.name')), flex: 0.25, minWidth: 180 },
     {
       field: 'is_active',
-      headerName: 'Faol',
+      headerName: String(t('company.table.active')),
       flex: 0.1,
       minWidth: 100,
-      valueGetter: params => (params.row.is_active ? 'Ha' : 'Yo‘q')
+      valueGetter: params => (params.row.is_active ? String(t('common.yes')) : String(t('common.no')))
     },
-    { field: 'phone', headerName: 'Telefon', flex: 0.2, minWidth: 160 },
+    { field: 'phone', headerName: String(t('company.table.phone')), flex: 0.2, minWidth: 160 },
     {
       field: 'region',
-      headerName: 'Viloyat',
+      headerName: String(t('company.table.region')),
       flex: 0.12,
       minWidth: 120,
       valueGetter: params => (params.row as any).region_detail?.name_uz || params.row.region
     },
     {
       field: 'district',
-      headerName: 'Tuman',
+      headerName: String(t('company.table.district')),
       flex: 0.12,
       minWidth: 120,
       valueGetter: params => (params.row as any).district_detail?.name_uz || params.row.district
     },
-    { field: 'address', headerName: 'Manzil', flex: 0.3, minWidth: 220 },
+    { field: 'address', headerName: String(t('company.table.address')), flex: 0.3, minWidth: 220 },
     {
       field: 'logo',
-      headerName: 'Logo',
+      headerName: String(t('company.table.logo')),
       flex: 0.15,
       minWidth: 140,
       renderCell: params => {
@@ -104,7 +106,7 @@ const CompanyTable = () => {
     },
     {
       field: 'actions',
-      headerName: 'Amallar',
+      headerName: String(t('common.actions')),
       sortable: false,
       flex: 0.15,
       minWidth: 140,
@@ -129,10 +131,10 @@ const CompanyTable = () => {
   return (
     <Card>
       <CardHeader
-        title='Kompaniyalar'
+        title={String(t('company.title'))}
         action={
           <Button variant='contained' onClick={handleCreate}>
-            Yaratish
+            {String(t('common.create'))}
           </Button>
         }
       />

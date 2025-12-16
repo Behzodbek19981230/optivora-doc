@@ -9,11 +9,13 @@ import { DataService } from 'src/configs/dataService'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/router'
 import DeleteConfirmDialog from 'src/views/locations/dialogs/DeleteConfirmDialog'
+import { useTranslation } from 'react-i18next'
 
 const AddIcon = () => <span style={{ fontWeight: 'bold' }}>＋</span>
 
 const ReplyLetterTable = () => {
   const router = useRouter()
+  const { t } = useTranslation()
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 })
   const [selected, setSelected] = useState<any | null>(null)
   const [openDelete, setOpenDelete] = useState(false)
@@ -42,15 +44,15 @@ const ReplyLetterTable = () => {
     await DataService.delete(endpoints.replyLetterById(selected.id))
     mutate()
     setOpenDelete(false)
-    toast.success('Javob xati o‘chirildi')
+    toast.success(String(t('replyLetter.toast.deleted')))
   }
 
   const columns: GridColDef[] = [
-    { field: 'letter_number', headerName: 'Hujjat raqami', flex: 0.18, minWidth: 140 },
-    { field: 'basis', headerName: 'Asos', flex: 0.3, minWidth: 220 },
+    { field: 'letter_number', headerName: String(t('replyLetter.table.letterNumber')), flex: 0.18, minWidth: 140 },
+    { field: 'basis', headerName: String(t('replyLetter.table.basis')), flex: 0.3, minWidth: 220 },
     {
       field: 'responsible_person',
-      headerName: "Mas'ul",
+      headerName: String(t('replyLetter.table.responsiblePerson')),
       flex: 0.2,
       minWidth: 160,
       valueGetter: params =>
@@ -58,15 +60,15 @@ const ReplyLetterTable = () => {
     },
     {
       field: 'company_detail',
-      headerName: 'Tashkilot',
+      headerName: String(t('replyLetter.table.company')),
       flex: 0.2,
       minWidth: 160,
       valueGetter: params => (params.row.company_detail ? params.row.company_detail.name : '')
     },
-    { field: 'created_time', headerName: 'Yaratilgan', flex: 0.18, minWidth: 150 },
+    { field: 'created_time', headerName: String(t('replyLetter.table.createdAt')), flex: 0.18, minWidth: 150 },
     {
       field: 'actions',
-      headerName: 'Amallar',
+      headerName: String(t('common.actions')),
       flex: 0.18,
       minWidth: 160,
       sortable: false,
@@ -89,10 +91,10 @@ const ReplyLetterTable = () => {
   return (
     <Card>
       <CardHeader
-        title='Javob xatlari'
+        title={String(t('replyLetter.title'))}
         action={
           <Button variant='contained' onClick={() => router.push('/reply-letter/create')}>
-            Yangi javob xati
+            {String(t('replyLetter.create.title'))}
           </Button>
         }
       />
@@ -115,7 +117,7 @@ const ReplyLetterTable = () => {
         open={openDelete}
         onClose={() => setOpenDelete(false)}
         onConfirm={handleDeleteConfirm}
-        title='Javob xatini o‘chirishni tasdiqlang'
+        title={String(t('replyLetter.deleteConfirm.title'))}
         description={selected ? `ID: ${selected.id}` : undefined}
       />
     </Card>

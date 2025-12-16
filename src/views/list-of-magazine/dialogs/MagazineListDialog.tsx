@@ -5,6 +5,7 @@ import CustomTextField from 'src/@core/components/mui/text-field'
 import useThemedToast from 'src/@core/hooks/useThemedToast'
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
+import { useTranslation } from 'react-i18next'
 
 type Magazine = {
   id?: number
@@ -30,6 +31,7 @@ const defaultValues: Magazine = {
 
 const MagazineListDialog = ({ open, item, onClose, onSaved }: Props) => {
   const toast = useThemedToast()
+  const { t } = useTranslation()
   const { control, handleSubmit, reset } = useForm<Magazine>({ defaultValues })
 
   useEffect(() => {
@@ -41,20 +43,22 @@ const MagazineListDialog = ({ open, item, onClose, onSaved }: Props) => {
     try {
       if (item?.id) {
         await DataService.put(endpoints.listOfMagazineById(item.id), values)
-        toast.success('Updated')
+        toast.success(String(t('listOfMagazine.toast.updated')))
       } else {
         await DataService.post(endpoints.listOfMagazine, values)
-        toast.success('Created')
+        toast.success(String(t('listOfMagazine.toast.created')))
       }
       onSaved()
     } catch (e: any) {
-      toast.error(e?.message || 'Error')
+      toast.error(e?.message || String(t('common.error')))
     }
   }
 
   return (
     <Dialog fullWidth maxWidth='sm' open={open} onClose={onClose}>
-      <DialogTitle>{item ? 'Jurnalni tahrirlash' : 'Yangi jurnal'}</DialogTitle>
+      <DialogTitle>
+        {item ? String(t('listOfMagazine.edit.title')) : String(t('listOfMagazine.create.title'))}
+      </DialogTitle>
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent>
           <Grid container spacing={4}>
@@ -63,7 +67,7 @@ const MagazineListDialog = ({ open, item, onClose, onSaved }: Props) => {
                 name='name'
                 control={control}
                 rules={{ required: true }}
-                render={({ field }) => <CustomTextField fullWidth label='Name' {...field} />}
+                render={({ field }) => <CustomTextField fullWidth label={String(t('common.name'))} {...field} />}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -71,7 +75,7 @@ const MagazineListDialog = ({ open, item, onClose, onSaved }: Props) => {
                 name='name_en'
                 control={control}
                 rules={{ required: true }}
-                render={({ field }) => <CustomTextField fullWidth label='Name (EN)' {...field} />}
+                render={({ field }) => <CustomTextField fullWidth label={String(t('common.nameEn'))} {...field} />}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -79,7 +83,7 @@ const MagazineListDialog = ({ open, item, onClose, onSaved }: Props) => {
                 name='name_uz'
                 control={control}
                 rules={{ required: true }}
-                render={({ field }) => <CustomTextField fullWidth label='Name (UZ)' {...field} />}
+                render={({ field }) => <CustomTextField fullWidth label={String(t('common.nameUz'))} {...field} />}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -87,17 +91,17 @@ const MagazineListDialog = ({ open, item, onClose, onSaved }: Props) => {
                 name='name_ru'
                 control={control}
                 rules={{ required: true }}
-                render={({ field }) => <CustomTextField fullWidth label='Name (RU)' {...field} />}
+                render={({ field }) => <CustomTextField fullWidth label={String(t('common.nameRu'))} {...field} />}
               />
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
           <Button variant='outlined' onClick={onClose}>
-            Bekor qilish
+            {String(t('common.cancel'))}
           </Button>
           <Button variant='contained' type='submit'>
-            Saqlash
+            {String(t('common.save'))}
           </Button>
         </DialogActions>
       </form>

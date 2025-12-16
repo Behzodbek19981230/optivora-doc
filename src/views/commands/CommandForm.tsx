@@ -17,6 +17,7 @@ import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'
 import { useRouter } from 'next/router'
 import { Card, CardContent, CardHeader, IconButton, Stack } from '@mui/material'
 import Icon from 'src/@core/components/icon'
+import { useTranslation } from 'react-i18next'
 
 type Props = {
   open: boolean
@@ -40,6 +41,7 @@ const defaultValues: CommandType = {
 
 const CommandForm = () => {
   const router = useRouter()
+  const { t } = useTranslation()
   const { id } = router.query
   const { user } = useAuth()
 
@@ -131,7 +133,7 @@ const CommandForm = () => {
         router.push(`/commands/${res.data.id}`)
       } else if (mode === 'edit' && id) await DataService.put(endpoints.commandById(id), payload)
 
-      toast.success('Buyruq muvaffaqiyatli saqlandi')
+      toast.success(String(t('commands.toast.saved')))
     } catch (error) {
       console.error('Failed to save command:', error)
     }
@@ -148,7 +150,7 @@ const CommandForm = () => {
   const uploadAttachments = async () => {
     if (!itemId) return
     const rowsToUpload = attachments.filter(r => r.file && r.title.trim().length)
-    if (!rowsToUpload.length) return toast.error('Fayl va title kiriting')
+    if (!rowsToUpload.length) return toast.error(String(t('commands.attachments.validation.fileAndTitleRequired')))
     try {
       setUploading(true)
       for (const row of rowsToUpload) {
@@ -158,12 +160,12 @@ const CommandForm = () => {
         if (row.file) form.append('file', row.file)
         await DataService.postForm(endpoints.downloads, form)
       }
-      toast.success('Fayllar muvaffaqiyatli yuklandi')
+      toast.success(String(t('commands.attachments.toast.uploaded')))
       setAttachments([])
       getInitValues()
     } catch (e) {
       console.error(e)
-      toast.error('Yuklashda xato yuz berdi')
+      toast.error(String(t('commands.attachments.toast.uploadError')))
     } finally {
       setUploading(false)
     }
@@ -171,7 +173,7 @@ const CommandForm = () => {
 
   return (
     <Card>
-      <CardHeader title={mode === 'create' ? 'Yangi buyruq yaratish' : 'Buyruqni tahrirlash'} />
+      <CardHeader title={mode === 'create' ? String(t('commands.create.title')) : String(t('commands.edit.title'))} />
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent>
           <Grid container spacing={4}>
@@ -179,11 +181,11 @@ const CommandForm = () => {
               <Controller
                 name='command_number'
                 control={control}
-                rules={{ required: 'Majburiy maydon' }}
+                rules={{ required: String(t('errors.required')) }}
                 render={({ field }) => (
                   <CustomTextField
                     fullWidth
-                    label='Buyruq nomeri'
+                    label={String(t('commands.form.number'))}
                     {...field}
                     error={!!errors.command_number}
                     helperText={errors.command_number?.message}
@@ -196,10 +198,10 @@ const CommandForm = () => {
               <Controller
                 name='basis'
                 control={control}
-                rules={{ required: 'Majburiy maydon' }}
+                rules={{ required: String(t('errors.required')) }}
                 render={({ field }) => (
                   <EditorWrapper>
-                    <div style={{ marginBottom: 8, fontWeight: 500 }}>Buyruq asosi</div>
+                    <div style={{ marginBottom: 8, fontWeight: 500 }}>{String(t('commands.form.basis'))}</div>
                     <EditorControlled
                       editorState={basisState}
                       onEditorStateChange={state => {
@@ -220,10 +222,10 @@ const CommandForm = () => {
               <Controller
                 name='basis_en'
                 control={control}
-                rules={{ required: 'Majburiy maydon' }}
+                rules={{ required: String(t('errors.required')) }}
                 render={({ field }) => (
                   <EditorWrapper>
-                    <div style={{ marginBottom: 8, fontWeight: 500 }}>Asos (EN)</div>
+                    <div style={{ marginBottom: 8, fontWeight: 500 }}>{String(t('commands.form.basisEn'))}</div>
                     <EditorControlled
                       editorState={basisEnState}
                       onEditorStateChange={state => {
@@ -243,10 +245,10 @@ const CommandForm = () => {
               <Controller
                 name='basis_uz'
                 control={control}
-                rules={{ required: 'Majburiy maydon' }}
+                rules={{ required: String(t('errors.required')) }}
                 render={({ field }) => (
                   <EditorWrapper>
-                    <div style={{ marginBottom: 8, fontWeight: 500 }}>Asos (UZ)</div>
+                    <div style={{ marginBottom: 8, fontWeight: 500 }}>{String(t('commands.form.basisUz'))}</div>
                     <EditorControlled
                       editorState={basisUzState}
                       onEditorStateChange={state => {
@@ -266,10 +268,10 @@ const CommandForm = () => {
               <Controller
                 name='basis_ru'
                 control={control}
-                rules={{ required: 'Majburiy maydon' }}
+                rules={{ required: String(t('errors.required')) }}
                 render={({ field }) => (
                   <EditorWrapper>
-                    <div style={{ marginBottom: 8, fontWeight: 500 }}>Asos (RU)</div>
+                    <div style={{ marginBottom: 8, fontWeight: 500 }}>{String(t('commands.form.basisRu'))}</div>
                     <EditorControlled
                       editorState={basisRuState}
                       onEditorStateChange={state => {
@@ -289,10 +291,10 @@ const CommandForm = () => {
               <Controller
                 name='comment'
                 control={control}
-                rules={{ required: 'Majburiy maydon' }}
+                rules={{ required: String(t('errors.required')) }}
                 render={({ field }) => (
                   <EditorWrapper>
-                    <div style={{ marginBottom: 8, fontWeight: 500 }}>Izoh</div>
+                    <div style={{ marginBottom: 8, fontWeight: 500 }}>{String(t('commands.form.comment'))}</div>
                     <EditorControlled
                       editorState={commentState}
                       onEditorStateChange={state => {
@@ -312,10 +314,10 @@ const CommandForm = () => {
               <Controller
                 name='comment_en'
                 control={control}
-                rules={{ required: 'Majburiy maydon' }}
+                rules={{ required: String(t('errors.required')) }}
                 render={({ field }) => (
                   <EditorWrapper>
-                    <div style={{ marginBottom: 8, fontWeight: 500 }}>Izoh (EN)</div>
+                    <div style={{ marginBottom: 8, fontWeight: 500 }}>{String(t('commands.form.commentEn'))}</div>
                     <EditorControlled
                       editorState={commentEnState}
                       onEditorStateChange={state => {
@@ -335,10 +337,10 @@ const CommandForm = () => {
               <Controller
                 name='comment_uz'
                 control={control}
-                rules={{ required: 'Majburiy maydon' }}
+                rules={{ required: String(t('errors.required')) }}
                 render={({ field }) => (
                   <EditorWrapper>
-                    <div style={{ marginBottom: 8, fontWeight: 500 }}>Izoh (UZ)</div>
+                    <div style={{ marginBottom: 8, fontWeight: 500 }}>{String(t('commands.form.commentUz'))}</div>
                     <EditorControlled
                       editorState={commentUzState}
                       onEditorStateChange={state => {
@@ -358,10 +360,10 @@ const CommandForm = () => {
               <Controller
                 name='comment_ru'
                 control={control}
-                rules={{ required: 'Majburiy maydon' }}
+                rules={{ required: String(t('errors.required')) }}
                 render={({ field }) => (
                   <EditorWrapper>
-                    <div style={{ marginBottom: 8, fontWeight: 500 }}>Izoh (RU)</div>
+                    <div style={{ marginBottom: 8, fontWeight: 500 }}>{String(t('commands.form.commentRu'))}</div>
                     <EditorControlled
                       editorState={commentRuState}
                       onEditorStateChange={state => {
@@ -381,8 +383,8 @@ const CommandForm = () => {
               <Grid item xs={12}>
                 <Card variant='outlined'>
                   <CardHeader
-                    title='Fayllar '
-                    subheader='Title kiriting va faylni biriktiring. Bir nechta qator qo‘shish mumkin.'
+                    title={String(t('commands.attachments.title'))}
+                    subheader={String(t('commands.attachments.subtitle'))}
                   />
                   <CardContent>
                     <Stack spacing={3}>
@@ -393,7 +395,7 @@ const CommandForm = () => {
                               <Grid item xs={12} md={5}>
                                 <CustomTextField
                                   fullWidth
-                                  label='Title'
+                                  label={String(t('commands.attachments.form.title'))}
                                   value={row.title}
                                   onChange={e => handleChangeAttachmentTitle(idx, e.target.value)}
                                 />
@@ -405,7 +407,7 @@ const CommandForm = () => {
                                     component='label'
                                     startIcon={<Icon icon='tabler:paperclip' />}
                                   >
-                                    Fayl biriktirish
+                                    {String(t('commands.attachments.form.attachFile'))}
                                     <input
                                       hidden
                                       type='file'
@@ -413,7 +415,7 @@ const CommandForm = () => {
                                     />
                                   </Button>
                                   <span style={{ color: 'rgba(0,0,0,0.6)' }}>
-                                    {row.file ? row.file.name : 'Fayl tanlanmagan'}
+                                    {row.file ? row.file.name : String(t('commands.attachments.form.noFileSelected'))}
                                   </span>
                                 </Stack>
                               </Grid>
@@ -432,10 +434,10 @@ const CommandForm = () => {
                       ))}
                       <Stack direction='row' spacing={2}>
                         <Button variant='contained' color='primary' onClick={handleAddAttachmentRow}>
-                          Qator qo‘shish
+                          {String(t('commands.attachments.addRow'))}
                         </Button>
                         <Button variant='outlined' color='success' onClick={uploadAttachments} disabled={uploading}>
-                          {uploading ? 'Yuklanmoqda…' : 'Yuklash'}
+                          {uploading ? String(t('common.loading')) : String(t('commands.attachments.upload'))}
                         </Button>
                       </Stack>
                     </Stack>
@@ -455,10 +457,10 @@ const CommandForm = () => {
             }}
             disabled={isSubmitting}
           >
-            Bekor qilish
+            {String(t('common.cancel'))}
           </Button>
           <Button type='submit' disabled={isSubmitting}>
-            {isSubmitting ? 'Saqlanmoqda…' : 'Saqlash'}
+            {isSubmitting ? String(t('common.saving')) : String(t('common.save'))}
           </Button>
         </div>
       </form>

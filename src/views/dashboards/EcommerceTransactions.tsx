@@ -14,6 +14,7 @@ import { ThemeColor } from 'src/@core/layouts/types'
 // ** Custom Components Imports
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import OptionsMenu from 'src/@core/components/option-menu'
+import { useTranslation } from 'react-i18next'
 
 interface DataType {
   title: string
@@ -80,14 +81,19 @@ const data: DataType[] = [
 ]
 
 const EcommerceTransactions = () => {
+  const { t } = useTranslation()
   return (
     <Card>
       <CardHeader
-        title='Transactions'
-        subheader='Total 58 transaction done in month'
+        title={String(t('dashboards.transactions.title'))}
+        subheader={String(t('dashboards.transactions.subheader'))}
         action={
           <OptionsMenu
-            options={['Refresh', 'Show all entries', 'Make payment']}
+            options={[
+              String(t('dashboards.transactions.menu.refresh')),
+              String(t('dashboards.transactions.menu.showAll')),
+              String(t('dashboards.transactions.menu.makePayment'))
+            ]}
             iconButtonProps={{ size: 'small', sx: { color: 'text.disabled' } }}
           />
         }

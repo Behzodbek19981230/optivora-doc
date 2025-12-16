@@ -11,6 +11,7 @@ import MenuItem from '@mui/material/MenuItem'
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
 import toast from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 
 export type Position = {
   id?: number
@@ -38,6 +39,7 @@ const defaultValues: Position = {
 }
 
 const PositionFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
+  const { t } = useTranslation()
   const {
     control,
     handleSubmit,
@@ -77,7 +79,7 @@ const PositionFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
       else if (mode === 'edit' && item) await DataService.put(endpoints.positionById(item.id), values)
       onSaved()
       onClose()
-      toast.success('Lavozim muvaffaqiyatli saqlandi')
+      toast.success(String(t('org.positions.toast.saved')))
     } catch (error) {
       console.error('Failed to save position:', error)
     }
@@ -85,7 +87,9 @@ const PositionFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
 
   return (
     <Dialog open={open} onClose={isSubmitting ? undefined : onClose} fullWidth maxWidth='sm'>
-      <DialogTitle>{mode === 'create' ? 'Lavozim qo\u2018shish' : 'Lavozimni tahrirlash'}</DialogTitle>
+      <DialogTitle>
+        {mode === 'create' ? String(t('org.positions.create.title')) : String(t('org.positions.edit.title'))}
+      </DialogTitle>
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent>
           <Grid container spacing={4}>
@@ -93,41 +97,49 @@ const PositionFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
               <Controller
                 name='name'
                 control={control}
-                rules={{ required: true }}
-                render={({ field }) => <CustomTextField fullWidth label='Nomi' {...field} />}
+                rules={{ required: String(t('errors.required')) }}
+                render={({ field }) => (
+                  <CustomTextField fullWidth label={String(t('org.positions.form.name'))} {...field} />
+                )}
               />
             </Grid>
             <Grid item xs={12} md={6}>
               <Controller
                 name='name_en'
                 control={control}
-                render={({ field }) => <CustomTextField fullWidth label='Nomi (EN)' {...field} />}
+                render={({ field }) => <CustomTextField fullWidth label={String(t('org.common.nameEn'))} {...field} />}
               />
             </Grid>
             <Grid item xs={12} md={6}>
               <Controller
                 name='name_uz'
                 control={control}
-                render={({ field }) => <CustomTextField fullWidth label='Nomi (UZ)' {...field} />}
+                render={({ field }) => <CustomTextField fullWidth label={String(t('org.common.nameUz'))} {...field} />}
               />
             </Grid>
             <Grid item xs={12} md={6}>
               <Controller
                 name='name_ru'
                 control={control}
-                render={({ field }) => <CustomTextField fullWidth label='Nomi (RU)' {...field} />}
+                render={({ field }) => <CustomTextField fullWidth label={String(t('org.common.nameRu'))} {...field} />}
               />
             </Grid>
             <Grid item xs={12} md={6}>
               <Controller
                 name='department'
                 control={control}
-                rules={{ required: true }}
+                rules={{ required: String(t('errors.required')) }}
                 render={({ field }) => (
-                  <CustomTextField select fullWidth label="Bo'lim" {...field} value={field.value || ''}>
+                  <CustomTextField
+                    select
+                    fullWidth
+                    label={String(t('org.positions.form.department'))}
+                    {...field}
+                    value={field.value || ''}
+                  >
                     {loadingDepartments ? (
                       <MenuItem value='' disabled>
-                        Yuklanmoqda…
+                        {String(t('common.loading'))}
                       </MenuItem>
                     ) : departments.length > 0 ? (
                       departments.map((d: any) => (
@@ -137,7 +149,7 @@ const PositionFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                       ))
                     ) : (
                       <MenuItem value='' disabled>
-                        Bo‘limlar topilmadi
+                        {String(t('org.positions.form.noDepartments'))}
                       </MenuItem>
                     )}
                   </CustomTextField>
@@ -148,10 +160,10 @@ const PositionFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
         </DialogContent>
         <DialogActions>
           <Button type='button' variant='tonal' color='secondary' onClick={onClose} disabled={isSubmitting}>
-            Bekor qilish
+            {String(t('common.cancel'))}
           </Button>
           <Button type='submit' disabled={isSubmitting}>
-            {isSubmitting ? 'Saqlanmoqda…' : 'Saqlash'}
+            {isSubmitting ? String(t('common.saving')) : String(t('common.save'))}
           </Button>
         </DialogActions>
       </form>

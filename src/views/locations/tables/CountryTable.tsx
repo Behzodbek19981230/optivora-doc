@@ -2,21 +2,17 @@ import { useState } from 'react'
 import CardHeader from '@mui/material/CardHeader'
 import IconButton from '@mui/material/IconButton'
 import Button from '@mui/material/Button'
-import Stack from '@mui/material/Stack'
-import Tooltip from '@mui/material/Tooltip'
-import { CardContent } from '@mui/material'
 import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid'
-const EditIcon = () => <span style={{ fontWeight: 'bold' }}>✏️</span>
-const DeleteIcon = () => <span style={{ fontWeight: 'bold', color: 'red' }}>🗑️</span>
 const AddIcon = () => <span style={{ fontWeight: 'bold' }}>＋</span>
-import { TablePagination } from '@mui/material'
 import CountryFormDialog from '../dialogs/CountryFormDialog'
 import DeleteConfirmDialog from '../dialogs/DeleteConfirmDialog'
 import IconifyIcon from 'src/@core/components/icon'
 import endpoints from 'src/configs/endpoints'
 import { useFetchList } from 'src/hooks/useFetchList'
+import { useTranslation } from 'react-i18next'
 
 const CountryTable = () => {
+  const { t } = useTranslation()
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 })
   const [search, setSearch] = useState('')
   const {
@@ -62,10 +58,10 @@ const CountryTable = () => {
   return (
     <>
       <CardHeader
-        title='Mamlakatlar'
+        title={String(t('locations.countries.title'))}
         action={
           <Button variant='contained' startIcon={<AddIcon />} onClick={handleCreate}>
-            Yangi mamlakat
+            {String(t('locations.countries.create'))}
           </Button>
         }
       />
@@ -76,14 +72,14 @@ const CountryTable = () => {
           rows={data}
           columns={
             [
-              { field: 'code', headerName: 'Kod', flex: 0.12, minWidth: 100 },
-              { field: 'name', headerName: 'Nomi', flex: 0.2, minWidth: 160 },
-              { field: 'name_en', headerName: 'Nomi (EN)', flex: 0.18, minWidth: 140 },
-              { field: 'name_uz', headerName: 'Nomi (UZ)', flex: 0.18, minWidth: 140 },
-              { field: 'name_ru', headerName: 'Nomi (RU)', flex: 0.18, minWidth: 140 },
+              { field: 'code', headerName: String(t('common.code')), flex: 0.12, minWidth: 100 },
+              { field: 'name', headerName: String(t('common.name')), flex: 0.2, minWidth: 160 },
+              { field: 'name_en', headerName: String(t('common.nameEn')), flex: 0.18, minWidth: 140 },
+              { field: 'name_uz', headerName: String(t('common.nameUz')), flex: 0.18, minWidth: 140 },
+              { field: 'name_ru', headerName: String(t('common.nameRu')), flex: 0.18, minWidth: 140 },
               {
                 field: 'actions',
-                headerName: 'Amallar',
+                headerName: String(t('common.actions')),
                 flex: 0.16,
                 minWidth: 140,
                 sortable: false,
@@ -122,8 +118,17 @@ const CountryTable = () => {
         open={openDelete}
         onClose={() => setOpenDelete(false)}
         onConfirm={handleDeleteConfirm}
-        title='Mamlakatni o‘chirishni tasdiqlang'
-        description={selected ? `“${selected.name_uz}” mamlakatini o‘chirmoqchimisiz?` : undefined}
+        title={String(t('locations.countries.deleteConfirm.title'))}
+        description={
+          selected
+            ? String(
+                t('locations.countries.deleteConfirm.description', {
+                  name: selected.name_uz || selected.name,
+                  id: selected.id
+                })
+              )
+            : undefined
+        }
       />
     </>
   )

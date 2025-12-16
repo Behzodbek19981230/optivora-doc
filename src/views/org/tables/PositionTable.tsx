@@ -13,8 +13,10 @@ import { useFetchList } from 'src/hooks/useFetchList'
 import { DataService } from 'src/configs/dataService'
 import toast from 'react-hot-toast'
 import PositionFormDialog from '../dialogs/PositionFormDialog'
+import { useTranslation } from 'react-i18next'
 
 const PositionTable = () => {
+  const { t } = useTranslation()
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 })
   const [search, setSearch] = useState('')
   const {
@@ -51,17 +53,17 @@ const PositionTable = () => {
       await DataService.delete(endpoints.positionById(selected.id))
       mutate()
       setOpenDelete(false)
-      toast.success('Lavozim muvaffaqiyatli o\u2018chirildi')
+      toast.success(String(t('org.positions.toast.deleted')))
     }
   }
 
   return (
     <>
       <CardHeader
-        title='Lavozimlar'
+        title={String(t('org.positions.title'))}
         action={
           <Button variant='contained' startIcon={<Icon icon='tabler:plus' />} onClick={handleCreate}>
-            Yangi lavozim
+            {String(t('org.positions.create.title'))}
           </Button>
         }
       />
@@ -72,20 +74,20 @@ const PositionTable = () => {
           rows={data}
           columns={
             [
-              { field: 'name', headerName: 'Nomi', flex: 0.22, minWidth: 180 },
-              { field: 'name_en', headerName: 'Nomi (EN)', flex: 0.18, minWidth: 140 },
-              { field: 'name_uz', headerName: 'Nomi (UZ)', flex: 0.18, minWidth: 140 },
-              { field: 'name_ru', headerName: 'Nomi (RU)', flex: 0.18, minWidth: 140 },
+              { field: 'name', headerName: String(t('org.positions.table.name')), flex: 0.22, minWidth: 180 },
+              { field: 'name_en', headerName: String(t('org.common.nameEn')), flex: 0.18, minWidth: 140 },
+              { field: 'name_uz', headerName: String(t('org.common.nameUz')), flex: 0.18, minWidth: 140 },
+              { field: 'name_ru', headerName: String(t('org.common.nameRu')), flex: 0.18, minWidth: 140 },
               {
                 field: 'department',
-                headerName: "Bo'lim",
+                headerName: String(t('org.positions.table.department')),
                 flex: 0.2,
                 minWidth: 160,
                 valueGetter: params => params.row.department_detail?.name_uz || params.row.department
               },
               {
                 field: 'actions',
-                headerName: 'Amallar',
+                headerName: String(t('common.actions')),
                 flex: 0.16,
                 minWidth: 140,
                 sortable: false,
@@ -124,8 +126,17 @@ const PositionTable = () => {
         open={openDelete}
         onClose={() => setOpenDelete(false)}
         onConfirm={handleDeleteConfirm}
-        title='Lavozimni o\u2018chirishni tasdiqlang'
-        description={selected ? `“${selected.name_uz || selected.name}” lavozimini o\u2018chirmoqchimisiz?` : undefined}
+        title={String(t('org.positions.deleteConfirm.title'))}
+        description={
+          selected
+            ? String(
+                t('org.positions.deleteConfirm.description', {
+                  name: selected.name_uz || selected.name,
+                  id: selected.id
+                })
+              )
+            : undefined
+        }
       />
     </>
   )

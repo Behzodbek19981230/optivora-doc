@@ -145,7 +145,7 @@ const AppBarContent = (props: Props) => {
         {auth.user && <CompanyDropdown auth={auth} />}
       </Box>
       <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center' }}>
-        {/* <LanguageDropdown settings={settings} saveSettings={saveSettings} /> */}
+        <LanguageDropdown settings={settings} saveSettings={saveSettings} />
         <ModeToggler settings={settings} saveSettings={saveSettings} />
         {auth.user && (
           <>

@@ -20,10 +20,12 @@ interface Props {
 
 const LanguageDropdown = ({ settings, saveSettings }: Props) => {
   // ** Hook
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
 
-  const handleLangItemClick = (lang: 'en' | 'fr' | 'ar') => {
+  const handleLangItemClick = (lang: 'en' | 'ru' | 'uz') => {
     i18n.changeLanguage(lang)
+    localStorage.setItem('i18nextLng', lang)
+    window.location.reload()
   }
 
   // ** Change html `lang` attribute when changing locale
@@ -38,7 +40,7 @@ const LanguageDropdown = ({ settings, saveSettings }: Props) => {
       menuProps={{ sx: { '& .MuiMenu-paper': { mt: 4.25, minWidth: 130 } } }}
       options={[
         {
-          text: 'English',
+          text: t('language.en'),
           menuItemProps: {
             sx: { py: 2 },
             selected: i18n.language === 'en',
@@ -49,24 +51,24 @@ const LanguageDropdown = ({ settings, saveSettings }: Props) => {
           }
         },
         {
-          text: 'French',
+          text: t('language.ru'),
           menuItemProps: {
             sx: { py: 2 },
-            selected: i18n.language === 'fr',
+            selected: i18n.language === 'ru',
             onClick: () => {
-              handleLangItemClick('fr')
+              handleLangItemClick('ru')
               saveSettings({ ...settings, direction: 'ltr' })
             }
           }
         },
         {
-          text: 'Arabic',
+          text: t('language.uz'),
           menuItemProps: {
             sx: { py: 2 },
-            selected: i18n.language === 'ar',
+            selected: i18n.language === 'uz',
             onClick: () => {
-              handleLangItemClick('ar')
-              saveSettings({ ...settings, direction: 'rtl' })
+              handleLangItemClick('uz')
+              saveSettings({ ...settings, direction: 'ltr' })
             }
           }
         }

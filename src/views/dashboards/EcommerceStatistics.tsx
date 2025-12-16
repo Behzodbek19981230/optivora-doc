@@ -14,6 +14,7 @@ import { ThemeColor } from 'src/@core/layouts/types'
 
 // ** Custom Components Imports
 import CustomAvatar from 'src/@core/components/mui/avatar'
+import { useTranslation } from 'react-i18next'
 
 interface DataType {
   icon: string
@@ -22,34 +23,34 @@ interface DataType {
   color: ThemeColor
 }
 
-const data: DataType[] = [
-  {
-    stats: '230k',
-    title: 'Sales',
-    color: 'primary',
-    icon: 'tabler:chart-pie-2'
-  },
-  {
-    color: 'info',
-    stats: '8.549k',
-    title: 'Customers',
-    icon: 'tabler:users'
-  },
-  {
-    color: 'error',
-    stats: '1.423k',
-    title: 'Products',
-    icon: 'tabler:shopping-cart'
-  },
-  {
-    stats: '$9745',
-    color: 'success',
-    title: 'Revenue',
-    icon: 'tabler:currency-dollar'
-  }
-]
+const renderStats = (t: (key: string) => string) => {
+  const data: DataType[] = [
+    {
+      stats: '230k',
+      title: String(t('dashboards.statistics.sales')),
+      color: 'primary',
+      icon: 'tabler:chart-pie-2'
+    },
+    {
+      color: 'info',
+      stats: '8.549k',
+      title: String(t('dashboards.statistics.customers')),
+      icon: 'tabler:users'
+    },
+    {
+      color: 'error',
+      stats: '1.423k',
+      title: String(t('dashboards.statistics.products')),
+      icon: 'tabler:shopping-cart'
+    },
+    {
+      stats: '$9745',
+      color: 'success',
+      title: String(t('dashboards.statistics.revenue')),
+      icon: 'tabler:currency-dollar'
+    }
+  ]
 
-const renderStats = () => {
   return data.map((sale: DataType, index: number) => (
     <Grid item xs={6} md={3} key={index}>
       <Box key={index} sx={{ display: 'flex', alignItems: 'center' }}>
@@ -66,14 +67,15 @@ const renderStats = () => {
 }
 
 const EcommerceStatistics = () => {
+  const { t } = useTranslation()
   return (
     <Card>
       <CardHeader
-        title='Statistics'
+        title={String(t('dashboards.statistics.title'))}
         sx={{ '& .MuiCardHeader-action': { m: 0, alignSelf: 'center' } }}
         action={
           <Typography variant='body2' sx={{ color: 'text.disabled' }}>
-            Updated 1 month ago
+            {String(t('dashboards.statistics.updatedAgo'))}
           </Typography>
         }
       />
@@ -81,7 +83,7 @@ const EcommerceStatistics = () => {
         sx={{ pt: theme => `${theme.spacing(7)} !important`, pb: theme => `${theme.spacing(7.5)} !important` }}
       >
         <Grid container spacing={6}>
-          {renderStats()}
+          {renderStats(t)}
         </Grid>
       </CardContent>
     </Card>
