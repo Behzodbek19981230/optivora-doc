@@ -16,7 +16,7 @@ const navigation = (): VerticalNavItemsType => {
     {
       title: 'nav.calendar',
       icon: 'tabler:calendar',
-      path: '/apps/calendar'
+      path: '/calendar'
     },
     {
       title: 'nav.documents',
