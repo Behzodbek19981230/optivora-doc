@@ -1,5 +1,20 @@
 import { useState } from 'react'
-import { Card, CardContent, IconButton, Tooltip, Stack, Button } from '@mui/material'
+import {
+  Card,
+  CardContent,
+  IconButton,
+  Tooltip,
+  Stack,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Grid,
+  CardActionArea,
+  Typography,
+  Box
+} from '@mui/material'
 import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 import { useRouter } from 'next/router'
 import IconifyIcon from 'src/@core/components/icon'
@@ -8,6 +23,9 @@ import endpoints from 'src/configs/endpoints'
 import { DocumentStatus } from './DocumentTabs'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
+import { DataService } from 'src/configs/dataService'
+import useThemedToast from 'src/@core/hooks/useThemedToast'
+import { useAuth } from 'src/hooks/useAuth'
 
 export type DocumentRow = {
   company: number
@@ -37,6 +55,12 @@ const DocumentTable = ({ status }: Props) => {
   const router = useRouter()
   const { t } = useTranslation()
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 })
+  const toast = useThemedToast()
+  const { user } = useAuth()
+
+  const [createOpen, setCreateOpen] = useState(false)
+  const [createType, setCreateType] = useState<'task' | 'application'>('task')
+  const [creating, setCreating] = useState(false)
 
   const {
     data = [],
@@ -86,10 +110,94 @@ const DocumentTable = ({ status }: Props) => {
     <Card variant='outlined'>
       <CardContent sx={{ pb: 0 }}>
         <Stack direction='row' justifyContent='flex-end' sx={{ mb: 2 }}>
-          <Button variant='contained' onClick={() => router.push('/tasks/create')}>
+          <Button variant='contained' onClick={() => setCreateOpen(true)}>
             {String(t('tasks.create.title'))}
           </Button>
         </Stack>
+
+        <Dialog open={createOpen} onClose={creating ? undefined : () => setCreateOpen(false)} fullWidth maxWidth='sm'>
+          <DialogTitle>{String(t('tasks.create.modal.title'))}</DialogTitle>
+          <DialogContent>
+            <Typography variant='body2' sx={{ color: 'text.secondary', mb: 4 }}>
+              {String(t('tasks.create.modal.subtitle'))}
+            </Typography>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6}>
+                <Card
+                  variant='outlined'
+                  sx={{
+                    borderColor: createType === 'task' ? 'primary.main' : 'divider',
+                    bgcolor: createType === 'task' ? 'primary.lighter' : 'background.paper'
+                  }}
+                >
+                  <CardActionArea onClick={() => setCreateType('task')}>
+                    <CardContent sx={{ height: 100 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                        <IconifyIcon icon='tabler:clipboard-list' />
+                        <Typography variant='h6'>{String(t('tasks.type.task'))}</Typography>
+                      </Box>
+                      <Typography variant='body2' sx={{ color: 'text.secondary' }}>
+                        {String(t('tasks.create.modal.taskHint'))}
+                      </Typography>
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <Card
+                  variant='outlined'
+                  sx={{
+                    borderColor: createType === 'application' ? 'primary.main' : 'divider',
+                    bgcolor: createType === 'application' ? 'primary.lighter' : 'background.paper'
+                  }}
+                >
+                  <CardActionArea onClick={() => setCreateType('application')}>
+                    <CardContent sx={{ height: 100 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                        <IconifyIcon icon='tabler:file-text' />
+                        <Typography variant='h6'>{String(t('tasks.type.application'))}</Typography>
+                      </Box>
+                      <Typography variant='body2' sx={{ color: 'text.secondary' }}>
+                        {String(t('tasks.create.modal.applicationHint'))}
+                      </Typography>
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+              </Grid>
+            </Grid>
+          </DialogContent>
+          <DialogActions>
+            <Button variant='tonal' color='secondary' onClick={() => setCreateOpen(false)} disabled={creating}>
+              {String(t('common.cancel'))}
+            </Button>
+            <Button
+              variant='contained'
+              onClick={async () => {
+                try {
+                  setCreating(true)
+                  const res = await DataService.post(endpoints.task, {
+                    type: createType,
+                    status: 'new',
+                    company: user?.company_id
+                  })
+                  const id = (res.data as any)?.id
+                  toast.success(String(t('tasks.toast.created')))
+                  setCreateOpen(false)
+                  if (id) router.push(`/tasks/update/${id}`)
+                } catch (e: any) {
+                  toast.error(e?.message || String(t('tasks.toast.createError')))
+                } finally {
+                  setCreating(false)
+                }
+              }}
+              disabled={creating}
+            >
+              {creating ? String(t('common.creating')) : String(t('common.create'))}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
         <DataGrid
           autoHeight
           rowHeight={56}
