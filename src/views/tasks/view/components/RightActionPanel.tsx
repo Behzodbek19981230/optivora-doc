@@ -40,8 +40,8 @@ const RightActionsPanel = ({ task, part }: { task?: TaskType; part?: TaskPartTyp
   const contentLabel = partId
     ? String(t('tasks.view.actions.selectedPartLabel', { id: partId }))
     : taskId
-      ? String(t('tasks.view.actions.selectedTaskLabel', { id: taskId }))
-      : '—'
+    ? String(t('tasks.view.actions.selectedTaskLabel', { id: taskId }))
+    : '—'
 
   const resetComment = () => {
     setCommentText('')
@@ -138,7 +138,7 @@ const RightActionsPanel = ({ task, part }: { task?: TaskType; part?: TaskPartTyp
                   <Chip
                     size='small'
                     icon={<Icon icon='mdi:subdirectory-arrow-right' />}
-                      label={String(t('tasks.view.actions.selectedPartLabel', { id: partId }))}
+                    label={String(t('tasks.view.actions.selectedPartLabel', { id: partId }))}
                     variant='outlined'
                   />
                   {part?.title ? <Chip size='small' label={part.title} variant='outlined' /> : null}

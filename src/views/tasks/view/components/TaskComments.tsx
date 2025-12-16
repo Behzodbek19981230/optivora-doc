@@ -138,10 +138,19 @@ export default function TaskComments({ taskId, partId }: { taskId: string | numb
                           {authorLabel}
                         </Typography>
                         {c.is_system ? (
-                          <Chip size='small' color='default' variant='outlined' label={String(t('tasks.view.comments.system'))} />
+                          <Chip
+                            size='small'
+                            color='default'
+                            variant='outlined'
+                            label={String(t('tasks.view.comments.system'))}
+                          />
                         ) : null}
                         {c.part ? (
-                          <Chip size='small' variant='outlined' label={String(t('tasks.view.comments.partLabel', { id: c.part }))} />
+                          <Chip
+                            size='small'
+                            variant='outlined'
+                            label={String(t('tasks.view.comments.partLabel', { id: c.part }))}
+                          />
                         ) : null}
                         {created ? (
                           <Typography variant='caption' sx={{ color: 'text.disabled' }}>

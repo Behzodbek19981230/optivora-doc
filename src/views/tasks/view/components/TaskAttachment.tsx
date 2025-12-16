@@ -140,7 +140,11 @@ export default function TaskAttachment({ taskId, partId }: { taskId: string | nu
       <CardContent>
         <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
           <Typography variant='subtitle2'>{String(t('tasks.view.attachments.title'))}</Typography>
-          <Chip size='small' color='info' label={String(t('tasks.view.attachments.count', { count: attachments.length }))} />
+          <Chip
+            size='small'
+            color='info'
+            label={String(t('tasks.view.attachments.count', { count: attachments.length }))}
+          />
         </Box>
 
         <List disablePadding>
@@ -202,7 +206,11 @@ export default function TaskAttachment({ taskId, partId }: { taskId: string | nu
 
                         {ext ? <Chip size='small' variant='outlined' label={ext.toUpperCase()} /> : null}
                         {a.part ? (
-                          <Chip size='small' variant='outlined' label={String(t('tasks.view.attachments.partLabel', { id: a.part }))} />
+                          <Chip
+                            size='small'
+                            variant='outlined'
+                            label={String(t('tasks.view.attachments.partLabel', { id: a.part }))}
+                          />
                         ) : null}
                       </Stack>
                     }

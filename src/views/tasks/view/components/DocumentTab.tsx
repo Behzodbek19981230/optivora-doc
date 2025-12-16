@@ -125,13 +125,13 @@ export default function DocumentTab({
 
             <Grid container spacing={3}>
               <Grid item xs={12} md={4}>
-                  <Item label={String(t('tasks.view.document.fields.inputDocNumber'))} value={task.input_doc_number} />
+                <Item label={String(t('tasks.view.document.fields.inputDocNumber'))} value={task.input_doc_number} />
               </Grid>
               <Grid item xs={12} md={4}>
-                  <Item label={String(t('tasks.view.document.fields.outputDocNumber'))} value={task.output_doc_number} />
+                <Item label={String(t('tasks.view.document.fields.outputDocNumber'))} value={task.output_doc_number} />
               </Grid>
               <Grid item xs={12} md={4}>
-                  <Item label={String(t('tasks.view.document.fields.sendingOrg'))} value={task.sending_org} />
+                <Item label={String(t('tasks.view.document.fields.sendingOrg'))} value={task.sending_org} />
               </Grid>
             </Grid>
           </CardContent>
@@ -147,24 +147,42 @@ export default function DocumentTab({
 
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <Item label={String(t('tasks.view.document.fields.company'))} value={task.company_detail?.name || task.company} />
+                <Item
+                  label={String(t('tasks.view.document.fields.company'))}
+                  value={task.company_detail?.name || task.company}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Item label={String(t('tasks.view.document.fields.department'))} value={task.department_detail?.name || task.department} />
+                <Item
+                  label={String(t('tasks.view.document.fields.department'))}
+                  value={task.department_detail?.name || task.department}
+                />
               </Grid>
 
               <Grid item xs={12} sm={6}>
-                <Item label={String(t('tasks.view.document.fields.taskForm'))} value={task.task_form_detail?.name || task.task_form} />
+                <Item
+                  label={String(t('tasks.view.document.fields.taskForm'))}
+                  value={task.task_form_detail?.name || task.task_form}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Item label={String(t('tasks.view.document.fields.magazine'))} value={task.list_of_magazine_detail?.name || task.list_of_magazine} />
+                <Item
+                  label={String(t('tasks.view.document.fields.magazine'))}
+                  value={task.list_of_magazine_detail?.name || task.list_of_magazine}
+                />
               </Grid>
 
               <Grid item xs={12} sm={6}>
-                <Item label={String(t('tasks.view.document.fields.signedBy'))} value={task.signed_by_detail?.fullname || task.signed_by} />
+                <Item
+                  label={String(t('tasks.view.document.fields.signedBy'))}
+                  value={task.signed_by_detail?.fullname || task.signed_by}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Item label={String(t('tasks.view.document.fields.responsiblePerson'))} value={task.sending_respon_person ?? '—'} />
+                <Item
+                  label={String(t('tasks.view.document.fields.responsiblePerson'))}
+                  value={task.sending_respon_person ?? '—'}
+                />
               </Grid>
             </Grid>
           </CardContent>

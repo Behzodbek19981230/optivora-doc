@@ -49,12 +49,19 @@ const TaskViewDetail = () => {
             <CardContent>
               <Stack direction='row' alignItems='center' justifyContent='space-between'>
                 <Typography variant='h6'>
-                  {task ? String(t('tasks.view.header.titleWithId', { id: task.id, name: task.name })) : String(t('tasks.view.header.title'))}
+                  {task
+                    ? String(t('tasks.view.header.titleWithId', { id: task.id, name: task.name }))
+                    : String(t('tasks.view.header.title'))}
                 </Typography>
                 <Stack direction='row' spacing={1}>
                   <Chip label={String(t('tasks.view.header.status', { value: task?.status || '—' }))} size='small' />
-                  <Chip label={String(t('tasks.view.header.priority', { value: task?.priority || '—' }))} size='small' />
-                  {task?.end_date && <Chip label={String(t('tasks.view.header.deadline', { value: task.end_date }))} size='small' />}
+                  <Chip
+                    label={String(t('tasks.view.header.priority', { value: task?.priority || '—' }))}
+                    size='small'
+                  />
+                  {task?.end_date && (
+                    <Chip label={String(t('tasks.view.header.deadline', { value: task.end_date }))} size='small' />
+                  )}
                 </Stack>
               </Stack>
               <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mt: 2 }} variant='scrollable' scrollButtons='auto'>
