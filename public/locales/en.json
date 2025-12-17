@@ -308,6 +308,7 @@
     "calendar.day": "Day",
     "calendar.list": "List",
     "calendar.year": "Year",
+    "calendar.stats.total": "Total",
     "tasks.form.type": "Type",
     "tasks.form.priority": "Priority",
     "tasks.form.name": "Task number/name",

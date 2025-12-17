@@ -18,6 +18,10 @@ import CalendarWrapper from 'src/@core/styles/libs/fullcalendar'
 import { updateEvent, handleSelectEvent } from 'src/store/apps/calendar'
 import Calendar from './components/Calendar'
 import { CalendarDataType } from 'src/types/calendar'
+import { DataService } from 'src/configs/dataService'
+import endpoints from 'src/configs/endpoints'
+import { TaskType } from 'src/types/task'
+import TaskTable from './components/TaskTable'
 
 // ** CalendarColors
 const calendarsColor: CalendarColors = {
@@ -37,118 +41,7 @@ const prevMonth =
   date.getMonth() === 11 ? new Date(date.getFullYear() - 1, 0, 1) : new Date(date.getFullYear(), date.getMonth() - 1, 1)
 
 const store: CalendarDataType = {
-  events: [
-    {
-      id: 1,
-      url: '',
-      title: 'Design Review',
-      start: date,
-      end: nextDay,
-      allDay: false,
-      extendedProps: {
-        calendar: 'Business'
-      }
-    },
-    {
-      id: 2,
-      url: '',
-      title: 'Meeting With Client',
-      start: new Date(date.getFullYear(), date.getMonth() + 1, -11),
-      end: new Date(date.getFullYear(), date.getMonth() + 1, -10),
-      allDay: true,
-      extendedProps: {
-        calendar: 'Business'
-      }
-    },
-    {
-      id: 3,
-      url: '',
-      title: 'Family Trip',
-      allDay: true,
-      start: new Date(date.getFullYear(), date.getMonth() + 1, -9),
-      end: new Date(date.getFullYear(), date.getMonth() + 1, -7),
-      extendedProps: {
-        calendar: 'Holiday'
-      }
-    },
-    {
-      id: 4,
-      url: '',
-      title: "Doctor's Appointment",
-      start: new Date(date.getFullYear(), date.getMonth() + 1, -11),
-      end: new Date(date.getFullYear(), date.getMonth() + 1, -10),
-      allDay: true,
-      extendedProps: {
-        calendar: 'Personal'
-      }
-    },
-    {
-      id: 5,
-      url: '',
-      title: 'Dart Game?',
-      start: new Date(date.getFullYear(), date.getMonth() + 1, -13),
-      end: new Date(date.getFullYear(), date.getMonth() + 1, -12),
-      allDay: true,
-      extendedProps: {
-        calendar: 'ETC'
-      }
-    },
-    {
-      id: 6,
-      url: '',
-      title: 'Meditation',
-      start: new Date(date.getFullYear(), date.getMonth() + 1, -13),
-      end: new Date(date.getFullYear(), date.getMonth() + 1, -12),
-      allDay: true,
-      extendedProps: {
-        calendar: 'Personal'
-      }
-    },
-    {
-      id: 7,
-      url: '',
-      title: 'Dinner',
-      start: new Date(date.getFullYear(), date.getMonth() + 1, -13),
-      end: new Date(date.getFullYear(), date.getMonth() + 1, -12),
-      allDay: true,
-      extendedProps: {
-        calendar: 'Family'
-      }
-    },
-    {
-      id: 8,
-      url: '',
-      title: 'Product Review',
-      start: new Date(date.getFullYear(), date.getMonth() + 1, -13),
-      end: new Date(date.getFullYear(), date.getMonth() + 1, -12),
-      allDay: true,
-      extendedProps: {
-        calendar: 'Business'
-      }
-    },
-    {
-      id: 9,
-      url: '',
-      title: 'Monthly Meeting',
-      start: nextMonth,
-      end: nextMonth,
-      allDay: true,
-      extendedProps: {
-        calendar: 'Business'
-      }
-    },
-    {
-      id: 10,
-      url: '',
-      title: 'Monthly Checkup',
-      start: prevMonth,
-      end: prevMonth,
-      allDay: true,
-      extendedProps: {
-        calendar: 'Personal'
-      }
-    }
-  ],
+  events: [],
   selectedEvent: null,
   selectedCalendars: []
 }
@@ -162,15 +55,34 @@ const CalendarActions = () => {
   // ** Hooks
   const { settings } = useSettings()
 
-  // ** Vars
-  const leftSidebarWidth = 300
-  const addEventSidebarWidth = 400
   const { skin, direction } = settings
   const mdAbove = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'))
 
   const handleLeftSidebarToggle = () => setLeftSidebarOpen(!leftSidebarOpen)
 
   const handleAddEventSidebarToggle = () => setAddEventSidebarOpen(!addEventSidebarOpen)
+
+  const [tasks, setTasks] = useState<TaskType[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const fetchTasks = async (selectedDate: string) => {
+    setIsLoading(true)
+    try {
+      const response = (await DataService.get(endpoints.task, {
+        start_date: selectedDate,
+        page: 1,
+        perPage: 1000
+      })) as { data?: { results?: TaskType[] } }
+      setTasks((response?.data?.results as TaskType[]) || [])
+    } catch (error) {
+      console.error('Error fetching tasks:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleSelectDate = (selectedDate: string) => {
+    fetchTasks(selectedDate)
+  }
 
   return (
     <CalendarWrapper
@@ -201,7 +113,17 @@ const CalendarActions = () => {
           handleSelectEvent={handleSelectEvent}
           handleLeftSidebarToggle={handleLeftSidebarToggle}
           handleAddEventSidebarToggle={handleAddEventSidebarToggle}
+          handleSelectDate={handleSelectDate}
         />
+        <Box sx={{ mt: 6 }}>
+          <TaskTable
+            data={tasks}
+            loading={isLoading}
+            total={tasks.length}
+            paginationModel={{}}
+            setPaginationModel={() => {}}
+          />
+        </Box>
       </Box>
     </CalendarWrapper>
   )
