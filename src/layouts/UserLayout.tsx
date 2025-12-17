@@ -52,22 +52,13 @@ const UserLayout = ({ children, contentHeightFixed }: Props) => {
   if (hidden && settings.layout === 'horizontal') {
     settings.layout = 'vertical'
   }
-
-  // Recursive menu filter for roles
-  const filterMenu = items =>
-    items
-      .filter(item => {
-        if (item.roles && user) {
-          return item.roles.some(role => user?.role_detail?.map(r => r.id.toString()).includes(role))
-        }
-        return true
-      })
-      .map(item => ({
-        ...item,
-        children: item.children ? filterMenu(item.children) : undefined
-      }))
-
-  const menuData = filterMenu(VerticalNavItems() || [])
+  const menuData = VerticalNavItems()?.filter(item => {
+    if (item.roles && user) {
+      // Compare by role id (as string)
+      return item.roles.some(role => user?.role_detail?.map(r => r.id.toString()).includes(role))
+    }
+    return true
+  })
 
   return (
     <Layout

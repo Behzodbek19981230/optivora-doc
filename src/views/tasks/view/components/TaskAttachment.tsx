@@ -43,6 +43,7 @@ const getFileLabel = (a: TaskAttachmentType) => {
   try {
     const base = file.split('?')[0]
     const parts = base.split('/')
+
     return decodeURIComponent(parts[parts.length - 1] || base)
   } catch {
     return file
@@ -52,6 +53,7 @@ const getFileLabel = (a: TaskAttachmentType) => {
 const getExt = (fileOrTitle: string) => {
   const v = (fileOrTitle || '').toLowerCase().split('?')[0]
   const last = v.split('.').pop()
+
   return last && last !== v ? last : ''
 }
 
@@ -94,6 +96,7 @@ export default function TaskAttachment({ taskId, partId }: { taskId: string | nu
         ...(partId != null ? { part: partId } : {})
       }
       const res = await DataService.get<{ results: TaskAttachmentType[] }>(endpoints.taskAttachment, params)
+
       return res.data || { results: [] }
     },
     enabled: !!taskId,

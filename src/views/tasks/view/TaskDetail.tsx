@@ -37,6 +37,7 @@ const TaskViewDetail = () => {
     enabled: !!selectedPartId,
     queryFn: async (): Promise<TaskPartType> => {
       const res = await DataService.get<TaskPartType>(endpoints.taskPartById(selectedPartId as number))
+
       return res.data as TaskPartType
     }
   })
