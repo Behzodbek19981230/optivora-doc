@@ -23,6 +23,7 @@ import HorizontalAppBarContent from './components/horizontal/AppBarContent'
 
 // ** Hook Import
 import { useSettings } from 'src/@core/hooks/useSettings'
+import { useAuth } from 'src/hooks/useAuth'
 
 interface Props {
   children: ReactNode
@@ -30,6 +31,7 @@ interface Props {
 }
 
 const UserLayout = ({ children, contentHeightFixed }: Props) => {
+  const { user } = useAuth()
   // ** Hooks
   const { settings, saveSettings } = useSettings()
 
@@ -51,6 +53,22 @@ const UserLayout = ({ children, contentHeightFixed }: Props) => {
     settings.layout = 'vertical'
   }
 
+  // Recursive menu filter for roles
+  const filterMenu = items =>
+    items
+      .filter(item => {
+        if (item.roles && user) {
+          return item.roles.some(role => user?.role_detail?.map(r => r.id.toString()).includes(role))
+        }
+        return true
+      })
+      .map(item => ({
+        ...item,
+        children: item.children ? filterMenu(item.children) : undefined
+      }))
+
+  const menuData = filterMenu(VerticalNavItems() || [])
+
   return (
     <Layout
       hidden={hidden}
@@ -59,7 +77,7 @@ const UserLayout = ({ children, contentHeightFixed }: Props) => {
       contentHeightFixed={contentHeightFixed}
       verticalLayoutProps={{
         navMenu: {
-          navItems: VerticalNavItems()
+          navItems: menuData
 
           // Uncomment the below line when using server-side menu in vertical layout and comment the above line
           // navItems: verticalMenuItems
@@ -90,7 +108,6 @@ const UserLayout = ({ children, contentHeightFixed }: Props) => {
       })}
     >
       {children}
-      
     </Layout>
   )
 }

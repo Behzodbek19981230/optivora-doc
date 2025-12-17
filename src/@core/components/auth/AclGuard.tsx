@@ -49,7 +49,7 @@ const AclGuard = (props: AclGuardProps) => {
   }
 
   // Build ability from user role; default to 'admin' for full access unless backend provides a role
-  const role = (auth.user as any)?.roles?.name || (auth.user as any)?.role || 'admin'
+  const role = (auth.user as any)?.role_detail?.map((role: any) => role.name) || ['admin']
   const ability = buildAbilityFor(role, aclAbilities.subject) as AppAbility
 
   // If no explicit ACL specified (defaults to manage all), don't enforce ACL and just provide ability context

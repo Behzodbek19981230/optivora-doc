@@ -24,11 +24,13 @@ export type UserDataType = {
   date_joined?: string
   date_of_birthday?: string | null
   role: number | null
-  roles: {
-    id: number
-    name: string
-    description: string
-  } | null
+  role_detail:
+    | {
+        id: number
+        name: string
+        description: string
+      }[]
+
   companies?: number[]
   companies_detail?: Array<{
     id: number

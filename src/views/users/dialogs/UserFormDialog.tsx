@@ -26,6 +26,7 @@ import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { useAuth } from 'src/hooks/useAuth'
 import { getInitials } from 'src/@core/utils/get-initials'
 import { useTranslation } from 'react-i18next'
+import { ROLES_OPTIONS } from 'src/configs/consts'
 
 export type UserForm = {
   id?: number
@@ -37,12 +38,13 @@ export type UserForm = {
   phone_number?: string
   avatar?: string
   email: string
-  role: string
+  role: string[]
   password?: string
   region: number
   district: number
   address?: string
   companies: number[]
+  roles_detail?: any[]
 }
 
 type Props = {
@@ -62,12 +64,13 @@ const defaultValues: UserForm = {
   phone_number: '',
   avatar: '',
   email: '',
-  role: 'user',
+  role: [],
   password: '',
   region: 0,
   district: 0,
   address: '',
-  companies: []
+  companies: [],
+  roles_detail: []
 }
 
 const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
@@ -95,7 +98,7 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
 
   useEffect(() => {
     if (mode === 'edit' && item) {
-      reset({ ...item, password: '' })
+      reset({ ...item, password: '', role: item.roles_detail?.map((r: any) => r.id) || [] })
       setPreviewUrl(item.avatar || '')
     } else {
       reset(defaultValues)
@@ -124,6 +127,14 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
         const form = new FormData()
         if (avatarFile) form.append('avatar', avatarFile)
         Object.keys(values).forEach(item => {
+          if (item == 'roles') return
+          if (item == 'role') {
+            values.role?.forEach(roleId => {
+              form.append('roles', roleId)
+            })
+            return
+          }
+
           if (item == 'companies') {
             values.companies.forEach(companyId => {
               form.append('companies', companyId.toString())
@@ -134,6 +145,13 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
       } else if (mode === 'edit' && item?.id) {
         const form = new FormData()
         Object.keys(values).forEach(item => {
+          if (item == 'roles') return
+          if (item == 'role') {
+            values.role?.forEach(roleId => {
+              form.append('roles', roleId)
+            })
+            return
+          }
           if (item == 'companies') {
             values.companies.forEach((companyId, index) => {
               form.append(`companies`, companyId.toString())
@@ -279,13 +297,20 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                       select
                       fullWidth
                       label={String(t('users.form.role'))}
-                      {...field}
+                      SelectProps={{ multiple: true }}
+                      value={Array.isArray(field.value) ? field.value : field.value ? [field.value] : []}
+                      onChange={e => {
+                        const value = e.target.value
+                        field.onChange(typeof value === 'string' ? value.split(',') : value)
+                      }}
                       error={!!errors.role}
                       helperText={errors.role?.message}
                     >
-                      <MenuItem value='1'>{String(t('users.roles.admin'))}</MenuItem>
-                      <MenuItem value='2'>{String(t('users.roles.manager'))}</MenuItem>
-                      <MenuItem value='3'>{String(t('users.roles.user'))}</MenuItem>
+                      {ROLES_OPTIONS.map(role => (
+                        <MenuItem key={role.value} value={role.value}>
+                          {t(`users.roles.${role.label.toLowerCase()}`)}
+                        </MenuItem>
+                      ))}
                     </CustomTextField>
                   )}
                 />

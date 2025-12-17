@@ -1,4 +1,6 @@
 {
+    "users.roles.performer": "Исполнитель",
+    "users.roles.signatory": "Подписант",
     "language.en": "English",
     "language.ru": "Русский",
     "language.uz": "O‘zbek",

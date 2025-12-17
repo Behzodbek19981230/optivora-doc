@@ -1,5 +1,6 @@
 // ** Type import
 import { VerticalNavItemsType } from 'src/@core/layouts/types'
+import { ROLES } from 'src/configs/consts'
 
 const navigation = (): VerticalNavItemsType => {
   return [
@@ -8,7 +9,8 @@ const navigation = (): VerticalNavItemsType => {
       icon: 'tabler:smart-home',
       badgeContent: 'new',
       badgeColor: 'error',
-      path: '/dashboards'
+      path: '/dashboards',
+      roles: [ROLES.ADMIN, ROLES.MANAGER]
     },
     {
       sectionTitle: 'nav.section.main'
@@ -16,30 +18,27 @@ const navigation = (): VerticalNavItemsType => {
     {
       title: 'nav.calendar',
       icon: 'tabler:calendar',
-      path: '/calendar'
+      path: '/calendar',
+      roles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.PERFORMER, ROLES.SIGNATORY]
     },
     {
       title: 'nav.documents',
       icon: 'tabler:folder',
-      path: '/documents/new',
-      children: [
-        { title: 'nav.documents.status.new', path: '/documents/new' },
-        { title: 'nav.documents.status.inProgress', path: '/documents/in_progress' },
-        { title: 'nav.documents.status.onReview', path: '/documents/on_review' },
-        { title: 'nav.documents.status.done', path: '/documents/done' },
-        { title: 'nav.documents.status.cancelled', path: '/documents/cancelled' },
-        { title: 'nav.documents.status.returned', path: '/documents/returned' }
-      ]
+      path: '/documents',
+
+      roles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.PERFORMER, ROLES.SIGNATORY]
     },
     {
       title: 'nav.commands',
       icon: 'tabler:command',
-      path: '/commands'
+      path: '/commands',
+      roles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.PERFORMER, ROLES.SIGNATORY]
     },
     {
       title: 'nav.replyLetters',
       icon: 'tabler:mail',
-      path: '/reply-letter'
+      path: '/reply-letter',
+      roles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.PERFORMER, ROLES.SIGNATORY]
     },
 
     {
@@ -48,37 +47,39 @@ const navigation = (): VerticalNavItemsType => {
     {
       title: 'nav.users',
       icon: 'tabler:users',
-      path: '/users'
+      path: '/users',
+      roles: [ROLES.ADMIN]
     },
     {
       title: 'nav.documentForm',
       icon: 'tabler:file-description',
-      path: '/document-form'
+      path: '/document-form',
+      roles: [ROLES.ADMIN, ROLES.MANAGER]
     },
-    {
-      title: 'nav.tasks',
-      icon: 'tabler:checklist',
-      path: '/tasks'
-    },
+
     {
       title: 'nav.listOfMagazine',
       icon: 'tabler:notebook',
-      path: '/list-of-magazine'
+      path: '/list-of-magazine',
+      roles: [ROLES.ADMIN, ROLES.MANAGER]
     },
     {
       title: 'nav.org',
       icon: 'tabler:users-group',
-      path: '/org'
+      path: '/org',
+      roles: [ROLES.ADMIN, ROLES.MANAGER]
     },
     {
       title: 'nav.locations',
       icon: 'tabler:map-pin',
-      path: '/locations'
+      path: '/locations',
+      roles: [ROLES.ADMIN, ROLES.MANAGER]
     },
     {
       title: 'nav.company',
       icon: 'tabler:building',
-      path: '/company'
+      path: '/company',
+      roles: [ROLES.ADMIN]
     }
   ]
 }

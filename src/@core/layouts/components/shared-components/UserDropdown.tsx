@@ -133,7 +133,9 @@ const UserDropdown = (props: Props) => {
             </Badge>
             <Box sx={{ display: 'flex', ml: 2.5, alignItems: 'flex-start', flexDirection: 'column' }}>
               <Typography sx={{ fontWeight: 500 }}>{user?.fullname}</Typography>
-              <Typography variant='body2'>{user?.roles?.name || 'No Role'}</Typography>
+              <Typography variant='body2'>
+                {user?.role_detail?.map(role => role.name).join(', ') || 'No Role'}
+              </Typography>
             </Box>
           </Box>
         </Box>

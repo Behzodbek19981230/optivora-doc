@@ -27,6 +27,7 @@ export type User = {
   address?: string
   companies: number[] | string[]
   companies_detail?: Array<{ id?: number; name?: string; title?: string } | string | number>
+  roles_detail?: Array<{ id?: number; name?: string; description?: string }>
 }
 
 const UserTable = () => {
@@ -100,7 +101,19 @@ const UserTable = () => {
       }
     },
     { field: 'username', headerName: String(t('users.table.username')), flex: 0.15, minWidth: 140 },
-    { field: 'role', headerName: String(t('users.table.role')), flex: 0.12, minWidth: 120 },
+    {
+      field: 'role',
+      headerName: String(t('users.table.role')),
+      flex: 0.12,
+      minWidth: 200,
+
+      valueGetter: params => {
+        const row = params.row as User
+        const roles = row.roles_detail || []
+        if (roles.length === 0) return ''
+        return roles.map(r => r.name).join(', ')
+      }
+    },
     { field: 'phone_number', headerName: String(t('users.table.phone')), flex: 0.18, minWidth: 160 },
     {
       field: 'is_active',

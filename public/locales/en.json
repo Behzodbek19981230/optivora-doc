@@ -1,4 +1,6 @@
 {
+    "users.roles.performer": "Performer",
+    "users.roles.signatory": "Signatory",
     "Dashboards": "Dashboards",
     "Analytics": "Analytics",
     "CRM": "CRM",
