@@ -14,6 +14,9 @@ import interactionPlugin from '@fullcalendar/interaction'
 
 // ** Third Party Style Import
 import 'bootstrap-icons/font/bootstrap-icons.css'
+
+// Shrink FullCalendar month cell size
+import { useEffect as useLayoutEffect } from 'react'
 import { CalendarType } from 'src/types/calendar'
 import { useTranslation } from 'react-i18next'
 import { DataService } from 'src/configs/dataService'
@@ -73,6 +76,77 @@ const blankEvent = {
 }
 
 const Calendar = (props: CalendarType) => {
+  // Inject compact cell CSS for month view
+  useLayoutEffect(() => {
+    const styleId = 'fc-compact-month-cells'
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style')
+      style.id = styleId
+      style.innerHTML = `
+        /* Set month cell height to exactly 100px, including <td> */
+        .fc-daygrid-day {
+          min-height: 100px !important;
+          height: 100px !important;
+          max-height: 100px !important;
+          padding: 0 !important;
+          width: 100% !important;
+          box-sizing: border-box !important;
+          vertical-align: top !important;
+        }
+        .fc-daygrid-day-frame {
+          min-height: 100px !important;
+          height: 100px !important;
+          max-height: 100px !important;
+          padding: 0 !important;
+          box-sizing: border-box !important;
+        }
+        .fc-daygrid-day-top {
+          padding-top: 0 !important;
+          padding-bottom: 0 !important;
+        }
+        .fc-daygrid-day-number {
+        font-size: 18px !important;  
+          display: inline-block !important;
+        }
+        .fc-daygrid-event {
+          margin-top: 0 !important;
+          margin-bottom: 0 !important;
+        }
+        .fc-scrollgrid-sync-table {
+          font-size: 12px !important;
+        }
+        /* Table row and cell fix for compactness */
+        .fc-scrollgrid-sync-table tr {
+          height: 100px !important;
+          min-height: 100px !important;
+          max-height: 100px !important;
+        }
+        .fc-scrollgrid-sync-table td[role="gridcell"],
+        .fc-scrollgrid-sync-table td.fc-daygrid-day {
+          height: 100px !important;
+          min-height: 100px !important;
+          max-height: 100px !important;
+          vertical-align: top !important;
+          padding: 0 !important;
+        }
+      `
+      document.head.appendChild(style)
+    }
+    // After render, forcibly override inline style on all month gridcells
+    setTimeout(() => {
+      document.querySelectorAll('.fc-daygrid-day').forEach(td => {
+        td.removeAttribute('style')
+        td.setAttribute(
+          'style',
+          'height:100px;min-height:100px;max-height:100px;padding:0;vertical-align:top;cursor:pointer;'
+        )
+      })
+    }, 100)
+    return () => {
+      const style = document.getElementById(styleId)
+      if (style) style.remove()
+    }
+  }, [])
   const { i18n, t } = useTranslation()
   const theme = useTheme()
 
@@ -434,6 +508,7 @@ const Calendar = (props: CalendarType) => {
 
       // Make day cells obviously clickable
       el.style.cursor = 'pointer'
+      el.style.padding = '4px'
 
       // reset
       el.style.background = ''
@@ -658,7 +733,12 @@ const Calendar = (props: CalendarType) => {
         day: String(t('calendar.day')),
         list: String(t('calendar.list'))
       },
-      views: {},
+      views: {
+        dayGridMonth: {
+          fixedWeekCount: false,
+          showNonCurrentDates: false
+        }
+      },
 
       // Month view title (e.g., "Dekabr 2025")
       titleFormat: { year: 'numeric' as const, month: 'long' as const },

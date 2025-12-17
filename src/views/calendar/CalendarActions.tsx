@@ -20,7 +20,7 @@ import Calendar from './components/Calendar'
 import { CalendarDataType } from 'src/types/calendar'
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
-import { TaskType } from 'src/types/task'
+import { TaskPartType, TaskType } from 'src/types/task'
 import TaskTable from './components/TaskTable'
 
 // ** CalendarColors
@@ -32,13 +32,6 @@ const calendarsColor: CalendarColors = {
   ETC: 'info'
 }
 const date = new Date()
-const nextDay = new Date(new Date().getTime() + 24 * 60 * 60 * 1000)
-
-const nextMonth =
-  date.getMonth() === 11 ? new Date(date.getFullYear() + 1, 0, 1) : new Date(date.getFullYear(), date.getMonth() + 1, 1)
-
-const prevMonth =
-  date.getMonth() === 11 ? new Date(date.getFullYear() - 1, 0, 1) : new Date(date.getFullYear(), date.getMonth() - 1, 1)
 
 const store: CalendarDataType = {
   events: [],
@@ -62,17 +55,17 @@ const CalendarActions = () => {
 
   const handleAddEventSidebarToggle = () => setAddEventSidebarOpen(!addEventSidebarOpen)
 
-  const [tasks, setTasks] = useState<TaskType[]>([])
+  const [tasks, setTasks] = useState<TaskPartType[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const fetchTasks = async (selectedDate: string) => {
     setIsLoading(true)
     try {
-      const response = (await DataService.get(endpoints.task, {
+      const response = (await DataService.get(endpoints.taskPart, {
         start_date: selectedDate,
         page: 1,
         perPage: 1000
-      })) as { data?: { results?: TaskType[] } }
-      setTasks((response?.data?.results as TaskType[]) || [])
+      })) as { data?: { results?: TaskPartType[] } }
+      setTasks((response?.data?.results as TaskPartType[]) || [])
     } catch (error) {
       console.error('Error fetching tasks:', error)
     } finally {
@@ -116,13 +109,7 @@ const CalendarActions = () => {
           handleSelectDate={handleSelectDate}
         />
         <Box sx={{ mt: 6 }}>
-          <TaskTable
-            data={tasks}
-            loading={isLoading}
-            total={tasks.length}
-            paginationModel={{}}
-            setPaginationModel={() => {}}
-          />
+          <TaskTable data={tasks} loading={isLoading} total={tasks.length} />
         </Box>
       </Box>
     </CalendarWrapper>
