@@ -2,6 +2,7 @@ import React, { useMemo } from 'react'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { useTranslation } from 'react-i18next'
 import { TaskPartType } from 'src/types/task'
+import { useRouter } from 'next/router'
 
 type Props = {
   data: TaskPartType[]
@@ -11,6 +12,7 @@ type Props = {
 
 export default function TaskTable({ data, loading, total }: Props) {
   const { t } = useTranslation()
+  const router = useRouter()
 
   const columns: GridColDef<TaskPartType>[] = [
     {
@@ -66,7 +68,7 @@ export default function TaskTable({ data, loading, total }: Props) {
       columns={columns}
       loading={loading}
       rowCount={total}
-      disableRowSelectionOnClick
+      onRowClick={params => router.push(`/tasks/view/${params.row?.task_detail?.id}`)}
       getRowId={row => row.id}
     />
   )
