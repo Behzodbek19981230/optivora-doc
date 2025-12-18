@@ -30,8 +30,10 @@ export default function DocumentTab({
     enabled: !!taskId,
     queryFn: async (): Promise<TaskPartType[]> => {
       const res = await DataService.get(endpoints.taskPart, { task: String(taskId), perPage: 100 })
+
       // Our mock list returns {results, pagination}; support both shapes.
       const payload: any = res.data
+
       return (payload?.results || payload || []) as TaskPartType[]
     },
     initialData: []

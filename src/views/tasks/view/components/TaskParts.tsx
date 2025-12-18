@@ -80,6 +80,7 @@ export default function TaskParts({
             <TableBody>
               {parts.map(p => {
                 const isSelected = selectedPartId === p.id
+
                 return (
                   <TableRow
                     key={p.id}

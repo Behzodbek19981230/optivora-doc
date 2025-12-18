@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/router'
 import { Box, Card, CardContent, Grid, Stack, Tabs, Tab, Typography, Chip } from '@mui/material'
 
@@ -17,22 +17,18 @@ const TaskViewDetail = () => {
   const router = useRouter()
   const { id } = router.query
   const [tab, setTab] = useState(0)
-  const [task, setTask] = useState<TaskType>()
   const [selectedPartId, setSelectedPartId] = useState<number | undefined>(undefined)
+  const { data: task, refetch: mutate } = useQuery<TaskType>({
+    queryKey: ['task', id],
+    enabled: !!id,
+    queryFn: async (): Promise<TaskType> => {
+      const res = await DataService.get<TaskType>(endpoints.taskById(id as string))
 
-  useEffect(() => {
-    if (!id || Array.isArray(id)) return
-    ;(async () => {
-      try {
-        const res = await DataService.get<TaskType>(endpoints.taskById(id))
-        setTask(res.data as TaskType)
-      } catch (e) {
-        console.error('Failed to fetch task', e)
-      }
-    })()
-  }, [id])
+      return res.data as TaskType
+    }
+  })
 
-  const { data: selectedPart } = useQuery<TaskPartType>({
+  const { data: selectedPart, refetch: refetchSelectedPart } = useQuery<TaskPartType>({
     queryKey: ['task-part', selectedPartId],
     enabled: !!selectedPartId,
     queryFn: async (): Promise<TaskPartType> => {
@@ -91,7 +87,14 @@ const TaskViewDetail = () => {
 
         {/* Right actions panel */}
         <Grid item xs={12} md={4} lg={3}>
-          <RightActionsPanel task={task} part={selectedPart} />
+          <RightActionsPanel
+            task={task}
+            part={selectedPart}
+            mutate={() => {
+              mutate()
+              refetchSelectedPart()
+            }}
+          />
         </Grid>
       </Grid>
     </Box>
