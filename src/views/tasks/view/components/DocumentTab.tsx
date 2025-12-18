@@ -81,6 +81,34 @@ export default function DocumentTab({
     }
   }
 
+  const translateStatus = (s?: string) => {
+    if (!s) return '—'
+    const toCamel = (str: string) =>
+      str
+        .split('_')
+        .map((seg, i) => (i === 0 ? seg : seg.charAt(0).toUpperCase() + seg.slice(1)))
+        .join('')
+
+    const key = `documents.status.${toCamel(s)}`
+    const translated = String(t(key))
+    return translated === key ? s : translated
+  }
+
+  const translatePriority = (p?: string) => {
+    if (!p) return '—'
+    const normalized = p === 'orgently' ? 'urgently' : p === 'normal' ? 'ordinary' : p
+    const key = `tasks.priority.${normalized}`
+    const translated = String(t(key))
+    return translated === key ? p : translated
+  }
+
+  const translateType = (tp?: string) => {
+    if (!tp) return '—'
+    const key = `tasks.type.${tp}`
+    const translated = String(t(key))
+    return translated === key ? tp : translated
+  }
+
   const Item = ({ label, value }: { label: string; value?: React.ReactNode }) => (
     <Stack spacing={0.75}>
       <Typography variant='caption' color='text.secondary'>
@@ -111,16 +139,18 @@ export default function DocumentTab({
               </Box>
 
               <Stack direction='row' spacing={1} flexWrap='wrap' justifyContent='flex-end'>
-                {task.status && <Chip size='small' label={task.status} color={statusColor(task.status) as any} />}
+                {task.status && (
+                  <Chip size='small' label={translateStatus(task.status)} color={statusColor(task.status) as any} />
+                )}
                 {task.priority && (
                   <Chip
                     size='small'
-                    label={task.priority}
+                    label={translatePriority(task.priority)}
                     color={priorityColor(task.priority) as any}
                     variant='outlined'
                   />
                 )}
-                {task.type && <Chip size='small' label={task.type} color='primary' variant='outlined' />}
+                {task.type && <Chip size='small' label={translateType(task.type)} color='primary' variant='outlined' />}
               </Stack>
             </Stack>
 

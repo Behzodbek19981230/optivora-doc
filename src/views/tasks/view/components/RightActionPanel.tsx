@@ -52,8 +52,7 @@ const RightActionsPanel = ({ task, part, mutate }: { task?: TaskType; part?: Tas
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        gap: 2,
-        p: 2
+        gap: 2
       }}
     >
       {isLoading ? <Skeleton variant='rectangular' height={100} /> : data && <DocumentTemplate fullTask={data} />}
@@ -77,18 +76,35 @@ const RightActionsPanel = ({ task, part, mutate }: { task?: TaskType; part?: Tas
                   {String(t('tasks.view.actions.partStatus'))}
                 </Typography>
                 <Stack direction='row' spacing={1} alignItems='center'>
-                  {part?.status ? <Chip size='small' label={t(part.status)} color='info' variant='outlined' /> : null}
+                  {part?.status ? (
+                    <Chip
+                      size='small'
+                      color='info'
+                      variant='outlined'
+                      label={(() => {
+                        const toCamel = (s: string) =>
+                          s
+                            .split('_')
+                            .map((seg, i) => (i === 0 ? seg : seg.charAt(0).toUpperCase() + seg.slice(1)))
+                            .join('')
+
+                        const key = `documents.status.${toCamel(part.status as string)}`
+                        const translated = String(t(key))
+                        return translated === key ? (part.status as string) : translated
+                      })()}
+                    />
+                  ) : null}
                 </Stack>
                 {user?.id === part?.assignee_detail?.id &&
                   partId &&
                   (part?.status === 'new' || part?.status === 'in_progress' || part?.status === 'returned') && (
                     <Button size='small' variant='contained' onClick={() => setOpen(true)}>
-                      Ijrosini ta'minlash
+                      {String(t('tasks.view.actions.ensureExecution') || 'Ensure execution')}
                     </Button>
                   )}
                 {user?.id === task?.signed_by_detail?.id && partId && part?.status === 'on_review' && (
                   <Button size='small' variant='contained' onClick={() => setOpen(true)}>
-                    Tasdiqlash
+                    {String(t('tasks.view.actions.approve') || 'Approve')}
                   </Button>
                 )}
               </Stack>

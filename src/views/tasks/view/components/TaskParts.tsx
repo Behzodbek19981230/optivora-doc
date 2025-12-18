@@ -46,6 +46,19 @@ export default function TaskParts({
     }
   }
 
+  const translateStatus = (s?: string) => {
+    if (!s) return '—'
+    const toCamel = (str: string) =>
+      str
+        .split('_')
+        .map((seg, i) => (i === 0 ? seg : seg.charAt(0).toUpperCase() + seg.slice(1)))
+        .join('')
+
+    const key = `documents.status.${toCamel(s)}`
+    const translated = String(t(key))
+    return translated === key ? s : translated
+  }
+
   return (
     <Card>
       <>
@@ -103,7 +116,12 @@ export default function TaskParts({
                       )}
                     </TableCell>
                     <TableCell>
-                      <Chip size='small' label={p.status} color={statusColor(p.status) as any} variant='outlined' />
+                      <Chip
+                        size='small'
+                        label={translateStatus(p.status)}
+                        color={statusColor(p.status) as any}
+                        variant='outlined'
+                      />
                     </TableCell>
                     <TableCell>{p.department_detail?.name || p.department}</TableCell>
                     <TableCell>{p.assignee_detail?.fullname || p.assignee}</TableCell>

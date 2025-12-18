@@ -342,13 +342,13 @@ const RightActionsDrawer = ({ open, toggle, taskId, partId, part, task }: Props)
             part?.status !== 'returned' && (
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 20 }}>
                 <Button variant='contained' color='warning' onClick={handleResendCombined} disabled={savingCombined}>
-                  {String(t('Qayta koʻrib chiqishga yuborish') || 'Qayta koʻrib chiqishga yuborish')}
+                  {String(t('tasks.view.actions.resendForReview') || 'Resend for review')}
                 </Button>
                 <Button variant='contained' color='error' onClick={handleCancelCombined} disabled={savingCombined}>
-                  {String(t('Bekor qilish') || 'Bekor qilish')}
+                  {String(t('tasks.view.actions.cancel') || String(t('common.cancel')) || 'Cancel')}
                 </Button>
                 <Button variant='contained' onClick={handleDoneCombined} disabled={savingCombined}>
-                  {String(t('Bajarilgan') || 'Bajarilgan')}
+                  {String(t('tasks.view.actions.done') || 'Done')}
                 </Button>
               </Box>
             )}

@@ -38,6 +38,27 @@ const TaskViewDetail = () => {
     }
   })
 
+  const translateStatus = (s?: string) => {
+    if (!s) return '—'
+    const toCamel = (str: string) =>
+      str
+        .split('_')
+        .map((seg, i) => (i === 0 ? seg : seg.charAt(0).toUpperCase() + seg.slice(1)))
+        .join('')
+
+    const key = `documents.status.${toCamel(s)}`
+    const translated = String(t(key))
+    return translated === key ? s : translated
+  }
+
+  const translatePriority = (p?: string) => {
+    if (!p) return '—'
+    const normalized = p === 'orgently' ? 'urgently' : p === 'normal' ? 'ordinary' : p
+    const key = `tasks.priority.${normalized}`
+    const translated = String(t(key))
+    return translated === key ? p : translated
+  }
+
   return (
     <Box sx={{ p: 4 }}>
       <Grid container spacing={4}>
@@ -51,9 +72,12 @@ const TaskViewDetail = () => {
                     : String(t('tasks.view.header.title'))}
                 </Typography>
                 <Stack direction='row' spacing={1}>
-                  <Chip label={String(t('tasks.view.header.status', { value: task?.status || '—' }))} size='small' />
                   <Chip
-                    label={String(t('tasks.view.header.priority', { value: task?.priority || '—' }))}
+                    label={String(t('tasks.view.header.status', { value: translateStatus(task?.status) }))}
+                    size='small'
+                  />
+                  <Chip
+                    label={String(t('tasks.view.header.priority', { value: translatePriority(task?.priority) }))}
                     size='small'
                   />
                   {task?.end_date && (

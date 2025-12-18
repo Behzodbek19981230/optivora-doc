@@ -104,6 +104,19 @@ export default function DocumentTemplate({
 
   const { t } = useTranslation()
 
+  const translateStatus = (s?: string) => {
+    if (!s) return '—'
+    const toCamel = (str: string) =>
+      str
+        .split('_')
+        .map((seg, i) => (i === 0 ? seg : seg.charAt(0).toUpperCase() + seg.slice(1)))
+        .join('')
+
+    const key = `documents.status.${toCamel(s)}`
+    const translated = String(t(key))
+    return translated === key ? s : translated
+  }
+
   return (
     <Card sx={{ position: { md: 'sticky' }, top: { md: 24 } }}>
       <Box ref={printRef}>
@@ -158,36 +171,51 @@ export default function DocumentTemplate({
             {/* Main Info */}
             <div className='print-body'>
               <div className='print-section'>
-                <span className='print-label'>{t('Imzolovchi')}:</span> {fullTask?.task?.signed_by_detail?.fullname}
+                <span className='print-label'>{String(t('tasks.view.document.fields.signedBy') || 'Signed by')}:</span>{' '}
+                {fullTask?.task?.signed_by_detail?.fullname}
               </div>
               <div className='print-section'>
-                <span className='print-label'>{t('Sana')}:</span>{' '}
+                <span className='print-label'>
+                  {String(t('tasks.view.document.fields.signedDate') || 'Signed date')}:
+                </span>{' '}
                 {fullTask?.task?.signed_date ? moment(fullTask?.task?.signed_date).format('DD.MM.YYYY') : ''}
               </div>
               <div className='print-section'>
-                <span className='print-label'>{t('Holati')}:</span> {t(fullTask?.task?.status)}
+                <span className='print-label'>{String(t('tasks.view.actions.partStatus') || 'Status')}:</span>{' '}
+                {translateStatus(fullTask?.task?.status)}
               </div>
               <div className='print-section'>
-                <span className='print-label'>{t('Note')}:</span> {t(fullTask?.task?.note)}
+                <span className='print-label'>{String(t('tasks.form.note') || 'Note')}:</span> {fullTask?.task?.note}
               </div>
               {fullTask?.parts?.map(part => (
                 <div key={part.id} className='print-section' style={{ marginBottom: 24 }}>
-                  <span className='print-label'>{t('Assigned to')}:</span> {part.assignee_detail.fullname}
+                  <span className='print-label'>{String(t('tasks.view.parts.table.assignee') || 'Assigned to')}:</span>{' '}
+                  {part.assignee_detail.fullname}
                   <br />
-                  <span className='print-label'>{t('Department')}:</span> {part.department_detail?.name}
+                  <span className='print-label'>
+                    {String(t('tasks.view.parts.table.department') || 'Department')}:
+                  </span>{' '}
+                  {part.department_detail?.name}
                   <br />
-                  <span className='print-label'>{t('Start Date')}:</span> {moment(part.start_date).format('DD.MM.YYYY')}
+                  <span className='print-label'>
+                    {String(t('tasks.view.document.fields.startDate') || 'Start Date')}:
+                  </span>{' '}
+                  {moment(part.start_date).format('DD.MM.YYYY')}
                   <br />
-                  <span className='print-label'>{t('Deadline')}:</span> {moment(part.end_date).format('DD.MM.YYYY')}
+                  <span className='print-label'>
+                    {String(t('tasks.view.document.fields.endDate') || 'Deadline')}:
+                  </span>{' '}
+                  {moment(part.end_date).format('DD.MM.YYYY')}
                   <br />
-                  <span className='print-label'>{t('Status')}:</span> {t(part.status)}
+                  <span className='print-label'>{String(t('tasks.view.actions.partStatus') || 'Status')}:</span>{' '}
+                  {translateStatus(part.status)}
                   <br />
-                  <span className='print-label'>{t('Note')}:</span> {part.note}
+                  <span className='print-label'>{String(t('tasks.form.note') || 'Note')}:</span> {part.note}
                 </div>
               ))}
             </div>
             <div className='print-footer'>
-              <span className='print-label'>{t('Deadline')}:</span>{' '}
+              <span className='print-label'>{String(t('tasks.view.actions.deadline') || 'Deadline')}:</span>{' '}
               {moment(fullTask?.task?.end_date).format('DD.MM.YYYY')}
               <br />
               <span className='print-label'>№{fullTask?.task?.input_doc_number}</span>
