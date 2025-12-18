@@ -118,7 +118,7 @@ export default function DocumentTemplate({
   }
 
   return (
-    <Card sx={{ position: { md: 'sticky' }, top: { md: 24 } }}>
+    <Card>
       <Box ref={printRef}>
         {/* Screen-only styles: smaller fonts and subtle border for UI */}
         <style>{`

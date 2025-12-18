@@ -108,6 +108,7 @@
     "tasks.view.header.titleWithId": "Задача: #{{id}} | {{name}}",
     "tasks.view.header.status": "Статус: {{value}}",
     "tasks.view.header.priority": "Приоритет: {{value}}",
+    "tasks.view.header.type": "Тип: {{value}}",
     "tasks.view.header.deadline": "Срок: {{value}}",
     "tasks.view.tabs.document": "Документ",
     "tasks.view.tabs.history": "История",

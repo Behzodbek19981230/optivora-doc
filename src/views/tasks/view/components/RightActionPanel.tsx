@@ -7,6 +7,7 @@ import { useAuth } from 'src/hooks/useAuth'
 import { useTranslation } from 'react-i18next'
 import DocumentTemplate from './DocumentTemplate'
 import RightActionsDrawer from './RightActionsDrawer'
+import ShowAssignes from './ShowAssignes'
 
 const RightActionsPanel = ({ task, part, mutate }: { task?: TaskType; part?: TaskPartType; mutate?: () => void }) => {
   const { t } = useTranslation()
@@ -57,7 +58,7 @@ const RightActionsPanel = ({ task, part, mutate }: { task?: TaskType; part?: Tas
     >
       {isLoading ? <Skeleton variant='rectangular' height={100} /> : data && <DocumentTemplate fullTask={data} />}
 
-      <Card sx={{ position: { md: 'sticky' }, top: { md: 24 } }}>
+      <Card>
         <CardContent>
           <Stack spacing={2}>
             <Typography variant='subtitle1'>{String(t('tasks.view.actions.title'))}</Typography>
@@ -116,6 +117,7 @@ const RightActionsPanel = ({ task, part, mutate }: { task?: TaskType; part?: Tas
           </Stack>
         </CardContent>
       </Card>
+      <ShowAssignes parts={data?.parts} />
       <RightActionsDrawer
         open={open}
         toggle={() => {

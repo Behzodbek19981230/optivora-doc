@@ -59,6 +59,13 @@ const TaskViewDetail = () => {
     return translated === key ? p : translated
   }
 
+  const translateType = (tp?: string) => {
+    if (!tp) return '—'
+    const key = `tasks.type.${tp}`
+    const translated = String(t(key))
+    return translated === key ? tp : translated
+  }
+
   return (
     <Box sx={{ p: 4 }}>
       <Grid container spacing={4}>
@@ -80,11 +87,31 @@ const TaskViewDetail = () => {
                     label={String(t('tasks.view.header.priority', { value: translatePriority(task?.priority) }))}
                     size='small'
                   />
+                  <Chip
+                    label={String(t('tasks.view.header.type', { value: translateType(task?.type) }))}
+                    size='small'
+                  />
                   {task?.end_date && (
                     <Chip label={String(t('tasks.view.header.deadline', { value: task.end_date }))} size='small' />
                   )}
                 </Stack>
               </Stack>
+
+              {/* Compact main document info (inline, wraps) */}
+              <Box sx={{ mt: 1, display: 'flex', gap: 3, flexWrap: 'wrap', alignItems: 'center' }}>
+                <Box>
+                  <Typography component='span' sx={{ fontWeight: 700, mr: 1 }}>
+                    {String(t('tasks.view.document.fields.inputDocNumber'))}:
+                  </Typography>
+                  <Typography component='span'>{task?.input_doc_number ?? '—'}</Typography>
+                </Box>
+                <Box>
+                  <Typography component='span' sx={{ fontWeight: 700, mr: 1 }}>
+                    {String(t('tasks.view.document.fields.outputDocNumber'))}:
+                  </Typography>
+                  <Typography component='span'>{task?.output_doc_number ?? '—'}</Typography>
+                </Box>
+              </Box>
               <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mt: 2 }} variant='scrollable' scrollButtons='auto'>
                 <Tab label={String(t('tasks.view.tabs.document'))} />
                 <Tab label={String(t('tasks.view.tabs.history'))} />

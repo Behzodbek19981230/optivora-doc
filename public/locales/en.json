@@ -222,6 +222,7 @@
     "tasks.view.header.titleWithId": "Task: #{{id}} | {{name}}",
     "tasks.view.header.status": "Status: {{value}}",
     "tasks.view.header.priority": "Priority: {{value}}",
+    "tasks.view.header.type": "Type: {{value}}",
     "tasks.view.header.deadline": "Deadline: {{value}}",
     "tasks.view.tabs.document": "Document",
     "tasks.view.tabs.history": "History",

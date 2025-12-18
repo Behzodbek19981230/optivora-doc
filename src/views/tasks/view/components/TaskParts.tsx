@@ -104,7 +104,6 @@ export default function TaskParts({
                   >
                     <TableCell>
                       <Stack direction='row' spacing={1} alignItems='center'>
-                        <Icon icon='mdi:subdirectory-arrow-right' />
                         <Typography variant='body2' sx={{ fontWeight: 600 }}>
                           {p.title || String(t('tasks.view.parts.partFallbackTitle', { id: p.id }))}
                         </Typography>

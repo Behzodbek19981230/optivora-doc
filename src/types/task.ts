@@ -92,6 +92,7 @@ export type TaskPartType = {
   updated_time: string // ISO
   created_by: number
   updated_by: number
+  show_date?: string // YYYY-MM-DD
 }
 export type TaskEventType = {
   id: number

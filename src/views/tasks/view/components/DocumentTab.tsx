@@ -122,55 +122,6 @@ export default function DocumentTab({
 
   return (
     <Grid container spacing={4}>
-      <Grid item xs={12}>
-        <Card>
-          <CardContent>
-            <Stack direction='row' justifyContent='space-between' alignItems='flex-start' spacing={3}>
-              <Box sx={{ minWidth: 0 }}>
-                <Typography variant='overline' color='text.secondary'>
-                  {String(t('tasks.view.document.header.overline'))}
-                </Typography>
-                <Typography variant='h6' sx={{ mt: 0.5, lineHeight: 1.35 }}>
-                  {task.name || String(t('tasks.view.document.header.fallbackTitle', { id: task.id }))}
-                </Typography>
-                <Typography variant='body2' color='text.secondary' sx={{ mt: 1 }}>
-                  {String(t('common.id'))}: {task.id}
-                </Typography>
-              </Box>
-
-              <Stack direction='row' spacing={1} flexWrap='wrap' justifyContent='flex-end'>
-                {task.status && (
-                  <Chip size='small' label={translateStatus(task.status)} color={statusColor(task.status) as any} />
-                )}
-                {task.priority && (
-                  <Chip
-                    size='small'
-                    label={translatePriority(task.priority)}
-                    color={priorityColor(task.priority) as any}
-                    variant='outlined'
-                  />
-                )}
-                {task.type && <Chip size='small' label={translateType(task.type)} color='primary' variant='outlined' />}
-              </Stack>
-            </Stack>
-
-            <Divider sx={{ my: 3 }} />
-
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={4}>
-                <Item label={String(t('tasks.view.document.fields.inputDocNumber'))} value={task.input_doc_number} />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Item label={String(t('tasks.view.document.fields.outputDocNumber'))} value={task.output_doc_number} />
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Item label={String(t('tasks.view.document.fields.sendingOrg'))} value={task.sending_org} />
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-      </Grid>
-
       <Grid item xs={12} md={6}>
         <Card>
           <CardContent>
@@ -250,42 +201,15 @@ export default function DocumentTab({
                   value={moment(task.created_time).format('DD.MM.YYYY HH:mm')}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <Item
-                  label={String(t('tasks.view.document.fields.updatedAt'))}
-                  value={moment(task.updated_time).format('DD.MM.YYYY HH:mm')}
-                />
-              </Grid>
+
               <Grid item xs={12} sm={6}>
                 <Item label={String(t('tasks.view.document.fields.createdBy'))} value={task.created_by} />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Item label={String(t('tasks.view.document.fields.updatedBy'))} value={task.updated_by ?? '—'} />
               </Grid>
             </Grid>
           </CardContent>
         </Card>
       </Grid>
 
-      <Grid item xs={12}>
-        <Card>
-          <CardContent>
-            <Typography variant='subtitle1' sx={{ mb: 2 }}>
-              {String(t('tasks.view.document.sections.note'))}
-            </Typography>
-            <Box
-              sx={{
-                p: 2.5,
-                background: theme.palette.background.paper
-              }}
-            >
-              <Typography variant='body2' sx={{ whiteSpace: 'pre-wrap' }}>
-                {task.note || '—'}
-              </Typography>
-            </Box>
-          </CardContent>
-        </Card>
-      </Grid>
       <Grid item xs={12}>
         <TaskParts parts={parts} selectedPartId={selectedPartId} setSelectedPartId={setSelectedPartId} />
       </Grid>

@@ -108,6 +108,7 @@
     "tasks.view.header.titleWithId": "Vazifa: #{{id}} | {{name}}",
     "tasks.view.header.status": "Holat: {{value}}",
     "tasks.view.header.priority": "Ustuvorlik: {{value}}",
+    "tasks.view.header.type": "Turi: {{value}}",
     "tasks.view.header.deadline": "Muddati: {{value}}",
     "tasks.view.tabs.document": "Hujjat",
     "tasks.view.tabs.history": "Tarix",
