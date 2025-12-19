@@ -3,11 +3,23 @@ import { useRouter } from 'next/router'
 import { useFetchList } from 'src/hooks/useFetchList'
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
-import { Card, CardHeader, CardContent, Button, IconButton } from '@mui/material'
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  Button,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography
+} from '@mui/material'
 import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 
 import Icon from 'src/@core/components/icon'
 import CompanyFormDialog from './dialogs/CompanyFormDialog'
+import CompanyViewDialog from './dialogs/CompanyViewDialog'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { getInitials } from 'src/@core/utils/get-initials'
 import { useTranslation } from 'react-i18next'
@@ -18,6 +30,7 @@ type Company = {
   name: string
   is_active: boolean
   phone: string
+  country: number
   region: number
   district: number
   address: string
@@ -39,6 +52,10 @@ const CompanyTable = () => {
   })
   const [open, setOpen] = useState(false)
   const [editItem, setEditItem] = useState<Company | null>(null)
+  const [openView, setOpenView] = useState(false)
+  const [viewId, setViewId] = useState<number | null>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [deleteItem, setDeleteItem] = useState<Company | null>(null)
 
   const handleCreate = () => {
     setEditItem(null)
@@ -50,9 +67,18 @@ const CompanyTable = () => {
     setOpen(true)
   }
 
-  const handleDelete = async (id: number) => {
-    await DataService.delete(endpoints.companyById(id))
-    mutate()
+  const handleDelete = (item: Company) => {
+    setDeleteItem(item)
+    setDeleteDialogOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    if (deleteItem) {
+      await DataService.delete(endpoints.companyById(deleteItem.id))
+      mutate()
+      setDeleteDialogOpen(false)
+      setDeleteItem(null)
+    }
   }
 
   const columns: GridColDef[] = [
@@ -66,6 +92,13 @@ const CompanyTable = () => {
       valueGetter: params => (params.row.is_active ? String(t('common.yes')) : String(t('common.no')))
     },
     { field: 'phone', headerName: String(t('company.table.phone')), flex: 0.2, minWidth: 160 },
+    {
+      field: 'country',
+      headerName: String(t('company.form.country')),
+      flex: 0.12,
+      minWidth: 120,
+      valueGetter: params => (params.row as any).country_detail?.name || params.row.country
+    },
     {
       field: 'region',
       headerName: String(t('company.table.region')),
@@ -114,13 +147,19 @@ const CompanyTable = () => {
         const row = params.row as Company
         return (
           <>
-            <IconButton aria-label='view' onClick={() => router.push(`/company/view?id=${row.id}`)}>
+            <IconButton
+              aria-label='view'
+              onClick={() => {
+                setViewId(row.id)
+                setOpenView(true)
+              }}
+            >
               <Icon icon='tabler:eye' />
             </IconButton>
             <IconButton aria-label='edit' onClick={() => handleEdit(row)}>
               <Icon icon='tabler:edit' />
             </IconButton>
-            <IconButton aria-label='delete' color='error' onClick={() => handleDelete(row.id)}>
+            <IconButton aria-label='delete' color='error' onClick={() => handleDelete(row)}>
               <Icon icon='tabler:trash' />
             </IconButton>
           </>
@@ -162,6 +201,23 @@ const CompanyTable = () => {
           item={editItem || undefined}
         />
       )}
+
+      {openView && <CompanyViewDialog open={openView} onClose={() => setOpenView(false)} id={viewId} />}
+
+      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+        <DialogTitle>{String(t('common.deleteConfirm.title'))}</DialogTitle>
+        <DialogContent>
+          <Typography>
+            {String(t('common.deleteConfirm.description'))} "{deleteItem?.name}"?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>{String(t('common.cancel'))}</Button>
+          <Button onClick={confirmDelete} color='error' variant='contained'>
+            {String(t('common.delete'))}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   )
 }

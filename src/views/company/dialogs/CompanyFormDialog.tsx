@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
@@ -9,12 +9,16 @@ import Button from '@mui/material/Button'
 import MenuItem from '@mui/material/MenuItem'
 import Switch from '@mui/material/Switch'
 import FormControlLabel from '@mui/material/FormControlLabel'
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
 import CustomTextField from 'src/@core/components/mui/text-field'
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
 import toast from 'react-hot-toast'
 import { useFetchList } from 'src/hooks/useFetchList'
 import { useTranslation } from 'react-i18next'
+import Icon from 'src/@core/components/icon'
+import CustomAvatar from 'src/@core/components/mui/avatar'
 
 type CompanyForm = {
   id?: number
@@ -22,6 +26,7 @@ type CompanyForm = {
   name: string
   is_active: boolean
   phone: string
+  country: number
   region: number
   district: number
   address: string
@@ -42,6 +47,7 @@ const defaultValues: CompanyForm = {
   name: '',
   is_active: true,
   phone: '',
+  country: 0,
   region: 0,
   district: 0,
   address: '',
@@ -60,8 +66,11 @@ const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
   } = useForm<CompanyForm>({ defaultValues })
 
   const [logoFile, setLogoFile] = useState<File | null>(null)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Fetch regions and districts
+  const { data: countries = [] } = useFetchList<{ id: number; name: string }>(endpoints.country, { perPage: 100 })
   const { data: regions = [] } = useFetchList<{ id: number; name: string }>(endpoints.region, { perPage: 100 })
   const selectedRegion = watch('region')
   const districtEndpoint = selectedRegion ? `${endpoints.district}?region=${selectedRegion}` : endpoints.district
@@ -72,10 +81,21 @@ const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
   useEffect(() => {
     if (mode === 'edit' && item) {
       reset(item)
+      setLogoPreview(item.logo || null)
     } else {
       reset(defaultValues)
+      setLogoPreview(null)
     }
+    setLogoFile(null)
   }, [mode, item, reset])
+
+  useEffect(() => {
+    if (logoFile) {
+      const url = URL.createObjectURL(logoFile)
+      setLogoPreview(url)
+      return () => URL.revokeObjectURL(url)
+    }
+  }, [logoFile])
 
   const onSubmit = async (values: CompanyForm) => {
     try {
@@ -87,6 +107,7 @@ const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
           form.append('code', values.code)
           form.append('name', values.name)
           form.append('phone', values.phone)
+          form.append('country', values.country.toString())
           form.append('region', values.region.toString())
           form.append('district', values.district.toString())
           form.append('address', values.address)
@@ -94,18 +115,21 @@ const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
           await DataService.postForm(endpoints.company, form)
         } else await DataService.post<{ id: number }>(endpoints.company, values)
       } else if (mode === 'edit' && item?.id) {
-        await DataService.put(endpoints.companyById(item.id), values)
         if (logoFile) {
           const form = new FormData()
           form.append('logo', logoFile)
           form.append('code', values.code)
           form.append('name', values.name)
           form.append('phone', values.phone)
+          form.append('country', values.country.toString())
           form.append('region', values.region.toString())
           form.append('district', values.district.toString())
           form.append('address', values.address)
 
-          await DataService.postForm(endpoints.companyById(item.id), form)
+          await DataService.putForm(endpoints.companyById(item.id), form)
+        } else {
+          delete values.logo
+          await DataService.put(endpoints.companyById(item.id), values)
         }
       }
       toast.success(String(t('company.toast.saved')))
@@ -126,16 +150,32 @@ const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
         <DialogContent>
           <Grid container spacing={4}>
             <Grid item xs={12}>
-              <Controller
-                name='is_active'
-                control={control}
-                render={({ field }) => (
-                  <FormControlLabel
-                    control={<Switch checked={!!field.value} onChange={(_, v) => field.onChange(v)} />}
-                    label={String(t('company.form.active'))}
-                  />
-                )}
-              />
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Typography variant='body2' sx={{ mb: 1 }}>
+                  {String(t('company.table.logo'))}
+                </Typography>
+                <CustomAvatar
+                  src={logoPreview || undefined}
+                  variant='circular'
+                  sx={{
+                    width: 100,
+                    height: 100,
+                    cursor: 'pointer',
+                    borderColor: 'primary.main',
+                    '& img': { width: '100%', height: '100%', objectFit: 'contain' }
+                  }}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  {!logoPreview && <Icon icon='tabler:camera-plus' />}
+                </CustomAvatar>
+                <input
+                  type='file'
+                  ref={fileInputRef}
+                  style={{ display: 'none' }}
+                  accept='image/*'
+                  onChange={e => setLogoFile(e.target.files?.[0] || null)}
+                />
+              </Box>
             </Grid>
             <Grid item xs={12} md={6}>
               <Controller
@@ -187,6 +227,29 @@ const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
             </Grid>
             <Grid item xs={12} md={6}>
               <Controller
+                name='country'
+                control={control}
+                rules={{ required: String(t('errors.required')) }}
+                render={({ field }) => (
+                  <CustomTextField
+                    select
+                    fullWidth
+                    label={String(t('company.form.country'))}
+                    {...field}
+                    error={!!errors.country}
+                    helperText={errors.country?.message}
+                  >
+                    {countries.map(c => (
+                      <MenuItem key={c.id} value={c.id}>
+                        {c.name}
+                      </MenuItem>
+                    ))}
+                  </CustomTextField>
+                )}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Controller
                 name='region'
                 control={control}
                 rules={{ required: String(t('errors.required')) }}
@@ -231,8 +294,18 @@ const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                 )}
               />
             </Grid>
-            <Grid item xs={12}>
-              <input type='file' onChange={e => setLogoFile(e.target.files?.[0] || null)} />
+
+            <Grid item xs={6}>
+              <Controller
+                name='is_active'
+                control={control}
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={<Switch checked={!!field.value} onChange={(_, v) => field.onChange(v)} />}
+                    label={String(t('company.form.active'))}
+                  />
+                )}
+              />
             </Grid>
           </Grid>
         </DialogContent>
