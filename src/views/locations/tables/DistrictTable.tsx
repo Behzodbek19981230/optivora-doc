@@ -73,8 +73,7 @@ const DistrictTable = () => {
           rows={data}
           columns={
             [
-              { field: 'code', headerName: String(t('common.code')), flex: 0.12, minWidth: 100 },
-              { field: 'name', headerName: String(t('common.name')), flex: 0.2, minWidth: 160 },
+              { field: 'code', headerName: String(t('chooseCompany.code')), flex: 0.12, minWidth: 100 },
               { field: 'name_en', headerName: String(t('common.nameEn')), flex: 0.18, minWidth: 140 },
               { field: 'name_uz', headerName: String(t('common.nameUz')), flex: 0.18, minWidth: 140 },
               { field: 'name_ru', headerName: String(t('common.nameRu')), flex: 0.18, minWidth: 140 },

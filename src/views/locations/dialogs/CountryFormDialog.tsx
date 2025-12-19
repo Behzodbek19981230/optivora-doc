@@ -84,17 +84,10 @@ const CountryFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                 name='code'
                 control={control}
                 rules={{ required: true }}
-                render={({ field }) => <CustomTextField fullWidth label={String(t('common.code'))} {...field} />}
+                render={({ field }) => <CustomTextField fullWidth label={String(t('chooseCompany.code'))} {...field} />}
               />
             </Grid>
-            <Grid item xs={12} md={6}>
-              <Controller
-                name='name'
-                control={control}
-                rules={{ required: true }}
-                render={({ field }) => <CustomTextField fullWidth label={String(t('common.name'))} {...field} />}
-              />
-            </Grid>
+
             <Grid item xs={12} md={6}>
               <Controller
                 name='name_en'
@@ -114,13 +107,6 @@ const CountryFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                 name='name_ru'
                 control={control}
                 render={({ field }) => <CustomTextField fullWidth label={String(t('common.nameRu'))} {...field} />}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Controller
-                name='name_lt'
-                control={control}
-                render={({ field }) => <CustomTextField fullWidth label={String(t('common.nameLt'))} {...field} />}
               />
             </Grid>
           </Grid>
