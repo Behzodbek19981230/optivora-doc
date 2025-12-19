@@ -163,7 +163,7 @@ const TaskCreateForm = () => {
                   render={({ field }) => (
                     <CustomTextField select fullWidth label={String(t('tasks.form.priority'))} {...field}>
                       <MenuItem value='ordinary'>{String(t('tasks.priority.ordinary'))}</MenuItem>
-                      <MenuItem value='orgently'>{String(t('tasks.priority.urgently'))}</MenuItem>
+                      <MenuItem value='orgently'>{String(t('tasks.priority.orgently'))}</MenuItem>
                     </CustomTextField>
                   )}
                 />

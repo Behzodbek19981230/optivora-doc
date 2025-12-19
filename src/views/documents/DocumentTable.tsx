@@ -13,7 +13,8 @@ import {
   Grid,
   CardActionArea,
   Typography,
-  Box
+  Box,
+  Chip
 } from '@mui/material'
 import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 import { useRouter } from 'next/router'
@@ -50,7 +51,24 @@ export type DocumentRow = {
 }
 
 type Props = { status: DocumentStatus }
-
+const statusColor = (status?: string) => {
+  switch (status) {
+    case 'new':
+      return 'info'
+    case 'in_progress':
+      return 'primary'
+    case 'on_review':
+      return 'warning'
+    case 'returned':
+      return 'warning'
+    case 'done':
+      return 'success'
+    case 'cancelled':
+      return 'error'
+    default:
+      return 'default'
+  }
+}
 const DocumentTable = ({ status }: Props) => {
   const router = useRouter()
   const { t } = useTranslation()
@@ -75,9 +93,44 @@ const DocumentTable = ({ status }: Props) => {
   const columns: GridColDef[] = [
     { field: 'id', headerName: String(t('common.id')), width: 90 },
     { field: 'name', headerName: String(t('documents.table.name')), flex: 0.3, minWidth: 180 },
-    { field: 'status', headerName: String(t('documents.table.status')), flex: 0.2, minWidth: 140 },
-    { field: 'type', headerName: String(t('documents.table.type')), flex: 0.15, minWidth: 120 },
-    { field: 'priority', headerName: String(t('documents.table.priority')), flex: 0.15, minWidth: 120 },
+    {
+      field: 'status',
+      headerName: String(t('documents.table.status')),
+      flex: 0.2,
+      minWidth: 140,
+      renderCell: params => {
+        const status = (params.row as any).status
+        return (
+          <Chip label={t(`documents.status.${status}`)} color={statusColor(status)} size='small' variant='outlined' />
+        )
+      }
+    },
+    {
+      field: 'type',
+      headerName: String(t('documents.table.type')),
+      flex: 0.15,
+      minWidth: 120,
+      renderCell: params => {
+        const type = (params.row as any).type
+        return t(`tasks.type.${type}`)
+      }
+    },
+    {
+      field: 'priority',
+      headerName: String(t('documents.table.priority')),
+      flex: 0.15,
+      minWidth: 120,
+      renderCell: params => {
+        const priority = (params.row as any).priority
+        return (
+          <Chip
+            label={t(`tasks.priority.${priority}`)}
+            color={priority === 'ordinary' ? 'primary' : 'warning'}
+            size='small'
+          />
+        )
+      }
+    },
     { field: 'start_date', headerName: String(t('documents.table.start')), flex: 0.15, minWidth: 130 },
     { field: 'end_date', headerName: String(t('documents.table.end')), flex: 0.15, minWidth: 130 },
     {

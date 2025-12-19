@@ -20,11 +20,15 @@ import { useTranslation } from 'react-i18next'
 export default function TaskParts({
   parts,
   selectedPartId,
-  setSelectedPartId
+  setSelectedPartId,
+  onDelete,
+  onEdit
 }: {
   parts: TaskPartType[]
   selectedPartId: number | undefined
   setSelectedPartId: (id: number) => void
+  onDelete: (id: number) => void
+  onEdit: (id: number) => void
 }) {
   const { t } = useTranslation()
   const statusColor = (status?: string) => {
@@ -127,11 +131,18 @@ export default function TaskParts({
                     <TableCell>{p.start_date || '—'}</TableCell>
                     <TableCell>{p.end_date || '—'}</TableCell>
                     <TableCell align='right' onClick={e => e.stopPropagation()}>
-                      <Tooltip title={String(t('common.delete'))}>
-                        <IconButton size='small'>
-                          <Icon icon='mdi:delete' />
-                        </IconButton>
-                      </Tooltip>
+                      <Stack direction='row' spacing={1}>
+                        <Tooltip title={String(t('common.edit'))}>
+                          <IconButton size='small' onClick={() => onEdit(p.id)}>
+                            <Icon icon='mdi:pencil' />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title={String(t('common.delete'))}>
+                          <IconButton size='small' onClick={() => onDelete(p.id)}>
+                            <Icon icon='mdi:delete' />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
                     </TableCell>
                   </TableRow>
                 )

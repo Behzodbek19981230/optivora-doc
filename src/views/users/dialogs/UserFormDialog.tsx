@@ -118,8 +118,6 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
 
   const onSubmit = async (values: UserForm) => {
     try {
-      console.log(avatarFile)
-
       const payload = { ...values }
       if (!payload.password) delete (payload as any).password
 
@@ -183,22 +181,6 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
             <Grid container spacing={4}>
               <Grid item xs={12} md={6}>
                 <Controller
-                  name='username'
-                  control={control}
-                  rules={{ required: String(t('errors.required')) }}
-                  render={({ field }) => (
-                    <CustomTextField
-                      fullWidth
-                      label={String(t('users.form.username'))}
-                      {...field}
-                      error={!!errors.username}
-                      helperText={errors.username?.message}
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Controller
                   name='fullname'
                   control={control}
                   rules={{ required: String(t('errors.required')) }}
@@ -213,18 +195,7 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                   )}
                 />
               </Grid>
-              <Grid item xs={12}>
-                <Controller
-                  name='is_active'
-                  control={control}
-                  render={({ field }) => (
-                    <FormControlLabel
-                      control={<Switch checked={!!field.value} onChange={(_, v) => field.onChange(v)} />}
-                      label={String(t('users.form.active'))}
-                    />
-                  )}
-                />
-              </Grid>
+
               <Grid item xs={12} md={6}>
                 <Controller
                   name='email'
@@ -317,10 +288,32 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
               </Grid>
               <Grid item xs={12} md={6}>
                 <Controller
+                  name='username'
+                  control={control}
+                  rules={{ required: String(t('errors.required')) }}
+                  render={({ field }) => (
+                    <CustomTextField
+                      fullWidth
+                      label={String(t('users.form.username'))}
+                      {...field}
+                      error={!!errors.username}
+                      helperText={errors.username?.message}
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Controller
                   name='password'
                   control={control}
                   render={({ field }) => (
-                    <CustomTextField fullWidth type='password' label={String(t('users.form.password'))} {...field} />
+                    <CustomTextField
+                      fullWidth
+                      type='password'
+                      label={String(t('users.form.password'))}
+                      {...field}
+                      autoComplete='new-password'
+                    />
                   )}
                 />
               </Grid>
@@ -400,7 +393,7 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                   )}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={6}>
                 {/* Hidden file input */}
                 <input
                   ref={fileInputRef}
@@ -427,19 +420,19 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                   <Button variant='outlined' onClick={() => fileInputRef.current?.click()}>
                     {String(t('users.form.uploadAvatar'))}
                   </Button>
-                  {previewUrl && (
-                    <Button
-                      variant='text'
-                      color='secondary'
-                      onClick={() => {
-                        setAvatarFile(null)
-                        setPreviewUrl(item?.avatar || '')
-                      }}
-                    >
-                      {String(t('common.cancel'))}
-                    </Button>
-                  )}
                 </div>
+              </Grid>
+              <Grid item xs={6}>
+                <Controller
+                  name='is_active'
+                  control={control}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={<Switch checked={!!field.value} onChange={(_, v) => field.onChange(v)} />}
+                      label={String(t('users.form.active'))}
+                    />
+                  )}
+                />
               </Grid>
             </Grid>
           </DatePickerWrapper>

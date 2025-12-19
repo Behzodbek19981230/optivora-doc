@@ -53,7 +53,7 @@ const TaskViewDetail = () => {
 
   const translatePriority = (p?: string) => {
     if (!p) return '—'
-    const normalized = p === 'orgently' ? 'urgently' : p === 'normal' ? 'ordinary' : p
+    const normalized = p === 'orgently' ? 'orgently' : p === 'normal' ? 'ordinary' : p
     const key = `tasks.priority.${normalized}`
     const translated = String(t(key))
     return translated === key ? p : translated

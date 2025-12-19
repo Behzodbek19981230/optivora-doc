@@ -24,7 +24,8 @@ import {
   Paper,
   IconButton,
   Typography,
-  Chip
+  Chip,
+  Autocomplete
 } from '@mui/material'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -173,6 +174,7 @@ const TaskUpdateForm = () => {
     note: ''
   })
   const [partErrors, setPartErrors] = useState<{ [K in keyof TaskPartPayload]?: string }>({})
+  const [editingPartId, setEditingPartId] = useState<number | null>(null)
 
   const { data: departments } = useFetchList<{ id: number; name: string }>(endpoints.department, {
     page: 1,
@@ -264,21 +266,38 @@ const TaskUpdateForm = () => {
     }
   }
 
-  const handleOpenDialog = () => {
-    setPartForm({
-      title: '',
-      department: 0,
-      assignee: 0,
-      start_date: '',
-      end_date: '',
-      note: ''
-    })
+  const handleOpenDialog = (partId?: number) => {
+    if (partId) {
+      const part = taskParts.find(p => p.id === partId)
+      if (part) {
+        setPartForm({
+          title: part.title,
+          department: part.department,
+          assignee: part.assignee,
+          start_date: part.start_date,
+          end_date: part.end_date,
+          note: part.note
+        })
+        setEditingPartId(partId)
+      }
+    } else {
+      setPartForm({
+        title: '',
+        department: 0,
+        assignee: 0,
+        start_date: '',
+        end_date: '',
+        note: ''
+      })
+      setEditingPartId(null)
+    }
     setPartErrors({})
     setDialogOpen(true)
   }
 
   const handleCloseDialog = () => {
     setDialogOpen(false)
+    setEditingPartId(null)
   }
 
   const handleSaveTaskPart = async () => {
@@ -286,6 +305,7 @@ const TaskUpdateForm = () => {
 
     // Validate required fields
     const errors: { [K in keyof TaskPartPayload]?: string } = {}
+
     if (!partForm.title || !partForm.title.trim()) errors.title = String(t('errors.required'))
     if (!partForm.department || Number(partForm.department) <= 0) errors.department = String(t('errors.required'))
     if (!partForm.assignee || Number(partForm.assignee) <= 0) errors.assignee = String(t('errors.required'))
@@ -304,20 +324,35 @@ const TaskUpdateForm = () => {
       return
     }
     try {
-      await DataService.post(endpoints.taskPart, {
-        task: Number(id),
-        title: partForm.title || String(t('tasks.parts.newTitleFallback')),
-        department: partForm.department || 0,
-        assignee: partForm.assignee || 0,
-        start_date: partForm.start_date || '',
-        end_date: partForm.end_date || '',
-        status: 'new',
-        note: partForm.note || '',
-        created_by: user?.id || 1,
-        updated_by: user?.id || 1
-      })
-      toast.success(String(t('tasks.toast.partCreated')))
+      if (editingPartId) {
+        await DataService.put(endpoints.taskPartById(editingPartId), {
+          title: partForm.title || '',
+          department: partForm.department || 0,
+          assignee: partForm.assignee || 0,
+          start_date: partForm.start_date || '',
+          end_date: partForm.end_date || '',
+          note: partForm.note || '',
+          updated_by: user?.id || 1,
+          task: Number(id)
+        })
+        toast.success(String(t('common.saved')))
+      } else {
+        await DataService.post(endpoints.taskPart, {
+          task: Number(id),
+          title: partForm.title || String(t('tasks.parts.newTitleFallback')),
+          department: partForm.department || 0,
+          assignee: partForm.assignee || 0,
+          start_date: partForm.start_date || '',
+          end_date: partForm.end_date || '',
+          status: 'new',
+          note: partForm.note || '',
+          created_by: user?.id || 1,
+          updated_by: user?.id || 1
+        })
+        toast.success(String(t('tasks.toast.partCreated')))
+      }
       setDialogOpen(false)
+      setEditingPartId(null)
 
       // Refresh task parts
       const res = await DataService.get<any>(endpoints.taskPart, { task: id, perPage: 50 })
@@ -421,7 +456,7 @@ const TaskUpdateForm = () => {
                               <FormControlLabel
                                 value='orgently'
                                 control={<Radio />}
-                                label={String(t('tasks.priority.urgently'))}
+                                label={String(t('tasks.priority.orgently'))}
                               />
                             </RadioGroup>
                             {!!fieldState.error && (
@@ -716,21 +751,22 @@ const TaskUpdateForm = () => {
                         control={control}
                         rules={{ required: true }}
                         render={({ field, fieldState }) => (
-                          <CustomTextField
-                            select
+                          <Autocomplete
                             fullWidth
-                            label={String(t('tasks.form.signedBy'))}
-                            {...field}
-                            error={!!fieldState.error}
-                            helperText={safeMsg(fieldState.error?.message)}
-                          >
-                            <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
-                            {(users || []).map(u => (
-                              <MenuItem key={u.id} value={u.id}>
-                                {u.fullname}
-                              </MenuItem>
-                            ))}
-                          </CustomTextField>
+                            options={users || []}
+                            getOptionLabel={option => option.fullname}
+                            value={users?.find(u => u.id === field.value) || null}
+                            onChange={(event, newValue) => field.onChange(newValue?.id || 0)}
+                            renderInput={params => (
+                              <CustomTextField
+                                {...params}
+                                label={String(t('tasks.form.signedBy'))}
+                                error={!!fieldState.error}
+                                helperText={safeMsg(fieldState.error?.message)}
+                                placeholder={String(t('common.selectPlaceholder'))}
+                              />
+                            )}
+                          />
                         )}
                       />
                     </Grid>
@@ -826,7 +862,7 @@ const TaskUpdateForm = () => {
                   variant='contained'
                   size='small'
                   startIcon={<Icon icon='mdi:plus' />}
-                  onClick={handleOpenDialog}
+                  onClick={() => handleOpenDialog()}
                 >
                   {String(t('common.add'))}
                 </Button>
@@ -858,9 +894,14 @@ const TaskUpdateForm = () => {
                           <TableCell>{part.end_date}</TableCell>
                           <TableCell>{part.note}</TableCell>
                           <TableCell align='right'>
-                            <IconButton size='small' color='error' onClick={() => handleDeleteTaskPart(part.id)}>
-                              <Icon icon='mdi:delete' />
-                            </IconButton>
+                            <Stack direction='row' spacing={1}>
+                              <IconButton size='small' onClick={() => handleOpenDialog(part.id)}>
+                                <Icon icon='mdi:pencil' />
+                              </IconButton>
+                              <IconButton size='small' color='error' onClick={() => handleDeleteTaskPart(part.id)}>
+                                <Icon icon='mdi:delete' />
+                              </IconButton>
+                            </Stack>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -878,7 +919,7 @@ const TaskUpdateForm = () => {
 
         {/* Dialog for adding task parts */}
         <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth='sm' fullWidth>
-          <DialogTitle>{String(t('tasks.parts.dialog.title'))}</DialogTitle>
+          <DialogTitle>{editingPartId ? 'Edit Task Part' : String(t('tasks.parts.dialog.title'))}</DialogTitle>
           <DialogContent>
             <Grid container spacing={3} sx={{ mt: 1 }}>
               <Grid item xs={12}>
@@ -892,40 +933,40 @@ const TaskUpdateForm = () => {
                 />
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField
-                  select
+                <Autocomplete
                   fullWidth
-                  label={String(t('tasks.parts.form.department'))}
-                  value={partForm.department}
-                  onChange={e => setPartForm({ ...partForm, department: Number(e.target.value) })}
-                  error={!!partErrors.department}
-                  helperText={partErrors.department}
-                >
-                  <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
-                  {(departments || []).map(d => (
-                    <MenuItem key={d.id} value={d.id}>
-                      {d.name}
-                    </MenuItem>
-                  ))}
-                </CustomTextField>
+                  options={departments || []}
+                  getOptionLabel={option => option.name}
+                  value={departments?.find(d => d.id === partForm.department) || null}
+                  onChange={(event, newValue) => setPartForm({ ...partForm, department: newValue?.id || 0 })}
+                  renderInput={params => (
+                    <CustomTextField
+                      {...params}
+                      label={String(t('tasks.parts.form.department'))}
+                      error={!!partErrors.department}
+                      helperText={partErrors.department}
+                      placeholder={String(t('common.selectPlaceholder'))}
+                    />
+                  )}
+                />
               </Grid>
               <Grid item xs={12}>
-                <CustomTextField
-                  select
+                <Autocomplete
                   fullWidth
-                  label={String(t('tasks.parts.form.assignee'))}
-                  value={partForm.assignee}
-                  onChange={e => setPartForm({ ...partForm, assignee: Number(e.target.value) })}
-                  error={!!partErrors.assignee}
-                  helperText={partErrors.assignee}
-                >
-                  <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
-                  {(users || []).map(u => (
-                    <MenuItem key={u.id} value={u.id}>
-                      {u.fullname}
-                    </MenuItem>
-                  ))}
-                </CustomTextField>
+                  options={users || []}
+                  getOptionLabel={option => option.fullname}
+                  value={users?.find(u => u.id === partForm.assignee) || null}
+                  onChange={(event, newValue) => setPartForm({ ...partForm, assignee: newValue?.id || 0 })}
+                  renderInput={params => (
+                    <CustomTextField
+                      {...params}
+                      label={String(t('tasks.parts.form.assignee'))}
+                      error={!!partErrors.assignee}
+                      helperText={partErrors.assignee}
+                      placeholder={String(t('common.selectPlaceholder'))}
+                    />
+                  )}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <CustomTextField
