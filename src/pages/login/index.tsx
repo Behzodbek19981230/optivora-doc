@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState, ReactNode, MouseEvent } from 'react'
+import { useState, ReactNode } from 'react'
 
 // ** Next Imports
 import Link from 'next/link'
@@ -43,6 +43,7 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 // ** Demo Imports
 import FooterIllustrationsV2 from 'src/views/pages/auth/FooterIllustrationsV2'
 import LogoIcon from '../ui/icons/Logo'
+import Paper from '@mui/material/Paper'
 
 // ** Styled Components
 const LoginIllustration = styled('img')(({ theme }) => ({
@@ -68,6 +69,20 @@ const RightWrapper = styled(Box)<BoxProps>(({ theme }) => ({
   },
   [theme.breakpoints.up('xl')]: {
     maxWidth: 750
+  }
+}))
+
+const LeftWrapper = styled(Box)(({ theme }) => ({
+  flex: 1,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: theme.spacing(8),
+  background: 'transparent',
+  borderRadius: theme.shape.borderRadius * 2,
+  margin: theme.spacing(8, 0, 8, 8),
+  [theme.breakpoints.down('md')]: {
+    display: 'none'
   }
 }))
 
@@ -140,118 +155,112 @@ const LoginPage = () => {
   const imageSource = skin === 'bordered' ? 'auth-v2-login-illustration-bordered' : 'auth-v2-login-illustration'
 
   return (
-    <Box className='content-right' sx={{ backgroundColor: 'background.paper' }}>
+    <Box
+      className='content-right'
+      sx={{
+        backgroundColor: 'background.paper',
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        p: 2
+      }}
+    >
       {!hidden ? (
-        <Box
-          sx={{
-            flex: 1,
-            display: 'flex',
-            position: 'relative',
-            alignItems: 'center',
-            borderRadius: '20px',
-            justifyContent: 'center',
-            backgroundColor: 'customColors.bodyBg',
-            margin: theme => theme.spacing(8, 0, 8, 8)
-          }}
-        >
-          <LoginIllustration alt='login-illustration' src={`/images/pages/${imageSource}-${theme.palette.mode}.png`} />
-          <FooterIllustrationsV2 />
-        </Box>
+        <LeftWrapper>
+          <LoginIllustration alt='login-illustration' src={`/images/pages/login-right.jpg`} />
+        </LeftWrapper>
       ) : null}
-      <RightWrapper>
-        <Box
-          sx={{
-            p: [6, 12],
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <Box sx={{ width: '100%', maxWidth: 400 }}>
-            <LogoIcon />
-            <Box sx={{ my: 6 }}>
-              <Typography variant='h3' sx={{ mb: 1.5 }}>
-                {t('login.welcome', { app: themeConfig.templateName })}
-              </Typography>
-              <Typography sx={{ color: 'text.secondary' }}>{t('login.subtitle')}</Typography>
-            </Box>
 
-            <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
-              <Box sx={{ mb: 4 }}>
-                <Controller
-                  name='username'
-                  control={control}
-                  rules={{ required: true }}
-                  render={({ field: { value, onChange, onBlur } }) => (
-                    <CustomTextField
-                      fullWidth
-                      autoFocus
-                      label={t('login.username')}
-                      value={value}
-                      onBlur={onBlur}
-                      onChange={onChange}
-                      placeholder='admin'
-                      error={Boolean(errors.username)}
-                      {...(errors.username && { helperText: errors.username.message })}
-                    />
-                  )}
-                />
+      {!hidden ? <Divider orientation='vertical' flexItem sx={{ mx: 3, height: '60%' }} /> : null}
+
+      <RightWrapper>
+        <Box sx={{ p: 10, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Box sx={{ width: '100%', maxWidth: 420 }}>
+            <Paper elevation={6} sx={{ p: 8, borderRadius: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                <LogoIcon />
+                <Box>
+                  <Typography variant='h5' sx={{ fontWeight: 700 }}>
+                    {t('login.welcome', { app: themeConfig.templateName })}
+                  </Typography>
+                  <Typography variant='body2' sx={{ color: 'text.secondary' }}>
+                    {t('login.subtitle')}
+                  </Typography>
+                </Box>
               </Box>
-              <Box sx={{ mb: 1.5 }}>
-                <Controller
-                  name='password'
-                  control={control}
-                  rules={{ required: true }}
-                  render={({ field: { value, onChange, onBlur } }) => (
-                    <CustomTextField
-                      fullWidth
-                      value={value}
-                      onBlur={onBlur}
-                      label={t('login.password')}
-                      onChange={onChange}
-                      id='auth-login-v2-password'
-                      error={Boolean(errors.password)}
-                      {...(errors.password && { helperText: errors.password.message })}
-                      type={showPassword ? 'text' : 'password'}
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position='end'>
-                            <IconButton
-                              edge='end'
-                              onMouseDown={e => e.preventDefault()}
-                              onClick={() => setShowPassword(!showPassword)}
-                            >
-                              <Icon fontSize='1.25rem' icon={showPassword ? 'tabler:eye' : 'tabler:eye-off'} />
-                            </IconButton>
-                          </InputAdornment>
-                        )
-                      }}
-                    />
-                  )}
-                />
-              </Box>
-              <Box
-                sx={{
-                  mb: 1.75,
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  alignItems: 'center',
-                  justifyContent: 'space-between'
-                }}
-              >
-                <FormControlLabel
-                  label={t('login.rememberMe')}
-                  control={<Checkbox checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} />}
-                />
-                <Typography component={LinkStyled} href='/forgot-password'>
-                  {t('login.forgotPassword')}
-                </Typography>
-              </Box>
-              <Button fullWidth type='submit' variant='contained' sx={{ mb: 4 }}>
-                {t('login.submit')}
-              </Button>
-            </form>
+
+              <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
+                <Box sx={{ mb: 3 }}>
+                  <Controller
+                    name='username'
+                    control={control}
+                    rules={{ required: true }}
+                    render={({ field: { value, onChange, onBlur } }) => (
+                      <CustomTextField
+                        fullWidth
+                        autoFocus
+                        label={t('login.username')}
+                        value={value}
+                        onBlur={onBlur}
+                        onChange={onChange}
+                        placeholder='admin'
+                        error={Boolean(errors.username)}
+                        {...(errors.username && { helperText: errors.username.message })}
+                      />
+                    )}
+                  />
+                </Box>
+
+                <Box sx={{ mb: 2 }}>
+                  <Controller
+                    name='password'
+                    control={control}
+                    rules={{ required: true }}
+                    render={({ field: { value, onChange, onBlur } }) => (
+                      <CustomTextField
+                        fullWidth
+                        value={value}
+                        onBlur={onBlur}
+                        label={t('login.password')}
+                        onChange={onChange}
+                        id='auth-login-v2-password'
+                        error={Boolean(errors.password)}
+                        {...(errors.password && { helperText: errors.password.message })}
+                        type={showPassword ? 'text' : 'password'}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position='end'>
+                              <IconButton
+                                edge='end'
+                                onMouseDown={e => e.preventDefault()}
+                                onClick={() => setShowPassword(!showPassword)}
+                              >
+                                <Icon fontSize='1.25rem' icon={showPassword ? 'tabler:eye' : 'tabler:eye-off'} />
+                              </IconButton>
+                            </InputAdornment>
+                          )
+                        }}
+                      />
+                    )}
+                  />
+                </Box>
+
+                <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <FormControlLabel
+                    label={t('login.rememberMe')}
+                    control={<Checkbox checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} />}
+                  />
+                  <Typography component={LinkStyled} href='/forgot-password'>
+                    {t('login.forgotPassword')}
+                  </Typography>
+                </Box>
+
+                <Button fullWidth type='submit' variant='contained' sx={{ mb: 0 }}>
+                  {t('login.submit')}
+                </Button>
+              </form>
+            </Paper>
           </Box>
         </Box>
       </RightWrapper>
