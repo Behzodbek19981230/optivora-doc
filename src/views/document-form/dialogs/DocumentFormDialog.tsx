@@ -62,12 +62,6 @@ const DocumentFormDialog = ({ open, item, onClose, onSaved }: Props) => {
       <DialogContent>
         <Stack spacing={4} sx={{ mt: 2 }}>
           <Controller
-            name='name'
-            control={control}
-            rules={{ required: true }}
-            render={({ field }) => <CustomTextField {...field} label={String(t('common.name'))} fullWidth />}
-          />
-          <Controller
             name='name_en'
             control={control}
             rules={{ required: true }}

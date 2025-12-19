@@ -364,6 +364,7 @@
     "users.view.details": "Детали",
     "users.toast.saved": "Пользователь сохранён",
     "users.toast.saveError": "Ошибка сохранения",
+    "users.avatar.title": "Аватар пользователя",
     "replyLetter.title": "Ответные письма",
     "replyLetter.create.title": "Создать ответное письмо",
     "replyLetter.edit.title": "Редактировать ответное письмо",

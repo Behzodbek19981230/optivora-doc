@@ -62,14 +62,6 @@ const MagazineListDialog = ({ open, item, onClose, onSaved }: Props) => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent>
           <Grid container spacing={4}>
-            <Grid item xs={12}>
-              <Controller
-                name='name'
-                control={control}
-                rules={{ required: true }}
-                render={({ field }) => <CustomTextField fullWidth label={String(t('common.name'))} {...field} />}
-              />
-            </Grid>
             <Grid item xs={12} sm={6}>
               <Controller
                 name='name_en'

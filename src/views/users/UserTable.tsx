@@ -1,6 +1,17 @@
 import { useState } from 'react'
 import { useRouter } from 'next/router'
-import { Card, CardHeader, CardContent, Button, IconButton, Chip } from '@mui/material'
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  Button,
+  IconButton,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
+} from '@mui/material'
 import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import Icon from 'src/@core/components/icon'
@@ -8,10 +19,11 @@ import { useFetchList } from 'src/hooks/useFetchList'
 import endpoints from 'src/configs/endpoints'
 import { DataService } from 'src/configs/dataService'
 import UserFormDialog from './dialogs/UserFormDialog'
+import UserViewDialog from './dialogs/UserViewDialog'
 import { getInitials } from 'src/@core/utils/get-initials'
 import { useTranslation } from 'react-i18next'
 
-export type User = {
+type User = {
   id: number
   username: string
   fullname: string
@@ -21,13 +33,43 @@ export type User = {
   phone_number?: string
   avatar?: string
   email: string
-  role: string
+  date_joined: string
+  roles: number[]
+  roles_detail?: Array<{ id: number; name: string; description: string }>
   region: number
+  region_detail?: {
+    id: number
+    code: string
+    name: string
+    name_en: string
+    name_uz: string
+    name_ru: string
+  }
   district: number
+  district_detail?: {
+    id: number
+    code: string
+    name: string
+    name_en: string
+    name_uz: string
+    name_ru: string
+    region: number
+  }
   address?: string
-  companies: number[] | string[]
-  companies_detail?: Array<{ id?: number; name?: string; title?: string } | string | number>
-  roles_detail?: Array<{ id?: number; name?: string; description?: string }>
+  companies: number[]
+  companies_detail?: Array<{
+    id: number
+    code: string
+    name: string
+    is_active: boolean
+    phone: string
+    country: number
+    region: number
+    district: number
+    address: string
+    created_time: string
+    logo: string
+  }>
 }
 
 const UserTable = () => {
@@ -44,6 +86,10 @@ const UserTable = () => {
   })
   const [open, setOpen] = useState(false)
   const [editItem, setEditItem] = useState<User | null>(null)
+  const [avatarDialogOpen, setAvatarDialogOpen] = useState(false)
+  const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null)
+  const [viewDialogOpen, setViewDialogOpen] = useState(false)
+  const [viewUser, setViewUser] = useState<User | null>(null)
 
   const handleCreate = () => {
     setEditItem(null)
@@ -69,7 +115,12 @@ const UserTable = () => {
             width: 38,
             height: 38,
             borderRadius: '50%',
-            '& img': { width: '100%', height: '100%', objectFit: 'cover' }
+            '& img': { width: '100%', height: '100%', objectFit: 'cover' },
+            cursor: 'pointer'
+          }}
+          onClick={() => {
+            setSelectedAvatar(row.avatar!)
+            setAvatarDialogOpen(true)
           }}
         />
       )
@@ -167,7 +218,13 @@ const UserTable = () => {
         const row = params.row as User
         return (
           <>
-            <IconButton aria-label='view' onClick={() => router.push(`/users/view?id=${row.id}`)}>
+            <IconButton
+              aria-label='view'
+              onClick={() => {
+                setViewUser(row)
+                setViewDialogOpen(true)
+              }}
+            >
               <Icon icon='tabler:eye' />
             </IconButton>
             <IconButton aria-label='edit' onClick={() => handleEdit(row)}>
@@ -223,6 +280,24 @@ const UserTable = () => {
           }
         />
       )}
+
+      <Dialog open={avatarDialogOpen} onClose={() => setAvatarDialogOpen(false)} maxWidth='sm' fullWidth>
+        <DialogTitle>{String(t('users.avatar.title'))}</DialogTitle>
+        <DialogContent>
+          {selectedAvatar && (
+            <img
+              src={selectedAvatar}
+              alt='User Avatar'
+              style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
+            />
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAvatarDialogOpen(false)}>{String(t('common.close'))}</Button>
+        </DialogActions>
+      </Dialog>
+
+      <UserViewDialog open={viewDialogOpen} onClose={() => setViewDialogOpen(false)} user={viewUser} />
     </Card>
   )
 }

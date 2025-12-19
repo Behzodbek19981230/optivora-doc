@@ -480,6 +480,7 @@
     "users.view.details": "Details",
     "users.toast.saved": "User saved",
     "users.toast.saveError": "Failed to save",
+    "users.avatar.title": "User Avatar",
     "replyLetter.title": "Reply letters",
     "replyLetter.create.title": "Create reply letter",
     "replyLetter.edit.title": "Edit reply letter",

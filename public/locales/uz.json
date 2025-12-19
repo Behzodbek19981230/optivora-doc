@@ -364,6 +364,7 @@
     "users.view.details": "Tafsilotlar",
     "users.toast.saved": "Foydalanuvchi saqlandi",
     "users.toast.saveError": "Saqlashda xato",
+    "users.avatar.title": "Foydalanuvchi avatari",
     "replyLetter.title": "Javob xatlari",
     "replyLetter.create.title": "Yangi javob xati",
     "replyLetter.edit.title": "Javob xatini tahrirlash",

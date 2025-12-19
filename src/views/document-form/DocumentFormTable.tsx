@@ -39,7 +39,6 @@ const DocumentFormTable = () => {
   })
 
   const columns: GridColDef[] = [
-    { field: 'name', headerName: String(t('common.name')), flex: 0.25, minWidth: 160 },
     { field: 'name_en', headerName: String(t('common.nameEn')), flex: 0.2, minWidth: 140 },
     { field: 'name_uz', headerName: String(t('common.nameUz')), flex: 0.2, minWidth: 140 },
     { field: 'name_ru', headerName: String(t('common.nameRu')), flex: 0.2, minWidth: 140 },
