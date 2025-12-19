@@ -30,19 +30,15 @@ const ChooseCompanyPage = () => {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [query, setQuery] = useState('')
-  console.log(user)
 
   const { t } = useTranslation()
 
   const companies = useMemo(() => {
     if (!user) return []
     if (Array.isArray(user.companies_detail) && user.companies_detail.length > 0) {
-      return user.companies_detail
+      return user.companies_detail.filter((c: any) => c.is_active)
     }
-    if (Array.isArray(user.companies) && user.companies.length > 0) {
-      // fallback: only IDs
-      return user.companies.map((id: number) => ({ id, name: `Company ${id}` }))
-    }
+
     return []
   }, [user])
 
@@ -51,7 +47,9 @@ const ChooseCompanyPage = () => {
     const q = query.toLowerCase()
     return companies.filter(
       (c: any) =>
-        (c.name || '').toLowerCase().includes(q) || (c.code || '').toLowerCase().includes(q) || String(c.id).includes(q)
+        (c.is_active && (c.name || '').toLowerCase().includes(q)) ||
+        (c.code || '').toLowerCase().includes(q) ||
+        String(c.id).includes(q)
     )
   }, [companies, query])
 
@@ -75,7 +73,7 @@ const ChooseCompanyPage = () => {
     const updated = { ...user, company_current: id, company_id: id }
     setUser(updated)
     window.localStorage.setItem('userData', JSON.stringify(updated))
-    router.replace('/dashboards')
+    router.replace('/')
   }
 
   return (

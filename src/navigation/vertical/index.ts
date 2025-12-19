@@ -9,7 +9,7 @@ const navigation = (): VerticalNavItemsType => {
       icon: 'tabler:smart-home',
       badgeContent: 'new',
       badgeColor: 'error',
-      path: '/dashboards',
+      path: '/',
       roles: [ROLES.ADMIN, ROLES.MANAGER]
     },
     {

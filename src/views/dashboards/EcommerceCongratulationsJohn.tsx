@@ -21,16 +21,13 @@ const EcommerceCongratulationsJohn = () => {
   const { user } = useAuth()
   const { t } = useTranslation()
   return (
-    <Card sx={{ position: 'relative' }}>
-      <CardContent>
+    <Card sx={{ position: 'relative', flex: 1 }}>
+      <CardContent sx={{ height: 192 }}>
         <Typography variant='h5' sx={{ mb: 0.5 }}>
           {String(t('dashboards.congrats.title', { name: user?.fullname || '' }))}
         </Typography>
         <Typography sx={{ mb: 2, color: 'text.secondary' }}>{String(t('dashboards.congrats.subtitle'))}</Typography>
-        <Typography variant='h4' sx={{ mb: 0.75, color: 'primary.main' }}>
-          $48.9k
-        </Typography>
-        <Button variant='contained'>{String(t('dashboards.congrats.cta'))}</Button>
+
         <Illustration width={116} alt='congratulations john' src='/images/cards/congratulations-john.png' />
       </CardContent>
     </Card>

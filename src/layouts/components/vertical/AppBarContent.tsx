@@ -168,7 +168,7 @@ const CompanyDropdown = ({ auth }: any) => {
   const open = Boolean(anchorEl)
   console.log(auth)
 
-  const companiesDetail = auth.user?.companies_detail || []
+  const companiesDetail = auth.user?.companies_detail?.filter((c: any) => c.is_active) || []
   const companiesIds = auth.user?.companies || []
   const selectedId = auth.user?.company_id ?? auth.user?.company_current ?? null
   const selected =

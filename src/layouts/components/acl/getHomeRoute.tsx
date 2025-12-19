@@ -3,10 +3,10 @@
  */
 const getHomeRoute = (roles: string[]) => {
   if (roles.includes('Admin')) {
-    return '/dashboards'
+    return '/'
   }
   if (roles.includes('Manager')) {
-    return '/dashboards'
+    return '/'
   }
   if (roles.includes('Performer')) {
     return '/calendar'
