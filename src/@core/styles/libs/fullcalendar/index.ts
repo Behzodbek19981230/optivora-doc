@@ -238,12 +238,6 @@ const CalendarWrapper = styled(Box)<BoxProps>(({ theme }) => {
         }
       },
 
-      '& .fc-view-harness': {
-        minHeight: '650px',
-        margin: theme.spacing(0, -6),
-        width: `calc(100% + ${theme.spacing(6 * 2)})`
-      },
-
       // ** Calendar Head
       '& .fc-col-header': {
         '& .fc-col-header-cell': {

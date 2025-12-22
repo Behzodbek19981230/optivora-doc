@@ -2,7 +2,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 // ** MUI
-import { useTheme } from '@mui/material/styles'
 
 // ** Full Calendar & it's Plugins
 import FullCalendar from '@fullcalendar/react'
@@ -76,6 +75,11 @@ const blankEvent = {
 }
 
 const Calendar = (props: CalendarType) => {
+  // Month view sizing (tune here)
+  const MONTH_CELL_HEIGHT = 20
+  const MONTH_DAY_NUMBER_FONT = 12
+  const MONTH_TABLE_FONT = 10
+
   // Inject compact cell CSS for month view
   useLayoutEffect(() => {
     const styleId = 'fc-compact-month-cells'
@@ -83,20 +87,33 @@ const Calendar = (props: CalendarType) => {
       const style = document.createElement('style')
       style.id = styleId
       style.innerHTML = `
-        /* Set month cell height to exactly 100px, including <td> */
+        /* Set month cell height to exactly ${MONTH_CELL_HEIGHT}px, including <td> */
         .fc-daygrid-day {
-          min-height: 100px !important;
-          height: 100px !important;
-          max-height: 100px !important;
+          min-height: ${MONTH_CELL_HEIGHT}px !important;
+          height: ${MONTH_CELL_HEIGHT}px !important;
+          max-height: ${MONTH_CELL_HEIGHT}px !important;
           padding: 0 !important;
           width: 100% !important;
           box-sizing: border-box !important;
           vertical-align: top !important;
         }
+        /* Make all children take the td height */
+        .fc-daygrid-day > .fc-daygrid-day-frame,
+        .fc-daygrid-day .fc-scrollgrid-sync-inner {
+          height: 100% !important;
+          max-height: 100% !important;
+          min-height: 0 !important;
+          box-sizing: border-box !important;
+        }
+        .fc-daygrid-day .fc-daygrid-day-frame {
+          display: flex !important;
+          flex-direction: column !important;
+          overflow: hidden !important;
+        }
         .fc-daygrid-day-frame {
-          min-height: 100px !important;
-          height: 100px !important;
-          max-height: 100px !important;
+          min-height: ${MONTH_CELL_HEIGHT}px !important;
+          height: ${MONTH_CELL_HEIGHT}px !important;
+          max-height: ${MONTH_CELL_HEIGHT}px !important;
           padding: 0 !important;
           box-sizing: border-box !important;
         }
@@ -105,61 +122,79 @@ const Calendar = (props: CalendarType) => {
           padding-bottom: 0 !important;
         }
         .fc-daygrid-day-number {
-        font-size: 18px !important;  
+          font-size: ${MONTH_DAY_NUMBER_FONT}px !important;
+          line-height: 1 !important;
           display: inline-block !important;
+        }
+        .fc-daygrid-day-events {
+          flex: 1 1 auto !important;
+          min-height: 0 !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          overflow: hidden !important;
+        }
+        .fc-daygrid-day-bottom {
+          margin-top: 0 !important;
+          padding: 0 !important;
         }
         .fc-daygrid-event {
           margin-top: 0 !important;
           margin-bottom: 0 !important;
         }
         .fc-scrollgrid-sync-table {
-          font-size: 12px !important;
+          font-size: ${MONTH_TABLE_FONT}px !important;
         }
         /* Table row and cell fix for compactness */
         .fc-scrollgrid-sync-table tr {
-          height: 100px !important;
-          min-height: 100px !important;
-          max-height: 100px !important;
+          height: ${MONTH_CELL_HEIGHT}px !important;
+          min-height: ${MONTH_CELL_HEIGHT}px !important;
+          max-height: ${MONTH_CELL_HEIGHT}px !important;
         }
         .fc-scrollgrid-sync-table td[role="gridcell"],
         .fc-scrollgrid-sync-table td.fc-daygrid-day {
-          height: 100px !important;
-          min-height: 100px !important;
-          max-height: 100px !important;
+          height: ${MONTH_CELL_HEIGHT}px !important;
+          min-height: ${MONTH_CELL_HEIGHT}px !important;
+          max-height: ${MONTH_CELL_HEIGHT}px !important;
           vertical-align: top !important;
           padding: 0 !important;
         }
       `
       document.head.appendChild(style)
     }
+
     // After render, forcibly override inline style on all month gridcells
     setTimeout(() => {
       document.querySelectorAll('.fc-daygrid-day').forEach(td => {
         td.removeAttribute('style')
         td.setAttribute(
           'style',
-          'height:100px;min-height:100px;max-height:100px;padding:0;vertical-align:top;cursor:pointer;'
+          `height:${MONTH_CELL_HEIGHT}px;min-height:${MONTH_CELL_HEIGHT}px;max-height:${MONTH_CELL_HEIGHT}px;padding:0;vertical-align:top;cursor:pointer;`
         )
       })
+
+      // Ensure inner frame always fills td height (some FC versions inject inline sizing)
+      document.querySelectorAll('.fc-daygrid-day-frame.fc-scrollgrid-sync-inner').forEach(frame => {
+        ;(frame as HTMLElement).style.height = '100%'
+        ;(frame as HTMLElement).style.maxHeight = '100%'
+        ;(frame as HTMLElement).style.minHeight = '0'
+      })
     }, 100)
+
     return () => {
       const style = document.getElementById(styleId)
       if (style) style.remove()
     }
-  }, [])
+  }, [MONTH_CELL_HEIGHT, MONTH_DAY_NUMBER_FONT, MONTH_TABLE_FONT])
   const { i18n, t } = useTranslation()
-  const theme = useTheme()
 
   // ** Props
   const {
     store,
 
     direction,
-    updateEvent,
     calendarApi,
     calendarsColor,
     setCalendarApi,
-    handleSelectEvent,
     handleLeftSidebarToggle,
     handleAddEventSidebarToggle,
     handleSelectDate
@@ -355,6 +390,7 @@ const Calendar = (props: CalendarType) => {
 
         row.appendChild(left)
         row.appendChild(right)
+
         return row
       }
 
@@ -460,6 +496,7 @@ const Calendar = (props: CalendarType) => {
 
         chip.appendChild(left)
         chip.appendChild(right)
+
         return chip
       }
 
@@ -508,7 +545,9 @@ const Calendar = (props: CalendarType) => {
 
       // Make day cells obviously clickable
       el.style.cursor = 'pointer'
-      el.style.padding = '4px'
+
+      // Keep padding tiny so month cells stay compact
+      el.style.padding = '0'
 
       // reset
       el.style.background = ''
@@ -526,6 +565,7 @@ const Calendar = (props: CalendarType) => {
         const bg = 'rgb(115 103 240 / 70%)'
         el.style.background = bg
       }
+
       //   el.style.borderRadius = '10px'
       //   el.style.boxShadow = isSelected ? 'inset 0 0 0 2px rgba(0,0,0,0.08)' : 'inset 0 0 0 1px rgba(0,0,0,0.06)'
     })
@@ -558,11 +598,16 @@ const Calendar = (props: CalendarType) => {
 
   const monthNames = monthNamesByLang[langKey]
 
-  const applyYearMonth = (y: number, m: number) => {
-    setYear(y)
-    setMonth(m)
-    calendarRef.current?.getApi()?.gotoDate(new Date(y, m, 1))
-  }
+  const applyYearMonth = useMemo(() => {
+    return (y: number, m: number) => {
+      setYear(y)
+      setMonth(m)
+      calendarRef.current?.getApi()?.gotoDate(new Date(y, m, 1))
+    }
+
+    // calendarRef is stable, setState fns are stable
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Inject year+month dropdowns into the FullCalendar toolbar so UI matches other header buttons.
   // This targets the actual `.fc-yearMonth-button` (custom button) and replaces its contents.
@@ -600,16 +645,20 @@ const Calendar = (props: CalendarType) => {
 
     const mkSelect = () => {
       const el = document.createElement('select')
+
       // Use FC button classes so it looks identical to other toolbar buttons.
       el.className = 'fc-button fc-button-primary'
       el.style.height = '32px'
       el.style.padding = '0 10px'
       el.style.borderRadius = '6px'
       el.style.cursor = 'pointer'
+
       // neutralize default select arrow differences
       el.style.appearance = 'none'
+
       // prevent select from expanding too much
       el.style.maxWidth = '140px'
+
       return el
     }
 
@@ -719,6 +768,7 @@ const Calendar = (props: CalendarType) => {
       events: store.events.length ? (store.events as any) : [],
       plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, listPlugin, bootstrap5Plugin],
       initialView: 'dayGridMonth',
+
       // Register built-in / custom locales.
       locales: typeof fullCalendarLocale === 'string' ? [] : [fullCalendarLocale],
       locale: fullCalendarLocale,
@@ -896,7 +946,7 @@ const Calendar = (props: CalendarType) => {
         ? Docs: https://fullcalendar.io/docs/eventDrop
         ? We can use `eventDragStop` but it doesn't return updated event so we have to use `eventDrop` which returns updated event
       */
-      eventDrop({ event: droppedEvent }: any) {
+      eventDrop() {
         // dispatch(updateEvent(droppedEvent))
       },
 
@@ -904,7 +954,7 @@ const Calendar = (props: CalendarType) => {
         Handle event resize
         ? Docs: https://fullcalendar.io/docs/eventResize
       */
-      eventResize({ event: resizedEvent }: any) {
+      eventResize() {
         // dispatch(updateEvent(resizedEvent))
       },
 

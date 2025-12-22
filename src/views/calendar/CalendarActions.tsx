@@ -16,7 +16,7 @@ import CalendarWrapper from 'src/@core/styles/libs/fullcalendar'
 
 // ** Actions
 import { updateEvent, handleSelectEvent } from 'src/store/apps/calendar'
-import Calendar from './components/Calendar'
+import Calendar from './components/CustomCalendar'
 import { CalendarDataType } from 'src/types/calendar'
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
@@ -108,7 +108,7 @@ const CalendarActions = () => {
           handleAddEventSidebarToggle={handleAddEventSidebarToggle}
           handleSelectDate={handleSelectDate}
         />
-        <Box sx={{ mt: 6 }}>
+        <Box sx={{ mt: 2 }}>
           <TaskTable data={tasks} loading={isLoading} total={tasks.length} />
         </Box>
       </Box>
