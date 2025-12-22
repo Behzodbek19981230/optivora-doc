@@ -30,6 +30,7 @@ export const useFetchList = <T = any>(path: string, params: ListParams = {}): Us
     queryKey,
     queryFn: async () => {
       const res = await DataService.get(path, safeParams)
+
       // Support either { data, meta } shape or plain array
       const payload = res.data as {
         results?: T[]
@@ -37,6 +38,7 @@ export const useFetchList = <T = any>(path: string, params: ListParams = {}): Us
       }
       const items: T[] = Array.isArray(payload) ? payload : payload?.results ?? []
       const total: number = Array.isArray(payload) ? items.length : payload?.pagination?.total ?? items.length
+
       return { items, total }
     },
     staleTime: 30_000

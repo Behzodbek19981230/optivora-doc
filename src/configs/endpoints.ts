@@ -14,7 +14,7 @@ const endpoints = {
   companyProfileById: (id: string | number | string[] | null | undefined) => `/company-profile/${normalizeId(id)}`,
   companyProfileFields: '/company-profile/fields',
   country: '/country/',
-  district: '/district/',
+  district: '/district',
   districtById: (id: string | number | string[] | null | undefined) => `/district/${normalizeId(id)}/`,
   region: '/region/',
   regionById: (id: string | number | string[] | null | undefined) => `/region/${normalizeId(id)}/`,

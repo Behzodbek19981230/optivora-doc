@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
@@ -93,6 +93,7 @@ const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
     if (logoFile) {
       const url = URL.createObjectURL(logoFile)
       setLogoPreview(url)
+
       return () => URL.revokeObjectURL(url)
     }
   }, [logoFile])
