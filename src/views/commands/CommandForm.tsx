@@ -7,6 +7,7 @@ import CustomTextField from 'src/@core/components/mui/text-field'
 import EditorControlled from 'src/views/forms/form-elements/editor/EditorControlled'
 import { EditorState, ContentState } from 'draft-js'
 import { EditorWrapper } from 'src/@core/styles/libs/react-draft-wysiwyg'
+
 // removed unused MenuItem and region fetch
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
@@ -15,25 +16,15 @@ import { CommandType } from 'src/types/command'
 import { useAuth } from 'src/hooks/useAuth'
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'
 import { useRouter } from 'next/router'
-import { Card, CardContent, CardHeader, IconButton, Stack } from '@mui/material'
+import { Card, CardContent, CardHeader, IconButton, Stack, Tabs, Tab, Divider, Typography, Box } from '@mui/material'
 import Icon from 'src/@core/components/icon'
 import { useTranslation } from 'react-i18next'
 
-type Props = {
-  open: boolean
-  onClose: () => void
-  onSaved: () => void
-  mode: 'create' | 'edit'
-  item?: CommandType | null
-}
-
 const defaultValues: CommandType = {
   command_number: '',
-  basis: '',
   basis_en: '',
   basis_uz: '',
   basis_ru: '',
-  comment: '',
   comment_en: '',
   comment_uz: '',
   comment_ru: ''
@@ -44,6 +35,7 @@ const CommandForm = () => {
   const { t } = useTranslation()
   const { id } = router.query
   const { user } = useAuth()
+  const [langTab, setLangTab] = useState<'uz' | 'ru' | 'en'>('uz')
 
   const mode = id ? 'edit' : 'create'
   const itemId = id ? parseInt(id as string, 10) : null
@@ -55,19 +47,14 @@ const CommandForm = () => {
     reset,
     formState: { isSubmitting, errors }
   } = useForm<CommandType>({ defaultValues })
-  // Attachments state for edit mode: multiple rows with title + file
+
   const [attachments, setAttachments] = useState<{ title: string; file: File | null }[]>([])
   const [uploading, setUploading] = useState(false)
 
-  // Editor states for rich text fields (we use plain text when submitting)
-  const [basisState, setBasisState] = useState(EditorState.createEmpty())
-  const [basisEnState, setBasisEnState] = useState(EditorState.createEmpty())
-  const [basisUzState, setBasisUzState] = useState(EditorState.createEmpty())
-  const [basisRuState, setBasisRuState] = useState(EditorState.createEmpty())
-  const [commentState, setCommentState] = useState(EditorState.createEmpty())
   const [commentEnState, setCommentEnState] = useState(EditorState.createEmpty())
   const [commentUzState, setCommentUzState] = useState(EditorState.createEmpty())
   const [commentRuState, setCommentRuState] = useState(EditorState.createEmpty())
+
   async function getInitValues() {
     if (mode === 'edit' && itemId) {
       try {
@@ -75,15 +62,11 @@ const CommandForm = () => {
         const dataInit = response.data
         reset(dataInit)
 
-        // Initialize editor states from item values (fall back to plain text)
-        setBasisState(EditorState.createWithContent(ContentState.createFromText(dataInit.basis || '')))
-        setBasisEnState(EditorState.createWithContent(ContentState.createFromText(dataInit.basis_en || '')))
-        setBasisUzState(EditorState.createWithContent(ContentState.createFromText(dataInit.basis_uz || '')))
-        setBasisRuState(EditorState.createWithContent(ContentState.createFromText(dataInit.basis_ru || '')))
-        setCommentState(EditorState.createWithContent(ContentState.createFromText(dataInit.comment || '')))
+        // Initialize editor states from item values
         setCommentEnState(EditorState.createWithContent(ContentState.createFromText(dataInit.comment_en || '')))
         setCommentUzState(EditorState.createWithContent(ContentState.createFromText(dataInit.comment_uz || '')))
         setCommentRuState(EditorState.createWithContent(ContentState.createFromText(dataInit.comment_ru || '')))
+
         const filesResponse = await DataService.get<{ results: any[] }>(endpoints.downloads + `?command=${itemId}`)
         const filesData = filesResponse.data
         setAttachments(
@@ -97,11 +80,6 @@ const CommandForm = () => {
       }
     } else {
       reset(defaultValues)
-      setBasisState(EditorState.createEmpty())
-      setBasisEnState(EditorState.createEmpty())
-      setBasisUzState(EditorState.createEmpty())
-      setBasisRuState(EditorState.createEmpty())
-      setCommentState(EditorState.createEmpty())
       setCommentEnState(EditorState.createEmpty())
       setCommentUzState(EditorState.createEmpty())
       setCommentRuState(EditorState.createEmpty())
@@ -114,19 +92,9 @@ const CommandForm = () => {
   const onSubmit = async (values: CommandType) => {
     // TODO: Replace with your actual DataService and endpoints
     try {
-      // Extract plain text from editor states to send to server (backend expects strings)
-      const getPlain = (st: EditorState) => st.getCurrentContent().getPlainText() || ''
       const payload: CommandType = {
         ...values,
-        company: user?.company_id || 0,
-        basis: getPlain(basisState),
-        basis_en: getPlain(basisEnState),
-        basis_uz: getPlain(basisUzState),
-        basis_ru: getPlain(basisRuState),
-        comment: getPlain(commentState),
-        comment_en: getPlain(commentEnState),
-        comment_uz: getPlain(commentUzState),
-        comment_ru: getPlain(commentRuState)
+        company: user?.company_id || 0
       }
       if (mode === 'create') {
         const res = await DataService.post<{ id: number }>(endpoints.command, payload)
@@ -195,188 +163,145 @@ const CommandForm = () => {
             </Grid>
 
             <Grid item xs={12}>
-              <Controller
-                name='basis'
-                control={control}
-                rules={{ required: String(t('errors.required')) }}
-                render={({ field }) => (
-                  <EditorWrapper>
-                    <div style={{ marginBottom: 8, fontWeight: 500 }}>{String(t('commands.form.basis'))}</div>
-                    <EditorControlled
-                      editorState={basisState}
-                      onEditorStateChange={state => {
-                        setBasisState(state)
-                        // update form value with plain text
-                        field.onChange(state.getCurrentContent().getPlainText())
-                      }}
-                    />
-                    {errors.basis ? (
-                      <div style={{ color: '#d32f2f', marginTop: 8, fontSize: 12 }}>{errors.basis.message}</div>
-                    ) : null}
-                  </EditorWrapper>
-                )}
-              />
-            </Grid>
+              <Divider sx={{ my: 1 }} />
+              <Stack spacing={2}>
+                <Typography variant='subtitle1'>
+                  {String(t('commands.form.translations', { defaultValue: 'Translations' }))}
+                </Typography>
+                <Tabs
+                  value={langTab}
+                  onChange={(_, v) => setLangTab(v)}
+                  variant='scrollable'
+                  scrollButtons='auto'
+                  sx={{ minHeight: 40 }}
+                >
+                  <Tab value='uz' label={String(t('language.uz', { defaultValue: 'Uzbek' }))} />
+                  <Tab value='ru' label={String(t('language.ru', { defaultValue: 'Russian' }))} />
+                  <Tab value='en' label={String(t('language.en', { defaultValue: 'English' }))} />
+                </Tabs>
 
-            <Grid item xs={12} md={6}>
-              <Controller
-                name='basis_en'
-                control={control}
-                rules={{ required: String(t('errors.required')) }}
-                render={({ field }) => (
-                  <EditorWrapper>
-                    <div style={{ marginBottom: 8, fontWeight: 500 }}>{String(t('commands.form.basisEn'))}</div>
-                    <EditorControlled
-                      editorState={basisEnState}
-                      onEditorStateChange={state => {
-                        setBasisEnState(state)
-                        field.onChange(state.getCurrentContent().getPlainText())
-                      }}
-                    />
-                    {errors.basis_en ? (
-                      <div style={{ color: '#d32f2f', marginTop: 8, fontSize: 12 }}>{errors.basis_en.message}</div>
-                    ) : null}
-                  </EditorWrapper>
-                )}
-              />
-            </Grid>
+                <Box>
+                  {langTab === 'uz' ? (
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} md={6}>
+                        <Controller
+                          name='basis_uz'
+                          control={control}
+                          render={({ field }) => (
+                            <CustomTextField
+                              fullWidth
+                              multiline
+                              minRows={3}
+                              label={String(t('commands.form.basisUz'))}
+                              {...field}
+                            />
+                          )}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <Controller
+                          name='comment_uz'
+                          control={control}
+                          render={({ field }) => (
+                            <EditorWrapper>
+                              <div style={{ marginBottom: 8, fontWeight: 500 }}>
+                                {String(t('commands.form.commentUz'))}
+                              </div>
+                              <EditorControlled
+                                editorState={commentUzState}
+                                onEditorStateChange={state => {
+                                  setCommentUzState(state)
+                                  field.onChange(state.getCurrentContent().getPlainText())
+                                }}
+                              />
+                            </EditorWrapper>
+                          )}
+                        />
+                      </Grid>
+                    </Grid>
+                  ) : null}
 
-            <Grid item xs={12} md={6}>
-              <Controller
-                name='basis_uz'
-                control={control}
-                rules={{ required: String(t('errors.required')) }}
-                render={({ field }) => (
-                  <EditorWrapper>
-                    <div style={{ marginBottom: 8, fontWeight: 500 }}>{String(t('commands.form.basisUz'))}</div>
-                    <EditorControlled
-                      editorState={basisUzState}
-                      onEditorStateChange={state => {
-                        setBasisUzState(state)
-                        field.onChange(state.getCurrentContent().getPlainText())
-                      }}
-                    />
-                    {errors.basis_uz ? (
-                      <div style={{ color: '#d32f2f', marginTop: 8, fontSize: 12 }}>{errors.basis_uz.message}</div>
-                    ) : null}
-                  </EditorWrapper>
-                )}
-              />
-            </Grid>
+                  {langTab === 'ru' ? (
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} md={6}>
+                        <Controller
+                          name='basis_ru'
+                          control={control}
+                          render={({ field }) => (
+                            <CustomTextField
+                              fullWidth
+                              multiline
+                              minRows={3}
+                              label={String(t('commands.form.basisRu'))}
+                              {...field}
+                            />
+                          )}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <Controller
+                          name='comment_ru'
+                          control={control}
+                          render={({ field }) => (
+                            <EditorWrapper>
+                              <div style={{ marginBottom: 8, fontWeight: 500 }}>
+                                {String(t('commands.form.commentRu'))}
+                              </div>
+                              <EditorControlled
+                                editorState={commentRuState}
+                                onEditorStateChange={state => {
+                                  setCommentRuState(state)
+                                  field.onChange(state.getCurrentContent().getPlainText())
+                                }}
+                              />
+                            </EditorWrapper>
+                          )}
+                        />
+                      </Grid>
+                    </Grid>
+                  ) : null}
 
-            <Grid item xs={12} md={6}>
-              <Controller
-                name='basis_ru'
-                control={control}
-                rules={{ required: String(t('errors.required')) }}
-                render={({ field }) => (
-                  <EditorWrapper>
-                    <div style={{ marginBottom: 8, fontWeight: 500 }}>{String(t('commands.form.basisRu'))}</div>
-                    <EditorControlled
-                      editorState={basisRuState}
-                      onEditorStateChange={state => {
-                        setBasisRuState(state)
-                        field.onChange(state.getCurrentContent().getPlainText())
-                      }}
-                    />
-                    {errors.basis_ru ? (
-                      <div style={{ color: '#d32f2f', marginTop: 8, fontSize: 12 }}>{errors.basis_ru.message}</div>
-                    ) : null}
-                  </EditorWrapper>
-                )}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <Controller
-                name='comment'
-                control={control}
-                rules={{ required: String(t('errors.required')) }}
-                render={({ field }) => (
-                  <EditorWrapper>
-                    <div style={{ marginBottom: 8, fontWeight: 500 }}>{String(t('commands.form.comment'))}</div>
-                    <EditorControlled
-                      editorState={commentState}
-                      onEditorStateChange={state => {
-                        setCommentState(state)
-                        field.onChange(state.getCurrentContent().getPlainText())
-                      }}
-                    />
-                    {errors.comment ? (
-                      <div style={{ color: '#d32f2f', marginTop: 8, fontSize: 12 }}>{errors.comment.message}</div>
-                    ) : null}
-                  </EditorWrapper>
-                )}
-              />
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <Controller
-                name='comment_en'
-                control={control}
-                rules={{ required: String(t('errors.required')) }}
-                render={({ field }) => (
-                  <EditorWrapper>
-                    <div style={{ marginBottom: 8, fontWeight: 500 }}>{String(t('commands.form.commentEn'))}</div>
-                    <EditorControlled
-                      editorState={commentEnState}
-                      onEditorStateChange={state => {
-                        setCommentEnState(state)
-                        field.onChange(state.getCurrentContent().getPlainText())
-                      }}
-                    />
-                    {errors.comment_en ? (
-                      <div style={{ color: '#d32f2f', marginTop: 8, fontSize: 12 }}>{errors.comment_en.message}</div>
-                    ) : null}
-                  </EditorWrapper>
-                )}
-              />
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <Controller
-                name='comment_uz'
-                control={control}
-                rules={{ required: String(t('errors.required')) }}
-                render={({ field }) => (
-                  <EditorWrapper>
-                    <div style={{ marginBottom: 8, fontWeight: 500 }}>{String(t('commands.form.commentUz'))}</div>
-                    <EditorControlled
-                      editorState={commentUzState}
-                      onEditorStateChange={state => {
-                        setCommentUzState(state)
-                        field.onChange(state.getCurrentContent().getPlainText())
-                      }}
-                    />
-                    {errors.comment_uz ? (
-                      <div style={{ color: '#d32f2f', marginTop: 8, fontSize: 12 }}>{errors.comment_uz.message}</div>
-                    ) : null}
-                  </EditorWrapper>
-                )}
-              />
-            </Grid>
-
-            <Grid item xs={12} md={6}>
-              <Controller
-                name='comment_ru'
-                control={control}
-                rules={{ required: String(t('errors.required')) }}
-                render={({ field }) => (
-                  <EditorWrapper>
-                    <div style={{ marginBottom: 8, fontWeight: 500 }}>{String(t('commands.form.commentRu'))}</div>
-                    <EditorControlled
-                      editorState={commentRuState}
-                      onEditorStateChange={state => {
-                        setCommentRuState(state)
-                        field.onChange(state.getCurrentContent().getPlainText())
-                      }}
-                    />
-                    {errors.comment_ru ? (
-                      <div style={{ color: '#d32f2f', marginTop: 8, fontSize: 12 }}>{errors.comment_ru.message}</div>
-                    ) : null}
-                  </EditorWrapper>
-                )}
-              />
+                  {langTab === 'en' ? (
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} md={6}>
+                        <Controller
+                          name='basis_en'
+                          control={control}
+                          render={({ field }) => (
+                            <CustomTextField
+                              fullWidth
+                              multiline
+                              minRows={3}
+                              label={String(t('commands.form.basisEn'))}
+                              {...field}
+                            />
+                          )}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <Controller
+                          name='comment_en'
+                          control={control}
+                          render={({ field }) => (
+                            <EditorWrapper>
+                              <div style={{ marginBottom: 8, fontWeight: 500 }}>
+                                {String(t('commands.form.commentEn'))}
+                              </div>
+                              <EditorControlled
+                                editorState={commentEnState}
+                                onEditorStateChange={state => {
+                                  setCommentEnState(state)
+                                  field.onChange(state.getCurrentContent().getPlainText())
+                                }}
+                              />
+                            </EditorWrapper>
+                          )}
+                        />
+                      </Grid>
+                    </Grid>
+                  ) : null}
+                </Box>
+              </Stack>
             </Grid>
 
             {mode === 'edit' ? (
