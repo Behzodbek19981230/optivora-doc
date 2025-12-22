@@ -74,6 +74,7 @@ const ReplyLetterTable = () => {
       sortable: false,
       renderCell: params => {
         const row = params.row as any
+
         return (
           <>
             <IconButton size='small' aria-label='edit' onClick={() => handleEdit(row)}>

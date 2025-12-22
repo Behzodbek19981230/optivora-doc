@@ -1,14 +1,36 @@
 import { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { useRouter } from 'next/router'
-import { Card, CardHeader, CardContent, Grid, Button, MenuItem, Stack, CardActions, IconButton } from '@mui/material'
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  Grid,
+  Button,
+  MenuItem,
+  Stack,
+  CardActions,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+  Tooltip,
+  Divider,
+  Autocomplete
+} from '@mui/material'
 import CustomTextField from 'src/@core/components/mui/text-field'
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
 import toast from 'react-hot-toast'
-import { useAuth } from 'src/hooks/useAuth'
 import Icon from 'src/@core/components/icon'
 import { useTranslation } from 'react-i18next'
+import EditorControlled from 'src/views/forms/form-elements/editor/EditorControlled'
+import { EditorState, ContentState } from 'draft-js'
+import { EditorWrapper } from 'src/@core/styles/libs/react-draft-wysiwyg'
+import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'
 
 type ReplyLetterFormType = {
   id?: number
@@ -27,23 +49,30 @@ const defaultValues: ReplyLetterFormType = {
   comment: ''
 }
 
+type ReplyLetterFileItem = {
+  id: number
+  title: string
+  file?: string | null
+  created_time?: string
+}
+
 const ReplyLetterForm = () => {
   const router = useRouter()
   const { t } = useTranslation()
   const { id } = router.query
   const mode = id ? 'edit' : 'create'
   const itemId = id ? Number(id) : null
-  const { user } = useAuth()
 
   const {
     control,
     handleSubmit,
     reset,
-    formState: { isSubmitting, errors }
+    formState: { isSubmitting }
   } = useForm<ReplyLetterFormType>({ defaultValues })
 
   const [companies, setCompanies] = useState<any[]>([])
   const [persons, setPersons] = useState<any[]>([])
+  const [commentState, setCommentState] = useState(EditorState.createEmpty())
 
   useEffect(() => {
     // load companies and persons for selects
@@ -68,8 +97,12 @@ const ReplyLetterForm = () => {
         const res = await DataService.get(endpoints.replyLetterById(itemId))
         const rdata: any = (res as any).data
         reset(rdata)
+
+        setCommentState(EditorState.createWithContent(ContentState.createFromText(String(rdata?.comment || ''))))
       } else {
         reset(defaultValues)
+
+        setCommentState(EditorState.createEmpty())
       }
     }
     getInit()
@@ -95,7 +128,8 @@ const ReplyLetterForm = () => {
   }
 
   // Attachments for edit mode
-  const [attachments, setAttachments] = useState<{ title: string; file: File | null }[]>([])
+  const [existingFiles, setExistingFiles] = useState<ReplyLetterFileItem[]>([])
+  const [newAttachments, setNewAttachments] = useState<{ title: string; file: File | null }[]>([])
   const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
@@ -104,8 +138,15 @@ const ReplyLetterForm = () => {
         try {
           const res = await DataService.get(endpoints.replyLetterFile + `?reply_letter=${itemId}`)
           const data: any = (res as any).data
-          const rows = (data.results || data || []).map((f: any) => ({ title: f.title, file: null }))
-          setAttachments(rows)
+          const rows = (data.results || data || []) as any[]
+          setExistingFiles(
+            rows.map(f => ({
+              id: Number(f.id),
+              title: String(f.title || ''),
+              file: f.file ?? f.file_url ?? f.url ?? null,
+              created_time: f.created_time
+            }))
+          )
         } catch (e) {
           console.error(e)
         }
@@ -114,16 +155,33 @@ const ReplyLetterForm = () => {
     loadFiles()
   }, [mode, itemId])
 
-  const handleAddAttachmentRow = () => setAttachments(prev => [...prev, { title: '', file: null }])
-  const handleRemoveAttachmentRow = (idx: number) => setAttachments(prev => prev.filter((_, i) => i !== idx))
+  const handleAddAttachmentRow = () => setNewAttachments(prev => [...prev, { title: '', file: null }])
+  const handleRemoveAttachmentRow = (idx: number) => setNewAttachments(prev => prev.filter((_, i) => i !== idx))
   const handleChangeAttachmentTitle = (idx: number, title: string) =>
-    setAttachments(prev => prev.map((row, i) => (i === idx ? { ...row, title } : row)))
+    setNewAttachments(prev => prev.map((row, i) => (i === idx ? { ...row, title } : row)))
   const handleChangeAttachmentFile = (idx: number, file: File | null) =>
-    setAttachments(prev => prev.map((row, i) => (i === idx ? { ...row, file } : row)))
+    setNewAttachments(prev => prev.map((row, i) => (i === idx ? { ...row, file } : row)))
+
+  const handleDownload = async (file: ReplyLetterFileItem) => {
+    try {
+      if (file.file) {
+        window.open(String(file.file), '_blank', 'noopener,noreferrer')
+
+        return
+      }
+      await DataService.downloadFile(
+        endpoints.replyLetterFileById(file.id),
+        file.title || `reply-letter-file-${file.id}`
+      )
+    } catch (e) {
+      console.error(e)
+      toast.error(String(t('replyLetter.attachments.toast.downloadError', { defaultValue: 'Failed to download file' })))
+    }
+  }
 
   const uploadAttachments = async () => {
     if (!itemId) return
-    const rowsToUpload = attachments.filter(r => r.file && r.title.trim().length)
+    const rowsToUpload = newAttachments.filter(r => r.file && r.title.trim().length)
     if (!rowsToUpload.length) return toast.error(String(t('replyLetter.attachments.validation.fileAndTitleRequired')))
     try {
       setUploading(true)
@@ -135,12 +193,20 @@ const ReplyLetterForm = () => {
         await DataService.postForm(endpoints.replyLetterFile, form)
       }
       toast.success(String(t('replyLetter.attachments.toast.uploaded')))
-      setAttachments([])
+      setNewAttachments([])
+
       // reload files
       const res = await DataService.get(endpoints.replyLetterFile + `?reply_letter=${itemId}`)
       const data: any = (res as any).data
-      const rows = (data.results || data || []).map((f: any) => ({ title: f.title, file: null }))
-      setAttachments(rows)
+      const rows = (data.results || data || []) as any[]
+      setExistingFiles(
+        rows.map(f => ({
+          id: Number(f.id),
+          title: String(f.title || ''),
+          file: f.file ?? f.file_url ?? f.url ?? null,
+          created_time: f.created_time
+        }))
+      )
     } catch (e) {
       console.error(e)
       toast.error(String(t('replyLetter.attachments.toast.uploadError')))
@@ -187,14 +253,21 @@ const ReplyLetterForm = () => {
                 name='responsible_person'
                 control={control}
                 render={({ field }) => (
-                  <CustomTextField select fullWidth label={String(t('replyLetter.form.responsiblePerson'))} {...field}>
-                    <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
-                    {persons.map(p => (
-                      <MenuItem key={p.id} value={p.id}>
-                        {p.fullname || p.username}
-                      </MenuItem>
-                    ))}
-                  </CustomTextField>
+                  <Autocomplete
+                    options={persons || []}
+                    value={persons.find(p => Number(p.id) === Number(field.value)) || null}
+                    onChange={(_, newValue) => field.onChange(newValue?.id ? Number(newValue.id) : 0)}
+                    isOptionEqualToValue={(option, value) => Number(option.id) === Number((value as any)?.id)}
+                    getOptionLabel={option => option?.fullname || option?.username || String(option?.id || '')}
+                    renderInput={params => (
+                      <CustomTextField
+                        {...params}
+                        fullWidth
+                        label={String(t('replyLetter.form.responsiblePerson'))}
+                        placeholder={String(t('common.search', { defaultValue: 'Search' }))}
+                      />
+                    )}
+                  />
                 )}
               />
             </Grid>
@@ -212,13 +285,16 @@ const ReplyLetterForm = () => {
                 name='comment'
                 control={control}
                 render={({ field }) => (
-                  <CustomTextField
-                    fullWidth
-                    label={String(t('replyLetter.form.comment'))}
-                    {...field}
-                    multiline
-                    rows={4}
-                  />
+                  <EditorWrapper>
+                    <div style={{ marginBottom: 8, fontWeight: 500 }}>{String(t('replyLetter.form.comment'))}</div>
+                    <EditorControlled
+                      editorState={commentState}
+                      onEditorStateChange={state => {
+                        setCommentState(state)
+                        field.onChange(state.getCurrentContent().getPlainText())
+                      }}
+                    />
+                  </EditorWrapper>
                 )}
               />
             </Grid>
@@ -233,54 +309,123 @@ const ReplyLetterForm = () => {
               />
               <CardContent>
                 <Stack spacing={3}>
-                  {attachments.map((row, idx) => (
-                    <Card key={idx} variant='outlined'>
-                      <CardContent>
-                        <Grid container spacing={3} alignItems='end'>
-                          <Grid item xs={12} md={5}>
-                            <CustomTextField
-                              fullWidth
-                              label={String(t('replyLetter.attachments.form.title'))}
-                              value={row.title}
-                              onChange={e => handleChangeAttachmentTitle(idx, e.target.value)}
-                            />
-                          </Grid>
-                          <Grid item xs={12} md={5}>
-                            <Stack direction='row' spacing={2} alignItems='end'>
-                              <Button variant='outlined' component='label' startIcon={<Icon icon='tabler:paperclip' />}>
-                                {String(t('replyLetter.attachments.form.attachFile'))}
-                                <input
-                                  hidden
-                                  type='file'
-                                  onChange={e => handleChangeAttachmentFile(idx, e.target.files?.[0] || null)}
+                  <div>
+                    <Typography variant='subtitle2' sx={{ mb: 1 }}>
+                      {String(t('replyLetter.attachments.existing', { defaultValue: 'Attached files' }))}
+                    </Typography>
+                    {existingFiles.length ? (
+                      <Table size='small'>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>
+                              {String(t('replyLetter.attachments.table.title', { defaultValue: 'Title' }))}
+                            </TableCell>
+                            <TableCell>
+                              {String(t('replyLetter.attachments.table.file', { defaultValue: 'File' }))}
+                            </TableCell>
+                            <TableCell align='right'>
+                              {String(t('replyLetter.attachments.table.actions', { defaultValue: 'Actions' }))}
+                            </TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {existingFiles.map(f => (
+                            <TableRow key={f.id}>
+                              <TableCell>{f.title || '—'}</TableCell>
+                              <TableCell>{f.file ? String(f.file).split('/').pop() : '—'}</TableCell>
+                              <TableCell align='right'>
+                                <Tooltip
+                                  title={String(
+                                    t('replyLetter.attachments.actions.download', { defaultValue: 'Open / download' })
+                                  )}
+                                >
+                                  <IconButton size='small' onClick={() => handleDownload(f)}>
+                                    <Icon icon='tabler:download' />
+                                  </IconButton>
+                                </Tooltip>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    ) : (
+                      <Typography variant='body2' color='text.secondary'>
+                        {String(t('replyLetter.attachments.empty', { defaultValue: 'No attached files' }))}
+                      </Typography>
+                    )}
+                  </div>
+
+                  <Divider />
+
+                  <div>
+                    <Typography variant='subtitle2' sx={{ mb: 1 }}>
+                      {String(t('replyLetter.attachments.addNew', { defaultValue: 'Add new files' }))}
+                    </Typography>
+
+                    <Stack spacing={2}>
+                      {newAttachments.map((row, idx) => (
+                        <Card key={idx} variant='outlined'>
+                          <CardContent>
+                            <Grid container spacing={3} alignItems='end'>
+                              <Grid item xs={12} md={5}>
+                                <CustomTextField
+                                  fullWidth
+                                  label={String(t('replyLetter.attachments.form.title'))}
+                                  value={row.title}
+                                  onChange={e => handleChangeAttachmentTitle(idx, e.target.value)}
                                 />
-                              </Button>
-                              <span style={{ color: 'rgba(0,0,0,0.6)' }}>
-                                {row.file ? row.file.name : String(t('replyLetter.attachments.form.noFileSelected'))}
-                              </span>
-                            </Stack>
-                          </Grid>
-                          <Grid item xs={12} md={2} sx={{ textAlign: 'right' }}>
-                            <IconButton
-                              aria-label='remove'
-                              color='error'
-                              onClick={() => handleRemoveAttachmentRow(idx)}
-                            >
-                              <Icon icon='tabler:trash' />
-                            </IconButton>
-                          </Grid>
-                        </Grid>
-                      </CardContent>
-                    </Card>
-                  ))}
-                  <Stack direction='row' spacing={2}>
-                    <Button variant='contained' color='primary' onClick={handleAddAttachmentRow}>
-                      {String(t('replyLetter.attachments.addRow'))}
-                    </Button>
-                    <Button variant='outlined' color='success' onClick={uploadAttachments} disabled={uploading}>
-                      {uploading ? String(t('common.loading')) : String(t('replyLetter.attachments.upload'))}
-                    </Button>
-                  </Stack>
+                              </Grid>
+                              <Grid item xs={12} md={5}>
+                                <Stack direction='row' spacing={2} alignItems='end'>
+                                  <Button
+                                    variant='outlined'
+                                    component='label'
+                                    startIcon={<Icon icon='tabler:paperclip' />}
+                                  >
+                                    {String(t('replyLetter.attachments.form.attachFile'))}
+                                    <input
+                                      hidden
+                                      type='file'
+                                      onChange={e => handleChangeAttachmentFile(idx, e.target.files?.[0] || null)}
+                                    />
+                                  </Button>
+                                  <span style={{ color: 'rgba(0,0,0,0.6)' }}>
+                                    {row.file
+                                      ? row.file.name
+                                      : String(t('replyLetter.attachments.form.noFileSelected'))}
+                                  </span>
+                                </Stack>
+                              </Grid>
+                              <Grid item xs={12} md={2} sx={{ textAlign: 'right' }}>
+                                <IconButton
+                                  aria-label='remove'
+                                  color='error'
+                                  onClick={() => handleRemoveAttachmentRow(idx)}
+                                >
+                                  <Icon icon='tabler:trash' />
+                                </IconButton>
+                              </Grid>
+                            </Grid>
+                          </CardContent>
+                        </Card>
+                      ))}
+
+                      <Stack direction='row' spacing={2}>
+                        <Button type='button' variant='contained' color='primary' onClick={handleAddAttachmentRow}>
+                          {String(t('replyLetter.attachments.addRow'))}
+                        </Button>
+                        <Button
+                          type='button'
+                          variant='outlined'
+                          color='success'
+                          onClick={uploadAttachments}
+                          disabled={uploading}
+                        >
+                          {uploading ? String(t('common.loading')) : String(t('replyLetter.attachments.upload'))}
+                        </Button>
+                      </Stack>
+                    </Stack>
+                  </div>
                 </Stack>
               </CardContent>
             </Card>

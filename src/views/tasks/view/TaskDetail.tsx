@@ -48,6 +48,7 @@ const TaskViewDetail = () => {
 
     const key = `documents.status.${toCamel(s)}`
     const translated = String(t(key))
+
     return translated === key ? s : translated
   }
 
@@ -56,6 +57,7 @@ const TaskViewDetail = () => {
     const normalized = p === 'orgently' ? 'orgently' : p === 'normal' ? 'ordinary' : p
     const key = `tasks.priority.${normalized}`
     const translated = String(t(key))
+
     return translated === key ? p : translated
   }
 
@@ -63,11 +65,12 @@ const TaskViewDetail = () => {
     if (!tp) return '—'
     const key = `tasks.type.${tp}`
     const translated = String(t(key))
+
     return translated === key ? tp : translated
   }
 
   return (
-    <Box sx={{ p: 4 }}>
+    <Box>
       <Grid container spacing={4}>
         <Grid item xs={12} md={8} lg={9}>
           <Card>
