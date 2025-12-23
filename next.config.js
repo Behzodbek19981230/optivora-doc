@@ -3,6 +3,7 @@ const path = require('path')
 
 module.exports = {
   reactStrictMode: false,
+  trailingSlash: true,
 
   images: {
     unoptimized: true
