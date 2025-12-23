@@ -18,26 +18,16 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build and Export
         run: npm run build
 
-      # If your server is Apache, it needs .htaccess for SPA fallback on refresh.
-      # Nginx ignores .htaccess, but keeping it in the export doesn't hurt.
-      - name: Add Apache SPA fallback (.htaccess)
-        run: |
-          cp deploy/.htaccess out/.htaccess || true
-
-      # NOTE: appleboy/scp-action tars sources inside a container and can be OOM-killed (exit 137)
-      # on large exports. rsync avoids that and only uploads diffs.
-      - name: Setup SSH agent
-        uses: webfactory/ssh-agent@v0.9.0
+      - name: Deploy to VDS
+        uses: appleboy/scp-action@v0.1.6
         with:
-          ssh-private-key: ${{ secrets.SERVER_SSH_KEY }}
-
-      - name: Deploy to VDS (rsync)
-        env:
-          SERVER_HOST: ${{ secrets.SERVER_HOST }}
-          SERVER_USER: ${{ secrets.SERVER_USER }}
-          SERVER_PORT: ${{ secrets.SERVER_PORT }}
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: 'out/*'
+          target: '/var/www/optivora-doc'
