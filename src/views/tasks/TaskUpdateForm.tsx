@@ -24,7 +24,10 @@ import {
   IconButton,
   Typography,
   Chip,
-  Autocomplete
+  Autocomplete,
+  Box,
+  Divider,
+  Tooltip
 } from '@mui/material'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -34,6 +37,7 @@ import endpoints from 'src/configs/endpoints'
 import { DataService } from 'src/configs/dataService'
 import useThemedToast from 'src/@core/hooks/useThemedToast'
 import { useRouter } from 'next/router'
+import Link from 'next/link'
 import 'react-datepicker/dist/react-datepicker.css'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { useFetchList } from 'src/hooks/useFetchList'
@@ -61,6 +65,7 @@ export type TaskPayload = {
   created_by?: number
   updated_by?: number
   list_of_magazine?: number
+  task_type?: 'simple' | 'divide_into_parts'
 }
 
 const defaults: TaskPayload = {
@@ -136,7 +141,7 @@ type TaskPartItem = TaskPartPayload & { id: number; status: string }
 const TaskUpdateForm = () => {
   const { t } = useTranslation()
   const schema = buildSchema(t)
-  const { control, handleSubmit, reset } = useForm<TaskPayload>({
+  const { control, handleSubmit, reset, getValues } = useForm<TaskPayload>({
     defaultValues: defaults,
     resolver: yupResolver(schema)
   })
@@ -146,7 +151,7 @@ const TaskUpdateForm = () => {
   const { user } = useAuth()
 
   // State for assignment mode
-  const [assignmentMode, setAssignmentMode] = useState<'simple' | 'split'>('simple')
+  const [assignmentMode, setAssignmentMode] = useState<'simple' | 'divide_into_parts'>('simple')
   const [simpleAssignee, setSimpleAssignee] = useState<number>(0)
   const [taskParts, setTaskParts] = useState<TaskPartItem[]>([])
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -160,6 +165,13 @@ const TaskUpdateForm = () => {
   })
   const [partErrors, setPartErrors] = useState<{ [K in keyof TaskPartPayload]?: string }>({})
   const [editingPartId, setEditingPartId] = useState<number | null>(null)
+
+  // Attachment states for task parts
+  const [attachmentDialogOpen, setAttachmentDialogOpen] = useState(false)
+  const [selectedPartId, setSelectedPartId] = useState<number | null>(null)
+  const [existingPartFiles, setExistingPartFiles] = useState<any[]>([])
+  const [newPartAttachments, setNewPartAttachments] = useState<{ title: string; file: File | null }[]>([])
+  const [uploadingPartFiles, setUploadingPartFiles] = useState(false)
 
   const { data: departments } = useFetchList<{ id: number; name: string }>(endpoints.department, {
     page: 1,
@@ -188,8 +200,14 @@ const TaskUpdateForm = () => {
       if (!id || Array.isArray(id)) return
       const res = await DataService.get<TaskPayload>(endpoints.taskById(id))
       const data = res.data as TaskPayload
-
-      // Reset form with existing values
+      setAssignmentMode(data.task_type || 'simple')
+      if (data.task_type === 'simple') {
+        const res = await DataService.get<TaskPartItem>(endpoints.taskPart, { task: id, perPage: 50 })
+        const data = (res.data as any)?.results?.[0] as TaskPartItem
+        if (data) {
+          setSimpleAssignee(data.assignee || 0)
+        }
+      }
       reset({
         ...defaults,
         ...data,
@@ -225,18 +243,23 @@ const TaskUpdateForm = () => {
 
   const handleCreateSimpleAssignment = async () => {
     if (!id || Array.isArray(id) || !simpleAssignee) return
+    const { start_date, end_date, department } = getValues()
     try {
+      if (!start_date || !end_date || !department) {
+        toast.error(String(t('tasks.toast.startDateRequired')))
+
+        return
+      }
       await DataService.post(endpoints.taskPart, {
         task: Number(id),
         title: String(t('tasks.parts.simpleTitle')),
-        department: 0,
         assignee: simpleAssignee,
-        start_date: '',
-        end_date: '',
+        department: department,
+        start_date: start_date,
+        end_date: end_date,
         status: 'new',
         note: '',
-        created_by: user?.id || 1,
-        updated_by: user?.id || 1
+        created_by: user?.id || 1
       })
       toast.success(String(t('tasks.toast.assigneeAssigned')))
 
@@ -328,8 +351,7 @@ const TaskUpdateForm = () => {
           end_date: partForm.end_date || '',
           status: 'new',
           note: partForm.note || '',
-          created_by: user?.id || 1,
-          updated_by: user?.id || 1
+          created_by: user?.id || 1
         })
         toast.success(String(t('tasks.toast.partCreated')))
       }
@@ -354,13 +376,85 @@ const TaskUpdateForm = () => {
     }
   }
 
+  // Task Part Attachment Functions
+  const fetchPartAttachments = async (partId: number) => {
+    try {
+      const res = await DataService.get<any>(endpoints.taskAttachment, { part: partId })
+      const data = res.data
+      setExistingPartFiles(data.results || data || [])
+    } catch (e) {
+      console.error('Error fetching part attachments:', e)
+    }
+  }
+
+  const handleOpenAttachmentDialog = (partId: number) => {
+    setSelectedPartId(partId)
+    setNewPartAttachments([])
+    fetchPartAttachments(partId)
+    setAttachmentDialogOpen(true)
+  }
+
+  const handleCloseAttachmentDialog = () => {
+    setAttachmentDialogOpen(false)
+    setSelectedPartId(null)
+    setExistingPartFiles([])
+    setNewPartAttachments([])
+  }
+
+  const handleAddPartAttachmentRow = () => {
+    setNewPartAttachments(prev => [...prev, { title: '', file: null }])
+  }
+
+  const handleRemovePartAttachmentRow = (idx: number) => {
+    setNewPartAttachments(prev => prev.filter((_, i) => i !== idx))
+  }
+
+  const handleChangePartAttachmentTitle = (idx: number, title: string) => {
+    setNewPartAttachments(prev => prev.map((row, i) => (i === idx ? { ...row, title } : row)))
+  }
+
+  const handleChangePartAttachmentFile = (idx: number, file: File | null) => {
+    setNewPartAttachments(prev => prev.map((row, i) => (i === idx ? { ...row, file } : row)))
+  }
+
+  const handleUploadPartAttachments = async () => {
+    if (!selectedPartId || !id) return
+    const rowsToUpload = newPartAttachments.filter(r => r.file && r.title.trim().length)
+    if (!rowsToUpload.length) return toast.error(String(t('replyLetter.attachments.validation.fileAndTitleRequired')))
+
+    try {
+      setUploadingPartFiles(true)
+      for (const row of rowsToUpload) {
+        const formData = new FormData()
+        formData.append('task', id.toString())
+        formData.append('part', selectedPartId.toString())
+        formData.append('title', row.title)
+        if (row.file) formData.append('file', row.file)
+        await DataService.postForm(endpoints.taskAttachment, formData)
+      }
+      toast.success(String(t('tasks.attachments.attached')))
+      setNewPartAttachments([])
+      fetchPartAttachments(selectedPartId)
+    } catch (e) {
+      console.error('Error uploading part attachments:', e)
+      toast.error(String(t('tasks.attachments.attachError')))
+    } finally {
+      setUploadingPartFiles(false)
+    }
+  }
+
+  const handleDownloadPartFile = (file: any) => {
+    if (file.file) {
+      window.open(String(file.file), '_blank', 'noopener,noreferrer')
+    }
+  }
+
   const onSubmit = async (values: TaskPayload) => {
     try {
       if (!id || Array.isArray(id)) return
       if (attachFiles.length) await submitAttachment()
       await DataService.put(endpoints.taskById(id), { ...values, company: user?.company_id })
       toast.success(String(t('tasks.toast.updated')))
-      router.push(`/tasks/view/${id}`)
     } catch (e: any) {
       toast.error(e?.message || String(t('tasks.toast.updateError')))
     }
@@ -395,14 +489,19 @@ const TaskUpdateForm = () => {
     }
   }
 
+  const updateTaskType = async (type: 'simple' | 'divide_into_parts') => {
+    if (!id || Array.isArray(id)) return
+    await DataService.patch<any>(endpoints.taskById(id), { task_type: type })
+  }
+
   return (
     <Stack spacing={4}>
       {/* Main form (top) */}
       <DatePickerWrapper>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={4}>
+          <Grid container spacing={4} alignItems='stretch'>
             <Grid item xs={12} md={6}>
-              <Card variant='outlined'>
+              <Card variant='outlined' sx={{ height: '100%' }}>
                 <CardContent>
                   <Grid container spacing={4}>
                     <Grid item xs={12} sm={6}>
@@ -708,7 +807,7 @@ const TaskUpdateForm = () => {
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <Card variant='outlined'>
+              <Card variant='outlined' sx={{ height: '100%' }}>
                 <CardContent>
                   <Grid container spacing={4}>
                     <Grid item xs={12}>
@@ -790,6 +889,7 @@ const TaskUpdateForm = () => {
                 <Button type='button' variant='outlined' onClick={() => router.back()}>
                   {String(t('common.cancel'))}
                 </Button>
+
                 <Button type='submit' variant='contained'>
                   {String(t('common.save'))}
                 </Button>
@@ -807,10 +907,17 @@ const TaskUpdateForm = () => {
             <RadioGroup
               row
               value={assignmentMode}
-              onChange={e => setAssignmentMode(e.target.value as 'simple' | 'split')}
+              onChange={e => {
+                setAssignmentMode(e.target.value as 'simple' | 'divide_into_parts')
+                updateTaskType(e.target.value as 'simple' | 'divide_into_parts')
+              }}
             >
               <FormControlLabel value='simple' control={<Radio />} label={String(t('tasks.assignment.simple'))} />
-              <FormControlLabel value='split' control={<Radio />} label={String(t('tasks.assignment.split'))} />
+              <FormControlLabel
+                value='divide_into_parts'
+                control={<Radio />}
+                label={String(t('tasks.assignment.split'))}
+              />
             </RadioGroup>
           </FormControl>
 
@@ -887,7 +994,16 @@ const TaskUpdateForm = () => {
                           <TableCell>{part.end_date}</TableCell>
                           <TableCell>{part.note}</TableCell>
                           <TableCell align='right'>
-                            <Stack direction='row' spacing={1}>
+                            <Stack direction='row' spacing={1} justifyContent='flex-end'>
+                              <Tooltip title={String(t('task.addFile'))}>
+                                <IconButton
+                                  size='small'
+                                  color='primary'
+                                  onClick={() => handleOpenAttachmentDialog(part.id)}
+                                >
+                                  <Icon icon='tabler:paperclip' />
+                                </IconButton>
+                              </Tooltip>
                               <IconButton size='small' onClick={() => handleOpenDialog(part.id)}>
                                 <Icon icon='mdi:pencil' />
                               </IconButton>
@@ -1006,7 +1122,155 @@ const TaskUpdateForm = () => {
             </Button>
           </DialogActions>
         </Dialog>
+
+        {/* Dialog for task part attachments */}
+        <Dialog open={attachmentDialogOpen} onClose={handleCloseAttachmentDialog} maxWidth='md' fullWidth>
+          <DialogTitle>
+            {String(t('replyLetter.attachments.title'))} -{' '}
+            {taskParts.find(p => p.id === selectedPartId)?.title || String(t('tasks.parts.simpleTitle'))}
+          </DialogTitle>
+          <DialogContent>
+            <Stack spacing={4} sx={{ mt: 2 }}>
+              {/* Existing files */}
+              <Box>
+                <Typography variant='subtitle2' sx={{ mb: 2 }}>
+                  {String(t('replyLetter.attachments.existing'))}
+                </Typography>
+                {existingPartFiles.length > 0 ? (
+                  <TableContainer component={Paper} variant='outlined'>
+                    <Table size='small'>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>{String(t('replyLetter.attachments.table.title'))}</TableCell>
+                          <TableCell>{String(t('replyLetter.attachments.table.file'))}</TableCell>
+                          <TableCell align='right'>{String(t('replyLetter.attachments.table.actions'))}</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {existingPartFiles.map(file => (
+                          <TableRow key={file.id}>
+                            <TableCell>{file.title}</TableCell>
+                            <TableCell>{file.file ? file.file.split('/').pop() : '-'}</TableCell>
+                            <TableCell align='right'>
+                              <Tooltip title={String(t('replyLetter.attachments.actions.download'))}>
+                                <IconButton size='small' onClick={() => handleDownloadPartFile(file)}>
+                                  <Icon icon='tabler:download' />
+                                </IconButton>
+                              </Tooltip>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                ) : (
+                  <Typography variant='body2' color='text.secondary'>
+                    {String(t('replyLetter.attachments.empty'))}
+                  </Typography>
+                )}
+              </Box>
+
+              <Divider />
+
+              {/* Add new files */}
+              <Box>
+                <Typography variant='subtitle2' sx={{ mb: 2 }}>
+                  {String(t('replyLetter.attachments.addNew'))}
+                </Typography>
+                <Stack spacing={2}>
+                  {newPartAttachments.map((row, idx) => (
+                    <Card key={idx} variant='outlined'>
+                      <CardContent sx={{ p: '1rem !important' }}>
+                        <Grid container spacing={3} alignItems='center'>
+                          <Grid item xs={12} md={5}>
+                            <CustomTextField
+                              fullWidth
+                              label={String(t('replyLetter.attachments.form.title'))}
+                              value={row.title}
+                              onChange={e => handleChangePartAttachmentTitle(idx, e.target.value)}
+                            />
+                          </Grid>
+                          <Grid item xs={12} md={5}>
+                            <Stack direction='row' spacing={2} alignItems='center'>
+                              <Button
+                                variant='outlined'
+                                component='label'
+                                size='small'
+                                startIcon={<Icon icon='tabler:paperclip' />}
+                              >
+                                {String(t('replyLetter.attachments.form.attachFile'))}
+                                <input
+                                  hidden
+                                  type='file'
+                                  onChange={e => handleChangePartAttachmentFile(idx, e.target.files?.[0] || null)}
+                                />
+                              </Button>
+                              <Typography
+                                variant='caption'
+                                sx={{
+                                  color: 'text.secondary',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap'
+                                }}
+                              >
+                                {row.file ? row.file.name : String(t('replyLetter.attachments.form.noFileSelected'))}
+                              </Typography>
+                            </Stack>
+                          </Grid>
+                          <Grid item xs={12} md={2} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <IconButton color='error' onClick={() => handleRemovePartAttachmentRow(idx)}>
+                              <Icon icon='tabler:trash' />
+                            </IconButton>
+                          </Grid>
+                        </Grid>
+                      </CardContent>
+                    </Card>
+                  ))}
+
+                  <Stack direction='row' spacing={2}>
+                    <Button
+                      variant='outlined'
+                      size='small'
+                      startIcon={<Icon icon='tabler:plus' />}
+                      onClick={handleAddPartAttachmentRow}
+                    >
+                      {String(t('replyLetter.attachments.addRow'))}
+                    </Button>
+                    {newPartAttachments.length > 0 && (
+                      <Button
+                        variant='contained'
+                        color='success'
+                        size='small'
+                        onClick={handleUploadPartAttachments}
+                        disabled={uploadingPartFiles}
+                        startIcon={<Icon icon='tabler:upload' />}
+                      >
+                        {uploadingPartFiles ? String(t('common.loading')) : String(t('replyLetter.attachments.upload'))}
+                      </Button>
+                    )}
+                  </Stack>
+                </Stack>
+              </Box>
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseAttachmentDialog}>{String(t('common.close'))}</Button>
+          </DialogActions>
+        </Dialog>
       </Card>
+
+      <Box sx={{ display: 'flex', justifyContent: 'flex-start', mt: 2 }}>
+        <Button
+          component={Link}
+          href={`/tasks/view/${id}`}
+          variant='contained'
+          color='info'
+          startIcon={<Icon icon='tabler:file-text' />}
+        >
+          {String(t('common.view'))}
+        </Button>
+      </Box>
     </Stack>
   )
 }
