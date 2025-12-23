@@ -3,7 +3,6 @@ const path = require('path')
 
 module.exports = {
   reactStrictMode: false,
-  output: 'export',
 
   images: {
     unoptimized: true
