@@ -48,7 +48,7 @@ export type TaskPayload = {
   type?: string
   name?: string
   task_form?: number
-  sending_org?: number
+  sending_org?: string
   input_doc_number?: string
   output_doc_number?: string
   start_date?: string
@@ -68,7 +68,7 @@ const defaults: TaskPayload = {
   type: 'task',
   name: '',
   task_form: 0,
-  sending_org: 0,
+  sending_org: '',
   input_doc_number: '',
   output_doc_number: '',
   start_date: '',
@@ -95,24 +95,11 @@ const buildSchema = (t: (key: string, options?: any) => any): yup.ObjectSchema<T
       .typeError(String(t('errors.select')))
       .moreThan(0, String(t('errors.select')))
       .required(String(t('errors.required'))),
-    sending_org: yup
-      .number()
-      .typeError(String(t('errors.select')))
-      .moreThan(0, String(t('errors.select')))
-      .required(String(t('errors.required'))),
+    sending_org: yup.string().required(String(t('errors.required'))),
     input_doc_number: yup.string().required(String(t('errors.required'))),
     output_doc_number: yup.string().required(String(t('errors.required'))),
     start_date: yup.string().required(String(t('errors.required'))),
-    end_date: yup
-      .string()
-      .optional()
-      .default('')
-      .test('end-after-start', String(t('errors.endAfterStart')), function (value) {
-        const { start_date } = this.parent as TaskPayload
-        if (!start_date || !value) return true
-
-        return new Date(value) >= new Date(start_date)
-      }),
+    end_date: yup.string().required(String(t('errors.required'))),
     priority: yup
       .string()
       .oneOf(['ordinary', 'orgently'])
@@ -122,7 +109,6 @@ const buildSchema = (t: (key: string, options?: any) => any): yup.ObjectSchema<T
       .typeError(String(t('errors.select')))
       .moreThan(0, String(t('errors.select')))
       .required(String(t('errors.required'))),
-    note: yup.string().required(String(t('errors.required'))),
     list_of_magazine: yup
       .number()
       .typeError(String(t('errors.select')))
@@ -211,7 +197,7 @@ const TaskUpdateForm = () => {
         // Normalize numeric selects to numbers with fallback
         priority: data.priority || 'ordinary',
         task_form: typeof data.task_form === 'number' ? data.task_form : 0,
-        sending_org: data.sending_org || 0,
+        sending_org: data.sending_org || '',
         department: typeof data.department === 'number' ? data.department : 0,
         signed_by: typeof data.signed_by === 'number' ? data.signed_by : 0,
         list_of_magazine: typeof data.list_of_magazine === 'number' ? data.list_of_magazine : 0,
