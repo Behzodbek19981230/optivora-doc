@@ -11,6 +11,7 @@ module.exports = {
   eslint: {
     ignoreDuringBuilds: true
   },
+  output: 'export',
 
   webpack: config => {
     config.resolve.alias = {
