@@ -12,6 +12,7 @@ module.exports = {
   images: {
     unoptimized: true
   },
+
   // Skip ESLint checks during production builds
   eslint: {
     ignoreDuringBuilds: true
