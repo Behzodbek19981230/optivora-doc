@@ -41,9 +41,3 @@ jobs:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
           SERVER_USER: ${{ secrets.SERVER_USER }}
           SERVER_PORT: ${{ secrets.SERVER_PORT }}
-        run: |
-          set -euo pipefail
-          PORT="${SERVER_PORT:-22}"
-          rsync -az --delete \
-            -e "ssh -o StrictHostKeyChecking=no -p ${PORT}" \
-            out/ "${SERVER_USER}@${SERVER_HOST}:/var/www/optivora-doc/"
