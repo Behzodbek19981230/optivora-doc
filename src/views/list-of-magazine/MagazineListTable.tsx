@@ -8,6 +8,7 @@ import { DataService } from 'src/configs/dataService'
 import useThemedToast from 'src/@core/hooks/useThemedToast'
 import MagazineListDialog from './dialogs/MagazineListDialog'
 import { useTranslation } from 'react-i18next'
+import { getDataGridLocaleText } from 'src/@core/utils/getDataGridLocaleText'
 
 type Magazine = {
   id?: number
@@ -105,6 +106,7 @@ const MagazineListTable = () => {
         paginationModel={paginationModel}
         onPaginationModelChange={setPaginationModel}
         getRowId={row => (row as any).id as number}
+        localeText={getDataGridLocaleText(t)}
       />
 
       <MagazineListDialog

@@ -10,6 +10,7 @@ import IconifyIcon from 'src/@core/components/icon'
 import endpoints from 'src/configs/endpoints'
 import { useFetchList } from 'src/hooks/useFetchList'
 import { useTranslation } from 'react-i18next'
+import { getDataGridLocaleText } from 'src/@core/utils/getDataGridLocaleText'
 
 const CountryTable = () => {
   const { t } = useTranslation()
@@ -104,6 +105,7 @@ const CountryTable = () => {
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           getRowId={row => (row as any).id as number}
+          localeText={getDataGridLocaleText(t)}
         />
       </>
       <CountryFormDialog

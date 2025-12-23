@@ -25,6 +25,7 @@ import { useTranslation } from 'react-i18next'
 import { DataService } from 'src/configs/dataService'
 import useThemedToast from 'src/@core/hooks/useThemedToast'
 import { useAuth } from 'src/hooks/useAuth'
+import { getDataGridLocaleText } from 'src/@core/utils/getDataGridLocaleText'
 
 export type TaskRow = {
   id: number
@@ -194,6 +195,7 @@ const TaskTable = () => {
         paginationModel={paginationModel}
         onPaginationModelChange={setPaginationModel}
         getRowId={row => (row as any).id as number}
+        localeText={getDataGridLocaleText(t)}
       />
     </>
   )

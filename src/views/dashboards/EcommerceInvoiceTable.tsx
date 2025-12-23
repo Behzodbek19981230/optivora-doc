@@ -18,6 +18,8 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
+import { useTranslation } from 'react-i18next'
+import { getDataGridLocaleText } from 'src/@core/utils/getDataGridLocaleText'
 
 // ** Store & Actions Imports
 import { useDispatch, useSelector } from 'react-redux'
@@ -127,6 +129,7 @@ const EcommerceInvoiceTable = () => {
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 6 })
 
   // ** Hooks
+  const { t } = useTranslation()
   const dispatch = useDispatch<AppDispatch>()
   const store = useSelector((state: RootState) => state.invoice)
 
@@ -221,6 +224,7 @@ const EcommerceInvoiceTable = () => {
         paginationModel={paginationModel}
         pageSizeOptions={[6, 10, 25, 50]}
         onPaginationModelChange={setPaginationModel}
+        localeText={getDataGridLocaleText(t)}
       />
     </Card>
   )

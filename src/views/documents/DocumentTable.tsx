@@ -27,6 +27,7 @@ import { useTranslation } from 'react-i18next'
 import { DataService } from 'src/configs/dataService'
 import useThemedToast from 'src/@core/hooks/useThemedToast'
 import { useAuth } from 'src/hooks/useAuth'
+import { getDataGridLocaleText } from 'src/@core/utils/getDataGridLocaleText'
 
 export type DocumentRow = {
   company: number
@@ -264,7 +265,10 @@ const DocumentTable = ({ status }: Props) => {
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           getRowId={row => (row as any).id as number}
-          localeText={{ noRowsLabel: String(t('documents.table.emptyForStatus', { status })) }}
+          localeText={{
+            ...getDataGridLocaleText(t),
+            noRowsLabel: String(t('documents.table.emptyForStatus', { status }))
+          }}
         />
       </CardContent>
     </Card>

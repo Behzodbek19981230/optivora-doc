@@ -14,6 +14,7 @@ import { DataService } from 'src/configs/dataService'
 import toast from 'react-hot-toast'
 import PositionFormDialog from '../dialogs/PositionFormDialog'
 import { useTranslation } from 'react-i18next'
+import { getDataGridLocaleText } from 'src/@core/utils/getDataGridLocaleText'
 
 const PositionTable = () => {
   const { t } = useTranslation()
@@ -113,6 +114,7 @@ const PositionTable = () => {
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           getRowId={row => (row as any).id as number}
+          localeText={getDataGridLocaleText(t)}
         />
       </>
       <PositionFormDialog

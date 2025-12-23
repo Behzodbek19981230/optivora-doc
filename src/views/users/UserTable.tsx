@@ -22,6 +22,7 @@ import UserFormDialog from './dialogs/UserFormDialog'
 import UserViewDialog from './dialogs/UserViewDialog'
 import { getInitials } from 'src/@core/utils/get-initials'
 import { useTranslation } from 'react-i18next'
+import { getDataGridLocaleText } from 'src/@core/utils/getDataGridLocaleText'
 
 type User = {
   id: number
@@ -261,6 +262,7 @@ const UserTable = () => {
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           getRowId={row => (row as User).id}
+          localeText={getDataGridLocaleText(t)}
         />
       </>
 

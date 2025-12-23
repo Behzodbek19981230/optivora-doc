@@ -14,6 +14,7 @@ import { DataService } from 'src/configs/dataService'
 import toast from 'react-hot-toast'
 import DepartmentFormDialog from '../dialogs/DepartmentFormDialog'
 import { useTranslation } from 'react-i18next'
+import { getDataGridLocaleText } from 'src/@core/utils/getDataGridLocaleText'
 
 const DepartmentTable = () => {
   const { t } = useTranslation()
@@ -106,6 +107,7 @@ const DepartmentTable = () => {
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           getRowId={row => (row as any).id as number}
+          localeText={getDataGridLocaleText(t)}
         />
       </>
       <DepartmentFormDialog

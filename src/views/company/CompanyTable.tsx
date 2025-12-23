@@ -23,6 +23,7 @@ import CompanyViewDialog from './dialogs/CompanyViewDialog'
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { getInitials } from 'src/@core/utils/get-initials'
 import { useTranslation } from 'react-i18next'
+import { getDataGridLocaleText } from 'src/@core/utils/getDataGridLocaleText'
 
 type Company = {
   id: number
@@ -189,6 +190,7 @@ const CompanyTable = () => {
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           getRowId={row => (row as Company).id}
+          localeText={getDataGridLocaleText(t)}
         />
       </>
 

@@ -7,7 +7,6 @@ import {
   CardContent,
   Grid,
   Button,
-  MenuItem,
   Stack,
   CardActions,
   IconButton,
@@ -31,6 +30,7 @@ import EditorControlled from 'src/views/forms/form-elements/editor/EditorControl
 import { EditorState, ContentState } from 'draft-js'
 import { EditorWrapper } from 'src/@core/styles/libs/react-draft-wysiwyg'
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'
+import { useAuth } from 'src/hooks/useAuth'
 
 type ReplyLetterFormType = {
   id?: number
@@ -39,6 +39,7 @@ type ReplyLetterFormType = {
   responsible_person: number
   basis: string
   comment: string
+  organization: string
 }
 
 const defaultValues: ReplyLetterFormType = {
@@ -46,7 +47,8 @@ const defaultValues: ReplyLetterFormType = {
   letter_number: '',
   responsible_person: 0,
   basis: '',
-  comment: ''
+  comment: '',
+  organization: ''
 }
 
 type ReplyLetterFileItem = {
@@ -62,7 +64,7 @@ const ReplyLetterForm = () => {
   const { id } = router.query
   const mode = id ? 'edit' : 'create'
   const itemId = id ? Number(id) : null
-
+  const { user } = useAuth()
   const {
     control,
     handleSubmit,
@@ -70,18 +72,12 @@ const ReplyLetterForm = () => {
     formState: { isSubmitting }
   } = useForm<ReplyLetterFormType>({ defaultValues })
 
-  const [companies, setCompanies] = useState<any[]>([])
   const [persons, setPersons] = useState<any[]>([])
   const [commentState, setCommentState] = useState(EditorState.createEmpty())
 
   useEffect(() => {
     // load companies and persons for selects
     const load = async () => {
-      try {
-        const cRes = await DataService.get(endpoints.company + '?perPage=200')
-        const cData: any = (cRes as any).data
-        setCompanies(cData.results || cData || [])
-      } catch (e) {}
       try {
         const pRes = await DataService.get(endpoints.users + '?perPage=200')
         const pData: any = (pRes as any).data
@@ -110,10 +106,8 @@ const ReplyLetterForm = () => {
 
   const onSubmit = async (values: ReplyLetterFormType) => {
     try {
-      const payload = { ...values }
+      const payload = { ...values, company: user?.company_id }
       if (mode === 'create') {
-        console.log(endpoints.replyLetter)
-
         const res = await DataService.post<{ id: number }>(endpoints.replyLetter, payload)
         toast.success(String(t('replyLetter.toast.created')))
         router.push(`/reply-letter/${res.data.id}`)
@@ -225,17 +219,10 @@ const ReplyLetterForm = () => {
           <Grid container spacing={4}>
             <Grid item xs={12} md={6}>
               <Controller
-                name='company'
+                name='organization'
                 control={control}
                 render={({ field }) => (
-                  <CustomTextField select fullWidth label={String(t('replyLetter.form.company'))} {...field}>
-                    <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
-                    {companies.map(c => (
-                      <MenuItem key={c.id} value={c.id}>
-                        {c.name}
-                      </MenuItem>
-                    ))}
-                  </CustomTextField>
+                  <CustomTextField fullWidth label={String(t('replyLetter.form.company'))} {...field} />
                 )}
               />
             </Grid>

@@ -12,6 +12,7 @@ import { useFetchList } from 'src/hooks/useFetchList'
 import { DataService } from 'src/configs/dataService'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
+import { getDataGridLocaleText } from 'src/@core/utils/getDataGridLocaleText'
 
 const RegionTable = () => {
   const { t } = useTranslation()
@@ -105,6 +106,7 @@ const RegionTable = () => {
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           getRowId={row => (row as any).id as number}
+          localeText={getDataGridLocaleText(t)}
         />
       </>
       <RegionFormDialog

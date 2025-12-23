@@ -11,6 +11,7 @@ import { CommandType } from 'src/types/command'
 import { useRouter } from 'next/router'
 import moment from 'moment'
 import { useTranslation } from 'react-i18next'
+import { getDataGridLocaleText } from 'src/@core/utils/getDataGridLocaleText'
 
 const CommandTable = () => {
   const router = useRouter()
@@ -107,6 +108,7 @@ const CommandTable = () => {
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           getRowId={row => (row as CommandType).id as number}
+          localeText={getDataGridLocaleText(t)}
         />
       </>
 

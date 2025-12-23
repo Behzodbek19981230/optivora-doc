@@ -3,6 +3,8 @@ import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import { useTranslation } from 'react-i18next'
+import { getDataGridLocaleText } from 'src/@core/utils/getDataGridLocaleText'
 
 // ** Data Import
 import { rows } from 'src/@fake-db/table/static-data'
@@ -49,11 +51,13 @@ const columns: GridColDef[] = [
 ]
 
 const TableBasic = () => {
+  const { t } = useTranslation()
+
   return (
     <Card>
       <CardHeader title='Basic' />
       <Box sx={{ height: 500 }}>
-        <DataGrid columns={columns} rows={rows.slice(0, 10)} />
+        <DataGrid columns={columns} rows={rows.slice(0, 10)} localeText={getDataGridLocaleText(t)} />
       </Box>
     </Card>
   )

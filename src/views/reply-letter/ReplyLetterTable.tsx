@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Card, CardHeader, CardContent, IconButton, Button, Stack } from '@mui/material'
+import { Card, CardHeader, IconButton, Button } from '@mui/material'
 import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid'
-import Tooltip from '@mui/material/Tooltip'
 import IconifyIcon from 'src/@core/components/icon'
+import { getDataGridLocaleText } from 'src/@core/utils/getDataGridLocaleText'
 import endpoints from 'src/configs/endpoints'
 import { useFetchList } from 'src/hooks/useFetchList'
 import { DataService } from 'src/configs/dataService'
@@ -10,8 +10,6 @@ import toast from 'react-hot-toast'
 import { useRouter } from 'next/router'
 import DeleteConfirmDialog from 'src/views/locations/dialogs/DeleteConfirmDialog'
 import { useTranslation } from 'react-i18next'
-
-const AddIcon = () => <span style={{ fontWeight: 'bold' }}>＋</span>
 
 const ReplyLetterTable = () => {
   const router = useRouter()
@@ -22,7 +20,6 @@ const ReplyLetterTable = () => {
 
   const {
     data = [],
-    total,
     loading,
     mutate
   } = useFetchList(endpoints.replyLetter, {
@@ -47,6 +44,8 @@ const ReplyLetterTable = () => {
     toast.success(String(t('replyLetter.toast.deleted')))
   }
 
+  const localeText = getDataGridLocaleText(t)
+
   const columns: GridColDef[] = [
     { field: 'letter_number', headerName: String(t('replyLetter.table.letterNumber')), flex: 0.18, minWidth: 140 },
     { field: 'basis', headerName: String(t('replyLetter.table.basis')), flex: 0.3, minWidth: 220 },
@@ -59,11 +58,10 @@ const ReplyLetterTable = () => {
         params.row.responsible_person_detail ? params.row.responsible_person_detail.name : params.row.responsible_person
     },
     {
-      field: 'company_detail',
+      field: 'organization',
       headerName: String(t('replyLetter.table.company')),
       flex: 0.2,
-      minWidth: 160,
-      valueGetter: params => (params.row.company_detail ? params.row.company_detail.name : '')
+      minWidth: 160
     },
     { field: 'created_time', headerName: String(t('replyLetter.table.createdAt')), flex: 0.18, minWidth: 150 },
     {
@@ -111,6 +109,7 @@ const ReplyLetterTable = () => {
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           getRowId={row => (row as any).id as number}
+          localeText={localeText}
         />
       </>
 
