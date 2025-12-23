@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react'
-import { Grid, Stack, Button, MenuItem, Card, CardContent } from '@mui/material'
+import { Grid, Stack, Button, Card, CardContent, Autocomplete } from '@mui/material'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
@@ -110,10 +109,7 @@ const TaskCreateForm = () => {
     page: 1,
     perPage: 100
   })
-  const { data: companies } = useFetchList<{ id: number; name: string }>(endpoints.company, {
-    page: 1,
-    perPage: 100
-  })
+
   const { data: docFormsData } = useFetchList(endpoints.documentForm, {
     page: 1,
     perPage: 100
@@ -148,24 +144,62 @@ const TaskCreateForm = () => {
                 <Controller
                   name='type'
                   control={control}
-                  render={({ field }) => (
-                    <CustomTextField select fullWidth label={String(t('tasks.form.type'))} {...field}>
-                      <MenuItem value='task'>{String(t('tasks.type.task'))}</MenuItem>
-                      <MenuItem value='application'>{String(t('tasks.type.application'))}</MenuItem>
-                    </CustomTextField>
-                  )}
+                  render={({ field, fieldState }) => {
+                    const options = [
+                      { value: 'task', label: String(t('tasks.type.task')) },
+                      { value: 'application', label: String(t('tasks.type.application')) }
+                    ]
+
+                    return (
+                      <Autocomplete
+                        options={options}
+                        value={options.find(o => o.value === field.value) || null}
+                        onChange={(_, v) => field.onChange(v?.value || '')}
+                        isOptionEqualToValue={(o, v) => o.value === v.value}
+                        getOptionLabel={o => o.label}
+                        renderInput={params => (
+                          <CustomTextField
+                            {...params}
+                            fullWidth
+                            label={String(t('tasks.form.type'))}
+                            error={!!fieldState.error}
+                            helperText={safeMsg(fieldState.error?.message)}
+                          />
+                        )}
+                      />
+                    )
+                  }}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Controller
                   name='priority'
                   control={control}
-                  render={({ field }) => (
-                    <CustomTextField select fullWidth label={String(t('tasks.form.priority'))} {...field}>
-                      <MenuItem value='ordinary'>{String(t('tasks.priority.ordinary'))}</MenuItem>
-                      <MenuItem value='orgently'>{String(t('tasks.priority.orgently'))}</MenuItem>
-                    </CustomTextField>
-                  )}
+                  render={({ field, fieldState }) => {
+                    const options = [
+                      { value: 'ordinary', label: String(t('tasks.priority.ordinary')) },
+                      { value: 'orgently', label: String(t('tasks.priority.orgently')) }
+                    ]
+
+                    return (
+                      <Autocomplete
+                        options={options}
+                        value={options.find(o => o.value === field.value) || null}
+                        onChange={(_, v) => field.onChange(v?.value || '')}
+                        isOptionEqualToValue={(o, v) => o.value === v.value}
+                        getOptionLabel={o => o.label}
+                        renderInput={params => (
+                          <CustomTextField
+                            {...params}
+                            fullWidth
+                            label={String(t('tasks.form.priority'))}
+                            error={!!fieldState.error}
+                            helperText={safeMsg(fieldState.error?.message)}
+                          />
+                        )}
+                      />
+                    )
+                  }}
                 />
               </Grid>
 
@@ -192,21 +226,22 @@ const TaskCreateForm = () => {
                   control={control}
                   rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => (
-                    <CustomTextField
-                      select
-                      fullWidth
-                      label={String(t('tasks.form.taskForm'))}
-                      {...field}
-                      error={!!fieldState.error}
-                      helperText={safeMsg(fieldState.error?.message)}
-                    >
-                      <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
-                      {(docForms || []).map(f => (
-                        <MenuItem key={f.id} value={f.id}>
-                          {f.name}
-                        </MenuItem>
-                      ))}
-                    </CustomTextField>
+                    <Autocomplete
+                      options={docForms || []}
+                      value={(docForms || []).find(f => f.id === field.value) || null}
+                      onChange={(_, v) => field.onChange(v?.id ?? undefined)}
+                      isOptionEqualToValue={(o, v) => o.id === v.id}
+                      getOptionLabel={o => o?.name || ''}
+                      renderInput={params => (
+                        <CustomTextField
+                          {...params}
+                          fullWidth
+                          label={String(t('tasks.form.taskForm'))}
+                          error={!!fieldState.error}
+                          helperText={safeMsg(fieldState.error?.message)}
+                        />
+                      )}
+                    />
                   )}
                 />
               </Grid>
@@ -219,18 +254,11 @@ const TaskCreateForm = () => {
                   render={({ field, fieldState }) => (
                     <CustomTextField
                       fullWidth
-                      select
                       label={String(t('tasks.form.sendingOrg'))}
                       {...field}
                       error={!!fieldState.error}
                       helperText={fieldState.error?.message}
-                    >
-                      {(companies || []).map(c => (
-                        <MenuItem key={c.id} value={c.id}>
-                          {c.name}
-                        </MenuItem>
-                      ))}
-                    </CustomTextField>
+                    />
                   )}
                 />
               </Grid>
@@ -275,6 +303,7 @@ const TaskCreateForm = () => {
                   rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => {
                     const selectedDate = field.value ? new Date(field.value) : null
+
                     return (
                       <div>
                         <DatePicker
@@ -304,6 +333,7 @@ const TaskCreateForm = () => {
                   rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => {
                     const selectedDate = field.value ? new Date(field.value) : null
+
                     return (
                       <div>
                         <DatePicker
@@ -333,20 +363,22 @@ const TaskCreateForm = () => {
                   control={control}
                   rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => (
-                    <CustomTextField
-                      select
-                      fullWidth
-                      label={String(t('tasks.form.department'))}
-                      {...field}
-                      error={!!fieldState.error}
-                      helperText={fieldState.error?.message}
-                    >
-                      {(departments || []).map(d => (
-                        <MenuItem key={d.id} value={d.id}>
-                          {d.name}
-                        </MenuItem>
-                      ))}
-                    </CustomTextField>
+                    <Autocomplete
+                      options={departments || []}
+                      value={(departments || []).find(d => d.id === field.value) || null}
+                      onChange={(_, v) => field.onChange(v?.id ?? undefined)}
+                      isOptionEqualToValue={(o, v) => o.id === v.id}
+                      getOptionLabel={o => o?.name || ''}
+                      renderInput={params => (
+                        <CustomTextField
+                          {...params}
+                          fullWidth
+                          label={String(t('tasks.form.department'))}
+                          error={!!fieldState.error}
+                          helperText={safeMsg(fieldState.error?.message)}
+                        />
+                      )}
+                    />
                   )}
                 />
               </Grid>
@@ -356,20 +388,22 @@ const TaskCreateForm = () => {
                   control={control}
                   rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => (
-                    <CustomTextField
-                      select
-                      fullWidth
-                      label={String(t('tasks.form.signedBy'))}
-                      {...field}
-                      error={!!fieldState.error}
-                      helperText={fieldState.error?.message}
-                    >
-                      {(users || []).map(u => (
-                        <MenuItem key={u.id} value={u.id}>
-                          {u.fullname}
-                        </MenuItem>
-                      ))}
-                    </CustomTextField>
+                    <Autocomplete
+                      options={users || []}
+                      value={(users || []).find(u => u.id === field.value) || null}
+                      onChange={(_, v) => field.onChange(v?.id ?? undefined)}
+                      isOptionEqualToValue={(o, v) => o.id === v.id}
+                      getOptionLabel={o => o?.fullname || ''}
+                      renderInput={params => (
+                        <CustomTextField
+                          {...params}
+                          fullWidth
+                          label={String(t('tasks.form.signedBy'))}
+                          error={!!fieldState.error}
+                          helperText={safeMsg(fieldState.error?.message)}
+                        />
+                      )}
+                    />
                   )}
                 />
               </Grid>
@@ -398,21 +432,22 @@ const TaskCreateForm = () => {
                   control={control}
                   rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => (
-                    <CustomTextField
-                      select
-                      fullWidth
-                      label={String(t('tasks.form.magazine'))}
-                      {...field}
-                      error={!!fieldState.error}
-                      helperText={fieldState.error?.message}
-                    >
-                      <MenuItem value={0}>{String(t('common.selectPlaceholder'))}</MenuItem>
-                      {(magData || []).map(m => (
-                        <MenuItem key={m.id} value={m.id}>
-                          {m.name}
-                        </MenuItem>
-                      ))}
-                    </CustomTextField>
+                    <Autocomplete
+                      options={magData || []}
+                      value={(magData || []).find(m => m.id === field.value) || null}
+                      onChange={(_, v) => field.onChange(v?.id ?? undefined)}
+                      isOptionEqualToValue={(o, v) => o.id === v.id}
+                      getOptionLabel={o => o?.name || ''}
+                      renderInput={params => (
+                        <CustomTextField
+                          {...params}
+                          fullWidth
+                          label={String(t('tasks.form.magazine'))}
+                          error={!!fieldState.error}
+                          helperText={safeMsg(fieldState.error?.message)}
+                        />
+                      )}
+                    />
                   )}
                 />
               </Grid>

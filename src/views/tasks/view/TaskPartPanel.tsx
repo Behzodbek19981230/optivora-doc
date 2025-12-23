@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Box, Stack, Typography, Divider, Button, Grid, Chip, MenuItem } from '@mui/material'
+import { Autocomplete, Box, Stack, Typography, Divider, Button, Grid, Chip } from '@mui/material'
 import { useForm, Controller } from 'react-hook-form'
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
@@ -118,20 +118,14 @@ const TaskPartPanel = ({ taskId }: Props) => {
         <Typography variant='subtitle1'>1) Oddiy biriktirish (1 ta ijrochi):</Typography>
         <Typography variant='caption'>Ijrochi → TaskPart.assignee (default part)</Typography>
         <Stack direction='row' spacing={2} sx={{ mt: 2 }}>
-          <CustomTextField
-            select
-            fullWidth
-            label='Ijrochini tanlang'
-            value={quickAssignee}
-            onChange={e => setQuickAssignee(Number(e.target.value))}
-          >
-            <MenuItem value={0}>---</MenuItem>
-            {(users || []).map(u => (
-              <MenuItem key={u.id} value={u.id}>
-                {u.fullname}
-              </MenuItem>
-            ))}
-          </CustomTextField>
+          <Autocomplete
+            options={users || []}
+            value={(users || []).find(u => u.id === quickAssignee) || null}
+            onChange={(_, v) => setQuickAssignee(v?.id || 0)}
+            isOptionEqualToValue={(o, v) => o.id === v.id}
+            getOptionLabel={o => o?.fullname || ''}
+            renderInput={params => <CustomTextField {...params} fullWidth label='Ijrochini tanlang' placeholder='---' />}
+          />
           <Button variant='contained' onClick={createDefaultAssigneePart} disabled={!quickAssignee}>
             Biriktirish
           </Button>

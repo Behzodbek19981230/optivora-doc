@@ -6,12 +6,12 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
-import MenuItem from '@mui/material/MenuItem'
 import Switch from '@mui/material/Switch'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import CustomTextField from 'src/@core/components/mui/text-field'
+import Autocomplete from '@mui/material/Autocomplete'
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
 import toast from 'react-hot-toast'
@@ -231,21 +231,23 @@ const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                 name='country'
                 control={control}
                 rules={{ required: String(t('errors.required')) }}
-                render={({ field }) => (
-                  <CustomTextField
-                    select
-                    fullWidth
-                    label={String(t('company.form.country'))}
-                    {...field}
-                    error={!!errors.country}
-                    helperText={errors.country?.message}
-                  >
-                    {countries.map(c => (
-                      <MenuItem key={c.id} value={c.id}>
-                        {c.name}
-                      </MenuItem>
-                    ))}
-                  </CustomTextField>
+                render={({ field, fieldState }) => (
+                  <Autocomplete
+                    options={countries}
+                    value={countries.find(c => c.id === field.value) || null}
+                    onChange={(_, v) => field.onChange(v?.id ?? 0)}
+                    isOptionEqualToValue={(o, v) => o.id === v.id}
+                    getOptionLabel={o => o?.name || ''}
+                    renderInput={params => (
+                      <CustomTextField
+                        {...params}
+                        fullWidth
+                        label={String(t('company.form.country'))}
+                        error={!!fieldState.error}
+                        helperText={fieldState.error?.message}
+                      />
+                    )}
+                  />
                 )}
               />
             </Grid>
@@ -254,21 +256,23 @@ const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                 name='region'
                 control={control}
                 rules={{ required: String(t('errors.required')) }}
-                render={({ field }) => (
-                  <CustomTextField
-                    select
-                    fullWidth
-                    label={String(t('company.form.region'))}
-                    {...field}
-                    error={!!errors.region}
-                    helperText={errors.region?.message}
-                  >
-                    {regions.map(r => (
-                      <MenuItem key={r.id} value={r.id}>
-                        {r.name}
-                      </MenuItem>
-                    ))}
-                  </CustomTextField>
+                render={({ field, fieldState }) => (
+                  <Autocomplete
+                    options={regions}
+                    value={regions.find(r => r.id === field.value) || null}
+                    onChange={(_, v) => field.onChange(v?.id ?? 0)}
+                    isOptionEqualToValue={(o, v) => o.id === v.id}
+                    getOptionLabel={o => o?.name || ''}
+                    renderInput={params => (
+                      <CustomTextField
+                        {...params}
+                        fullWidth
+                        label={String(t('company.form.region'))}
+                        error={!!fieldState.error}
+                        helperText={fieldState.error?.message}
+                      />
+                    )}
+                  />
                 )}
               />
             </Grid>
@@ -277,21 +281,23 @@ const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                 name='district'
                 control={control}
                 rules={{ required: String(t('errors.required')) }}
-                render={({ field }) => (
-                  <CustomTextField
-                    select
-                    fullWidth
-                    label={String(t('company.form.district'))}
-                    {...field}
-                    error={!!errors.district}
-                    helperText={errors.district?.message}
-                  >
-                    {districts.map(d => (
-                      <MenuItem key={d.id} value={d.id}>
-                        {d.name}
-                      </MenuItem>
-                    ))}
-                  </CustomTextField>
+                render={({ field, fieldState }) => (
+                  <Autocomplete
+                    options={districts}
+                    value={districts.find(d => d.id === field.value) || null}
+                    onChange={(_, v) => field.onChange(v?.id ?? 0)}
+                    isOptionEqualToValue={(o, v) => o.id === v.id}
+                    getOptionLabel={o => o?.name || ''}
+                    renderInput={params => (
+                      <CustomTextField
+                        {...params}
+                        fullWidth
+                        label={String(t('company.form.district'))}
+                        error={!!fieldState.error}
+                        helperText={fieldState.error?.message}
+                      />
+                    )}
+                  />
                 )}
               />
             </Grid>

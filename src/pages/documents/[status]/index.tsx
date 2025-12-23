@@ -1,30 +1,43 @@
-import { useEffect } from 'react'
-import { useRouter } from 'next/router'
+import type { GetStaticPaths, GetStaticProps } from 'next/types'
 import { Card, CardHeader, CardContent } from '@mui/material'
 import DocumentTabs, { DocumentStatus } from 'src/views/documents/DocumentTabs'
 import { useTranslation } from 'react-i18next'
 
-const DocumentsStatusPage = () => {
-  const router = useRouter()
-  const { status } = router.query as { status?: string }
-  const { t } = useTranslation()
+type Props = { status: DocumentStatus }
 
-  useEffect(() => {
-    if (!status) return
-    const isValid = Object.values(DocumentStatus).includes(status as DocumentStatus)
-    if (!isValid) {
-      router.replace('/404')
-    }
-  }, [status, router])
+const DocumentsStatusPage = ({ status }: Props) => {
+  const { t } = useTranslation()
 
   return (
     <Card>
       <CardHeader title={String(t('documents.title'))} />
       <CardContent>
-        <DocumentTabs currentStatus={(status as DocumentStatus) || DocumentStatus.New} />
+        <DocumentTabs currentStatus={status || DocumentStatus.New} />
       </CardContent>
     </Card>
   )
 }
 
 export default DocumentsStatusPage
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  // Next.js `output: 'export'` needs all dynamic paths at build time.
+  const statuses = Object.values(DocumentStatus) as DocumentStatus[]
+
+  return {
+    paths: statuses.map(s => ({ params: { status: s } })),
+    fallback: false
+  }
+}
+
+export const getStaticProps: GetStaticProps<Props> = async ctx => {
+  const raw = ctx.params?.status
+  const status = typeof raw === 'string' ? raw : Array.isArray(raw) ? raw[0] : undefined
+  const isValid = status && (Object.values(DocumentStatus) as string[]).includes(status)
+
+  if (!isValid) return { notFound: true }
+
+  return {
+    props: { status: status as DocumentStatus }
+  }
+}

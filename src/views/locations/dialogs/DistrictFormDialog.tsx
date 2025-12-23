@@ -7,7 +7,7 @@ import DialogActions from '@mui/material/DialogActions'
 import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
 import CustomTextField from 'src/@core/components/mui/text-field'
-import MenuItem from '@mui/material/MenuItem'
+import Autocomplete from '@mui/material/Autocomplete'
 import { useFetchList } from 'src/hooks/useFetchList'
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
@@ -122,26 +122,24 @@ const DistrictFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                 name='region'
                 control={control}
                 rules={{ required: true }}
-                render={({ field }) => (
-                  <CustomTextField
-                    select
-                    fullWidth
-                    label={String(t('locations.districts.form.region'))}
-                    {...field}
-                    value={field.value || ''}
-                  >
-                    {loadingRegions ? (
-                      <MenuItem value='' disabled>
-                        {String(t('common.loading'))}
-                      </MenuItem>
-                    ) : (
-                      regions.map((region: any) => (
-                        <MenuItem key={region.id} value={region.id}>
-                          {region.name_uz || region.name}
-                        </MenuItem>
-                      ))
+                render={({ field, fieldState }) => (
+                  <Autocomplete
+                    loading={loadingRegions}
+                    options={regions}
+                    value={regions.find((r: any) => Number(r.id) === Number(field.value)) || null}
+                    onChange={(_, v) => field.onChange(v?.id ? Number(v.id) : 0)}
+                    isOptionEqualToValue={(o: any, v: any) => Number(o.id) === Number(v.id)}
+                    getOptionLabel={(o: any) => o?.name_uz || o?.name || ''}
+                    renderInput={params => (
+                      <CustomTextField
+                        {...params}
+                        fullWidth
+                        label={String(t('locations.districts.form.region'))}
+                        error={!!fieldState.error}
+                        helperText={fieldState.error ? String(t('errors.required')) : undefined}
+                      />
                     )}
-                  </CustomTextField>
+                  />
                 )}
               />
             </Grid>
