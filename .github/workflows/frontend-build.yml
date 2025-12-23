@@ -36,15 +36,21 @@ jobs:
         run: ls -lah out
 
       # 6️⃣ Serverga deploy (RAM-safe)
-      - name: Deploy to VDS
-        uses: appleboy/scp-action@v0.1.6
+      # NOTE: appleboy/scp-action container ichida hammasini tar.gz qiladi, katta out/ bo‘lsa OOM (exit 137) bo‘ladi.
+      # rsync tar qilmaydi va faqat farqlarni yuboradi.
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          port: 22
-          source: 'out' # ❗ out/* EMAS
-          target: '/var/www/optivora-doc'
-          strip_components: 1 # out ichidagini to‘g‘ridan-to‘g‘ri joylaydi
-          rm: true # eski fayllarni o‘chiradi
-          timeout: 300s
+          ssh-private-key: ${{ secrets.SERVER_SSH_KEY }}
+
+      - name: Deploy to VDS (rsync)
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT }}
+        run: |
+          set -euo pipefail
+          PORT="${SERVER_PORT:-22}"
+          rsync -az --delete \
+            -e "ssh -o StrictHostKeyChecking=no -p ${PORT}" \
+            out/ "${SERVER_USER}@${SERVER_HOST}:/var/www/optivora-doc/"
