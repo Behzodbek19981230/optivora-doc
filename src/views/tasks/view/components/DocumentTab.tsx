@@ -296,9 +296,9 @@ export default function DocumentTab({
         </Card>
       </Grid>
 
-      {/* <Grid item xs={12}>
+      <Grid item xs={12}>
         <TaskAttachment taskId={task.id} partId={null} isCompact />
-      </Grid> */}
+      </Grid>
 
       <Grid item xs={12}>
         <TaskParts

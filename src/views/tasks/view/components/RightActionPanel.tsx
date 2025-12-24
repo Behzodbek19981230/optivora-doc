@@ -91,6 +91,7 @@ const RightActionsPanel = ({ task, part, mutate }: { task?: TaskType; part?: Tas
 
                         const key = `documents.status.${toCamel(part.status as string)}`
                         const translated = String(t(key))
+
                         return translated === key ? (part.status as string) : translated
                       })()}
                     />

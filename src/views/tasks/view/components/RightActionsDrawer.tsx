@@ -124,7 +124,6 @@ const RightActionsDrawer = ({ open, toggle, taskId, partId, part, task }: Props)
 
       if (hasComment) {
         await DataService.post(endpoints.taskComment, {
-          task: taskId,
           part: partId ?? null,
           author: user?.id,
           text: commentText.getCurrentContent().getPlainText()
@@ -135,7 +134,6 @@ const RightActionsDrawer = ({ open, toggle, taskId, partId, part, task }: Props)
         const formData = new FormData()
         formData.append('file', attachFile)
         formData.append('title', attachTitle.trim() || attachFile.name)
-        formData.append('task', taskId.toString())
         formData.append('part', partId ? partId.toString() : '')
         await DataService.postForm(endpoints.taskAttachment, formData)
       }

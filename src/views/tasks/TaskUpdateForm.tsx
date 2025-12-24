@@ -426,7 +426,6 @@ const TaskUpdateForm = () => {
       setUploadingPartFiles(true)
       for (const row of rowsToUpload) {
         const formData = new FormData()
-        formData.append('task', id.toString())
         formData.append('part', selectedPartId.toString())
         formData.append('title', row.title)
         if (row.file) formData.append('file', row.file)
