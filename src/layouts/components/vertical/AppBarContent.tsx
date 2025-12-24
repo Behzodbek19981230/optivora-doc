@@ -17,7 +17,7 @@ import LanguageDropdown from 'src/@core/layouts/components/shared-components/Lan
 
 // ** Hook Import
 import { useAuth } from 'src/hooks/useAuth'
-import { useRouter } from 'next/router'
+import { useRouter } from 'src/spa/router/useRouter'
 
 interface Props {
   hidden: boolean
@@ -105,7 +105,7 @@ const CompanyDropdown = ({ auth }: any) => {
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             {selected.logo && (
               <Avatar
-                src={`${process.env.NEXT_PUBLIC_FILE_URL}${selected.logo}`}
+                src={`${import.meta.env.VITE_FILE_URL}${selected.logo}`}
                 alt={selected.name}
                 sx={{ width: 20, height: 20, mr: 1, bgcolor: 'background.default', objectFit: 'contain' }}
               />
@@ -149,7 +149,7 @@ const CompanyDropdown = ({ auth }: any) => {
               >
                 {c.logo && (
                   <Avatar
-                    src={`${process.env.NEXT_PUBLIC_FILE_URL}${c.logo}`}
+                    src={`${import.meta.env.VITE_FILE_URL}${c.logo}`}
                     alt={c.name}
                     sx={{ width: 20, height: 20, mr: 1, bgcolor: 'background.default' }}
                   />

@@ -97,7 +97,7 @@ const CompanyViewDialog = ({ open, onClose, id }: Props) => {
             <Grid item xs={12} md={4}>
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <CustomAvatar
-                  src={`${process.env.NEXT_PUBLIC_FILE_URL}${company.logo}`}
+                  src={`${import.meta.env.VITE_FILE_URL}${company.logo}`}
                   variant='rounded'
                   sx={{
                     width: 200,

@@ -8,7 +8,7 @@ import { MenuItemProps } from '@mui/material/MenuItem'
 import { IconButtonProps } from '@mui/material/IconButton'
 
 // ** Types
-import { LinkProps } from 'next/link'
+import { LinkProps } from 'src/spa/router/Link'
 import { IconProps } from '@iconify/react'
 
 export type OptionDividerType = {

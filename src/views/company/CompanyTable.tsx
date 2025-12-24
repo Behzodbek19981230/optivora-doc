@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useRouter } from 'next/router'
+import { useRouter } from 'src/spa/router/useRouter'
 import { useFetchList } from 'src/hooks/useFetchList'
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'

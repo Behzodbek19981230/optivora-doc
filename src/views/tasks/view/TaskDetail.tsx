@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { useRouter } from 'next/router'
+import { useRouter } from 'src/spa/router/useRouter'
 import { Box, Card, CardContent, Grid, Stack, Tabs, Tab, Typography, Chip, Button } from '@mui/material'
-import Link from 'next/link'
+import Link from 'src/spa/router/Link'
 import Icon from 'src/@core/components/icon'
 
 import endpoints from 'src/configs/endpoints'

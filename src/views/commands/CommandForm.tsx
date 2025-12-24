@@ -15,7 +15,7 @@ import toast from 'react-hot-toast'
 import { CommandType } from 'src/types/command'
 import { useAuth } from 'src/hooks/useAuth'
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'
-import { useRouter } from 'next/router'
+import { useRouter } from 'src/spa/router/useRouter'
 import {
   Card,
   CardActions,

@@ -2,7 +2,7 @@
 import { useState, useEffect, ReactElement, SyntheticEvent } from 'react'
 
 // ** Next Import
-import { useRouter } from 'next/router'
+import { useRouter } from 'src/spa/router/useRouter'
 
 // ** MUI Components
 import Tab from '@mui/material/Tab'

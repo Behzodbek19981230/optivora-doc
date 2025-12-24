@@ -43,7 +43,7 @@ const getAcceptLanguageHeader = (): { 'Accept-Language': string } | {} => {
 }
 
 const API_CONFIG = {
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: import.meta.env.VITE_API_URL,
   timeout: 30000,
   withCredentials: false,
   maxRetries: 2,
@@ -82,7 +82,7 @@ client.interceptors.request.use(
 
 client.interceptors.response.use(
   (response: AxiosResponse) => {
-    if (process.env.NEXT_PUBLIC_LOG_AXIOS === 'true') {
+    if (import.meta.env.VITE_LOG_AXIOS === 'true') {
       const cfg: any = response.config || {}
       const took = cfg._startedAt ? `${Date.now() - cfg._startedAt}ms` : '—'
       // eslint-disable-next-line no-console
@@ -91,7 +91,7 @@ client.interceptors.response.use(
     return response
   },
   async (error: AxiosError<ApiError>) => {
-    if (process.env.NEXT_PUBLIC_LOG_AXIOS === 'true') {
+    if (import.meta.env.VITE_LOG_AXIOS === 'true') {
       const res = error.response
       const status = res?.status || 'ERR'
       // eslint-disable-next-line no-console

@@ -1,4 +1,4 @@
-import { useRouter } from 'next/router'
+import { useRouter } from 'src/spa/router/useRouter'
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, Grid, Typography, CircularProgress, Box } from '@mui/material'
 import { DataService } from 'src/configs/dataService'

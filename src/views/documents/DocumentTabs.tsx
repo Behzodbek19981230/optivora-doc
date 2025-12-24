@@ -1,6 +1,6 @@
 import { useMemo, useEffect } from 'react'
 import { Tabs, Tab, Box, Chip, Stack } from '@mui/material'
-import { useRouter } from 'next/router'
+import { useRouter } from 'src/spa/router/useRouter'
 import DocumentTable from 'src/views/documents/DocumentTable'
 import { useFetchList } from 'src/hooks/useFetchList'
 import endpoints from 'src/configs/endpoints'

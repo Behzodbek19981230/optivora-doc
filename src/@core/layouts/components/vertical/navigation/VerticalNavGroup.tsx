@@ -2,7 +2,7 @@
 import { useEffect, Fragment } from 'react'
 
 // ** Next Import
-import { useRouter } from 'next/router'
+import { useRouter } from 'src/spa/router/useRouter'
 
 // ** MUI Imports
 import Chip from '@mui/material/Chip'

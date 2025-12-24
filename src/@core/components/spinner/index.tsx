@@ -2,7 +2,7 @@
 import { useTheme } from '@mui/material/styles'
 import Box, { BoxProps } from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
-import Image from 'next/image'
+import Image from 'src/spa/router/Image'
 
 const FallbackSpinner = ({ sx }: { sx?: BoxProps['sx'] }) => {
   // ** Hook

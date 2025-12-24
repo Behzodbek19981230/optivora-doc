@@ -14,9 +14,9 @@ const users: UserDataType[] = []
 
 // ! These two secrets should be in .env file and not in any other file
 const jwtConfig = {
-  secret: process.env.NEXT_PUBLIC_JWT_SECRET,
-  expirationTime: process.env.NEXT_PUBLIC_JWT_EXPIRATION,
-  refreshTokenSecret: process.env.NEXT_PUBLIC_JWT_REFRESH_TOKEN_SECRET
+  secret: import.meta.env.VITE_JWT_SECRET,
+  expirationTime: import.meta.env.VITE_JWT_EXPIRATION,
+  refreshTokenSecret: import.meta.env.VITE_JWT_REFRESH_TOKEN_SECRET
 }
 
 type ResponseType = [number, { [key: string]: any }]

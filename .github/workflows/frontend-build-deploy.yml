@@ -1,4 +1,4 @@
-name: Frontend Deploy (Next.js SSR + PM2)
+name: Frontend Build and Deploy (Vite -> dist)
 
 on:
   push:
@@ -9,28 +9,48 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
       - name: Install dependencies
         run: npm install
-      - name: Build
+
+      - name: Build (Vite)
         run: npm run build
+
+      - name: Create dist bundle
+        run: tar -czf dist.tar.gz dist
+
+      - name: Upload dist bundle to server
+        uses: appleboy/scp-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: 'dist.tar.gz'
+          target: '/var/www/optivora-doc'
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Build & Reload PM2 on server
+      - name: Extract dist on server (no PM2)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
+            set -e
             cd /var/www/optivora-doc
-            git pull origin main
-            npm install
-            npm run build
-            pm2 restart npm --name optivora-doc -- start
-            pm2 save
+            rm -rf dist.new
+            mkdir -p dist.new
+            tar -xzf dist.tar.gz -C dist.new --strip-components=1
+            rm -f dist.tar.gz
+            rm -rf dist
+            mv dist.new dist

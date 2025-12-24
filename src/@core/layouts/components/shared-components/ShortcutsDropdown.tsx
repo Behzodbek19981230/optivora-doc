@@ -2,7 +2,7 @@
 import { useState, SyntheticEvent, Fragment, ReactNode } from 'react'
 
 // ** Next Import
-import Link from 'next/link'
+import Link from 'src/spa/router/Link'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
