@@ -55,7 +55,9 @@ const ReplyLetterTable = () => {
       flex: 0.2,
       minWidth: 160,
       valueGetter: params =>
-        params.row.responsible_person_detail ? params.row.responsible_person_detail.name : params.row.responsible_person
+        params.row.responsible_person_detail
+          ? params.row.responsible_person_detail.fullname
+          : params.row.responsible_person
     },
     {
       field: 'organization',
@@ -63,7 +65,6 @@ const ReplyLetterTable = () => {
       flex: 0.2,
       minWidth: 160
     },
-    { field: 'created_time', headerName: String(t('replyLetter.table.createdAt')), flex: 0.18, minWidth: 150 },
     {
       field: 'actions',
       headerName: String(t('common.actions')),

@@ -174,6 +174,7 @@ export default function DocumentTab({
 
     const key = `documents.status.${toCamel(s)}`
     const translated = String(t(key))
+
     return translated === key ? s : translated
   }
 
@@ -182,6 +183,7 @@ export default function DocumentTab({
     const normalized = p === 'orgently' ? 'orgently' : p === 'normal' ? 'ordinary' : p
     const key = `tasks.priority.${normalized}`
     const translated = String(t(key))
+
     return translated === key ? p : translated
   }
 
@@ -189,6 +191,7 @@ export default function DocumentTab({
     if (!tp) return '—'
     const key = `tasks.type.${tp}`
     const translated = String(t(key))
+
     return translated === key ? tp : translated
   }
 

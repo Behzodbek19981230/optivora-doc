@@ -60,6 +60,7 @@ export default function TaskParts({
 
     const key = `documents.status.${toCamel(s)}`
     const translated = String(t(key))
+
     return translated === key ? s : translated
   }
 
@@ -91,7 +92,7 @@ export default function TaskParts({
                 <TableCell>{String(t('tasks.view.parts.table.assignee'))}</TableCell>
                 <TableCell>{String(t('tasks.view.parts.table.start'))}</TableCell>
                 <TableCell>{String(t('tasks.view.parts.table.end'))}</TableCell>
-                <TableCell align='right'>{String(t('common.actions'))}</TableCell>
+                {/* <TableCell align='right'>{String(t('common.actions'))}</TableCell> */}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -130,7 +131,7 @@ export default function TaskParts({
                     <TableCell>{p.assignee_detail?.fullname || p.assignee}</TableCell>
                     <TableCell>{p.start_date || '—'}</TableCell>
                     <TableCell>{p.end_date || '—'}</TableCell>
-                    <TableCell align='right' onClick={e => e.stopPropagation()}>
+                    {/* <TableCell align='right' onClick={e => e.stopPropagation()}>
                       <Stack direction='row' spacing={1}>
                         <Tooltip title={String(t('common.edit'))}>
                           <IconButton size='small' onClick={() => onEdit(p.id)}>
@@ -143,7 +144,7 @@ export default function TaskParts({
                           </IconButton>
                         </Tooltip>
                       </Stack>
-                    </TableCell>
+                    </TableCell> */}
                   </TableRow>
                 )
               })}

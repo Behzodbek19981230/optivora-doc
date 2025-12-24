@@ -271,7 +271,7 @@
   "tasks.view.actions.noPartSelected": "No part selected",
   "tasks.view.actions.deadline": "Deadline",
   "tasks.view.actions.setDeadline": "Set deadline",
-  "tasks.view.actions.partStatus": "Part status",
+  "tasks.view.actions.partStatus": "Status",
   "tasks.view.actions.files": "Files",
   "tasks.view.actions.addFile": "Add file",
   "tasks.view.actions.comments": "Comments",
@@ -642,5 +642,12 @@
   "month.sep": "Sep",
   "month.oct": "Oct",
   "month.nov": "Nov",
-  "month.dec": "Dec"
+  "month.dec": "Dec",
+  "tasks": {
+    "view": {
+      "actions": {
+        "partStatus": "Status"
+      }
+    }
+  }
 }

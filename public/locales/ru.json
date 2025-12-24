@@ -155,7 +155,7 @@
     "tasks.view.actions.noPartSelected": "Часть не выбрана",
     "tasks.view.actions.deadline": "Срок",
     "tasks.view.actions.setDeadline": "Установить срок",
-    "tasks.view.actions.partStatus": "Статус части",
+    "tasks.view.actions.partStatus": "Статус",
     "tasks.view.actions.files": "Файлы",
     "tasks.view.actions.addFile": "Добавить файл",
     "tasks.view.actions.comments": "Комментарии",
