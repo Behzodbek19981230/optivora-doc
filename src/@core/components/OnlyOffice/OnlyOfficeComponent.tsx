@@ -31,7 +31,8 @@ function loadOnlyOfficeScript(baseUrl: string): Promise<void> {
 export const OnlyOfficeComponent: FC<Props> = React.memo(({ onlyOfficeConfig, fileId }) => {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const editorRef = useRef<any>(null)
-  const dsUrl = import.meta.env.VITE_ONLYOFFICE_URL || import.meta.env.VITE_ONLY_OFFICE_URL || 'http://localhost:8082'
+  const dsUrl =
+    process.env.NEXT_PUBLIC_ONLYOFFICE_URL || process.env.NEXT_PUBLIC_ONLY_OFFICE_URL || 'http://localhost:8082'
 
   useEffect(() => {
     const init = async () => {

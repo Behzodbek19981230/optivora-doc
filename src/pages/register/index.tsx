@@ -2,7 +2,7 @@
 import { ReactNode, useState } from 'react'
 
 // ** Next Import
-import Link from 'src/spa/router/Link'
+import Link from 'next/link'
 
 // ** MUI Components
 import Button from '@mui/material/Button'

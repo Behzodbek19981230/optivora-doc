@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
-import { useRouter } from 'src/spa/router/useRouter'
+import { useRouter } from 'next/router'
 import {
   Card,
   CardHeader,

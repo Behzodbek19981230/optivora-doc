@@ -2,7 +2,7 @@ import React from 'react'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { useTranslation } from 'react-i18next'
 import { TaskPartType } from 'src/types/task'
-import { useRouter } from 'src/spa/router/useRouter'
+import { useRouter } from 'next/router'
 import { getDataGridLocaleText } from 'src/@core/utils/getDataGridLocaleText'
 import { Chip } from '@mui/material'
 

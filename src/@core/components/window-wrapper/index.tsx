@@ -2,7 +2,7 @@
 import { useState, useEffect, ReactNode } from 'react'
 
 // ** Next Import
-import { useRouter } from 'src/spa/router/useRouter'
+import { useRouter } from 'next/router'
 
 interface Props {
   children: ReactNode

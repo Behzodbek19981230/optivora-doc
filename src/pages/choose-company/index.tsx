@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useAuth } from 'src/hooks/useAuth'
-import { useRouter } from 'src/spa/router/useRouter'
+import { useRouter } from 'next/router'
 import {
   Box,
   Card,
@@ -75,7 +75,7 @@ const ChooseCompanyPage = () => {
     const updated = { ...user, company_current: id, company_id: id }
     setUser(updated)
     window.localStorage.setItem('userData', JSON.stringify(updated))
-    const roleNames = updated?.role_detail?.map((role: any) => role.name) || []
+    const roleNames = updated?.role_detail?.map(role => role.name) || []
     const homeRoute = getHomeRoute(roleNames)
     router.replace(homeRoute)
   }
@@ -124,7 +124,7 @@ const ChooseCompanyPage = () => {
                     }
                   >
                     <ListItemAvatar>
-                      <Avatar src={`${import.meta.env.VITE_FILE_URL}${c.logo}` || undefined}>
+                      <Avatar src={`${process.env.NEXT_PUBLIC_FILE_URL}${c.logo}` || undefined}>
                         {c.name ? c.name.charAt(0).toUpperCase() : '?'}
                       </Avatar>
                     </ListItemAvatar>

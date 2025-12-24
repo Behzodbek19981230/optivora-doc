@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useRouter } from 'src/spa/router/useRouter'
+import { useRouter } from 'next/router'
 import {
   Grid,
   Card,

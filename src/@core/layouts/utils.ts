@@ -1,6 +1,6 @@
 // ** Types
 import { NavGroup, NavLink } from 'src/@core/layouts/types'
-import { NextRouter } from 'src/spa/router/useRouter'
+import { NextRouter } from 'next/router'
 
 /**
  * Check for URL queries as well for matching

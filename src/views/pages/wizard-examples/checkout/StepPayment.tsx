@@ -2,7 +2,7 @@
 import { SyntheticEvent, useState } from 'react'
 
 // ** Next Import
-import Link from 'src/spa/router/Link'
+import Link from 'next/link'
 
 // ** MUI Imports
 import Tab from '@mui/material/Tab'

@@ -2,7 +2,7 @@
 import { createContext, useEffect, useState, ReactNode } from 'react'
 
 // ** Next Import
-import { useRouter } from 'src/spa/router/useRouter'
+import { useRouter } from 'next/router'
 
 // ** Axios
 

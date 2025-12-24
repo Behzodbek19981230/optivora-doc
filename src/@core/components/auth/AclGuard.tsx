@@ -2,7 +2,7 @@
 import { ReactNode } from 'react'
 
 // ** Next Import
-import { useRouter } from 'src/spa/router/useRouter'
+import { useRouter } from 'next/router'
 
 // ** Types
 import type { ACLObj, AppAbility } from 'src/configs/acl'

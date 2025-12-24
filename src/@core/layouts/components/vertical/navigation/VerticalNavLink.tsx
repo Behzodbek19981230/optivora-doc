@@ -2,8 +2,8 @@
 import { ElementType } from 'react'
 
 // ** Next Imports
-import Link from 'src/spa/router/Link'
-import { useRouter } from 'src/spa/router/useRouter'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
 
 // ** MUI Imports
 import Chip from '@mui/material/Chip'

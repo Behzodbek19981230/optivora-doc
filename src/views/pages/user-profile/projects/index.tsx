@@ -1,5 +1,5 @@
 // ** Next Import
-import Link from 'src/spa/router/Link'
+import Link from 'next/link'
 
 // ** MUI Components
 import Box from '@mui/material/Box'

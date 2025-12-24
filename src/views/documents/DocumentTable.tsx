@@ -17,11 +17,11 @@ import {
   Chip
 } from '@mui/material'
 import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid'
-import { useRouter } from 'src/spa/router/useRouter'
+import { useRouter } from 'next/router'
 import IconifyIcon from 'src/@core/components/icon'
 import { useFetchList } from 'src/hooks/useFetchList'
 import endpoints from 'src/configs/endpoints'
-import Link from 'src/spa/router/Link'
+import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import { DataService } from 'src/configs/dataService'
 import useThemedToast from 'src/@core/hooks/useThemedToast'

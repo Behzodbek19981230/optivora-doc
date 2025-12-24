@@ -2,7 +2,7 @@
 import { ReactNode, ReactElement, useEffect } from 'react'
 
 // ** Next Import
-import { useRouter } from 'src/spa/router/useRouter'
+import { useRouter } from 'next/router'
 
 // ** Hooks Import
 import { useAuth } from 'src/hooks/useAuth'

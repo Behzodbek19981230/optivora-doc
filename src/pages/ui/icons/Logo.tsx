@@ -1,4 +1,4 @@
-import Image from 'src/spa/router/Image'
+import Image from 'next/image'
 export default function LogoIcon() {
 
   return (

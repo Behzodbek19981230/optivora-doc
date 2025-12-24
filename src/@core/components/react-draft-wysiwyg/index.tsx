@@ -1,16 +1,12 @@
-import { lazy, Suspense } from 'react'
-import type { EditorProps } from 'react-draft-wysiwyg'
+// ** Next Import
+import dynamic from 'next/dynamic'
 
-// In Vite SPA there is no SSR, but the editor is still safer to load lazily.
-const LazyEditor = lazy(async () => {
-  const mod = await import('react-draft-wysiwyg')
-  return { default: mod.Editor }
+// ** Types
+import { EditorProps } from 'react-draft-wysiwyg'
+
+// ! To avoid 'Window is not defined' error
+const ReactDraftWysiwyg = dynamic<EditorProps>(() => import('react-draft-wysiwyg').then(mod => mod.Editor), {
+  ssr: false
 })
 
-export default function ReactDraftWysiwyg(props: EditorProps) {
-  return (
-    <Suspense fallback={null}>
-      <LazyEditor {...props} />
-    </Suspense>
-  )
-}
+export default ReactDraftWysiwyg

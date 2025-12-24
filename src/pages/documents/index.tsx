@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useRouter } from 'src/spa/router/useRouter'
+import { useRouter } from 'next/router'
 
 const DocumentsIndexPage = () => {
   const router = useRouter()

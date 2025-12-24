@@ -2,7 +2,7 @@
 import { useState, ChangeEvent } from 'react'
 
 // ** Next Import
-import { useRouter } from 'src/spa/router/useRouter'
+import { useRouter } from 'next/router'
 
 // ** MUI Imports
 import { styled } from '@mui/material/styles'

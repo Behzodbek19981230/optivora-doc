@@ -7,7 +7,7 @@ import endpoints from 'src/configs/endpoints'
 import { useFetchList } from 'src/hooks/useFetchList'
 import { DataService } from 'src/configs/dataService'
 import toast from 'react-hot-toast'
-import { useRouter } from 'src/spa/router/useRouter'
+import { useRouter } from 'next/router'
 import DeleteConfirmDialog from 'src/views/locations/dialogs/DeleteConfirmDialog'
 import { useTranslation } from 'react-i18next'
 

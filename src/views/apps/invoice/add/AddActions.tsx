@@ -1,5 +1,5 @@
 // ** Next Import
-import Link from 'src/spa/router/Link'
+import Link from 'next/link'
 
 // ** MUI Imports
 import Card from '@mui/material/Card'

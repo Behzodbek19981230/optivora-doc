@@ -1,4 +1,4 @@
-import { useRouter } from 'src/spa/router/useRouter'
+import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 
 // This route is kept only to gracefully redirect to a static-export-friendly page.
