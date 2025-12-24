@@ -180,12 +180,21 @@ const CustomCalendar = (props: CalendarType) => {
   const fetchMonthStats = async (y: number, m: number) => {
     const monthParam = m + 1
     try {
-      const res = await DataService.post<any>('task-calendar/stats/by-start-date/', {
+      const roleNames = user?.role_detail?.map(r => r.name) || []
+      const isAdminOrManager = roleNames.includes('Admin') || roleNames.includes('Manager')
+
+      const payloadBody: any = {
         year: y,
         month: monthParam,
-        company: user?.company_id,
-        assignee_id: user?.id
-      })
+        company: user?.company_id
+      }
+
+      // Admin/Manager should see all tasks: do NOT filter by assignee_id
+      if (!isAdminOrManager) {
+        payloadBody.assignee_id = user?.id
+      }
+
+      const res = await DataService.post<any>('task-calendar/stats/by-start-date/', payloadBody)
       const payload = (res as any)?.data
       const nextMap: Record<string, DayStats> = {}
 
