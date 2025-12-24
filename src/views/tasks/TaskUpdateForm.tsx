@@ -153,6 +153,7 @@ const TaskUpdateForm = () => {
   // State for assignment mode
   const [assignmentMode, setAssignmentMode] = useState<'simple' | 'divide_into_parts'>('simple')
   const [simpleAssignee, setSimpleAssignee] = useState<number>(0)
+  const [simplePartId, setSimplePartId] = useState<number | null>(null)
   const [taskParts, setTaskParts] = useState<TaskPartItem[]>([])
   const [dialogOpen, setDialogOpen] = useState(false)
   const [partForm, setPartForm] = useState<Partial<TaskPartPayload>>({
@@ -206,6 +207,9 @@ const TaskUpdateForm = () => {
         const data = (res.data as any)?.results?.[0] as TaskPartItem
         if (data) {
           setSimpleAssignee(data.assignee || 0)
+          setSimplePartId(data.id || null)
+        } else {
+          setSimplePartId(null)
         }
       }
       reset({
@@ -250,22 +254,36 @@ const TaskUpdateForm = () => {
 
         return
       }
-      await DataService.post(endpoints.taskPart, {
+      const payload = {
         task: Number(id),
         title: String(t('tasks.parts.simpleTitle')),
         assignee: simpleAssignee,
         department: department,
         start_date: start_date,
         end_date: end_date,
-        status: 'new',
-        note: '',
-        created_by: user?.id || 1
-      })
+        note: ''
+      }
+
+      // If a simple assignment already exists, update it instead of creating a duplicate
+      if (simplePartId) {
+        await DataService.patch(endpoints.taskPartById(simplePartId), {
+          ...payload,
+          updated_by: user?.id || 1
+        })
+      } else {
+        await DataService.post(endpoints.taskPart, {
+          ...payload,
+          status: 'new',
+          created_by: user?.id || 1
+        })
+      }
       toast.success(String(t('tasks.toast.assigneeAssigned')))
 
       // Refresh task parts
       const res = await DataService.get<any>(endpoints.taskPart, { task: id, perPage: 50 })
-      setTaskParts((res.data?.results || []) as TaskPartItem[])
+      const refreshed = (res.data?.results || []) as TaskPartItem[]
+      setTaskParts(refreshed)
+      if (refreshed?.[0]?.id) setSimplePartId(refreshed[0].id)
     } catch (e: any) {
       toast.error(e?.message || String(t('errors.somethingWentWrong')))
     }

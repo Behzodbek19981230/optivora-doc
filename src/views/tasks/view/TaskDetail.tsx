@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/router'
-import { Box, Card, CardContent, Grid, Stack, Tabs, Tab, Typography, Chip } from '@mui/material'
+import { Box, Card, CardContent, Grid, Stack, Tabs, Tab, Typography, Chip, Button } from '@mui/material'
+import Link from 'next/link'
+import Icon from 'src/@core/components/icon'
 
 import endpoints from 'src/configs/endpoints'
 import { DataService } from 'src/configs/dataService'
@@ -81,7 +83,17 @@ const TaskViewDetail = () => {
                     ? String(t('tasks.view.header.titleWithId', { id: task.id, name: task.name }))
                     : String(t('tasks.view.header.title'))}
                 </Typography>
-                <Stack direction='row' spacing={1}>
+                <Stack direction='row' spacing={1} alignItems='center'>
+                  <Button
+                    size='small'
+                    variant='outlined'
+                    component={Link}
+                    href={id ? `/tasks/update/${id}` : '#'}
+                    disabled={!id}
+                    startIcon={<Icon icon='mdi:pencil' />}
+                  >
+                    {String(t('common.edit'))}
+                  </Button>
                   <Chip
                     label={String(t('tasks.view.header.status', { value: translateStatus(task?.status) }))}
                     size='small'
