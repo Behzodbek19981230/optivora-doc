@@ -24,6 +24,7 @@ import authConfig from 'src/configs/auth'
 import { DataService } from 'src/configs/dataService'
 import { UserDataType } from 'src/context/types'
 import { useTranslation } from 'react-i18next'
+import getHomeRoute from 'src/layouts/components/acl/getHomeRoute'
 
 const ChooseCompanyPage = () => {
   const { user, setUser } = useAuth() as any
@@ -45,6 +46,7 @@ const ChooseCompanyPage = () => {
   const filtered = useMemo(() => {
     if (!query) return companies
     const q = query.toLowerCase()
+
     return companies.filter(
       (c: any) =>
         (c.is_active && (c.name || '').toLowerCase().includes(q)) ||
@@ -73,7 +75,9 @@ const ChooseCompanyPage = () => {
     const updated = { ...user, company_current: id, company_id: id }
     setUser(updated)
     window.localStorage.setItem('userData', JSON.stringify(updated))
-    router.replace('/')
+    const roleNames = updated?.role_detail?.map(role => role.name) || []
+    const homeRoute = getHomeRoute(roleNames)
+    router.replace(homeRoute)
   }
 
   return (

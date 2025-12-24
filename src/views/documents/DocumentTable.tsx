@@ -21,7 +21,6 @@ import { useRouter } from 'next/router'
 import IconifyIcon from 'src/@core/components/icon'
 import { useFetchList } from 'src/hooks/useFetchList'
 import endpoints from 'src/configs/endpoints'
-import { DocumentStatus } from './DocumentTabs'
 import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import { DataService } from 'src/configs/dataService'
@@ -51,7 +50,7 @@ export type DocumentRow = {
   updated_by: number
 }
 
-type Props = { status: DocumentStatus }
+type Props = { status: string }
 const statusColor = (status?: string) => {
   switch (status) {
     case 'new':
@@ -66,6 +65,8 @@ const statusColor = (status?: string) => {
       return 'success'
     case 'cancelled':
       return 'error'
+    case 'archive':
+      return 'secondary'
     default:
       return 'default'
   }

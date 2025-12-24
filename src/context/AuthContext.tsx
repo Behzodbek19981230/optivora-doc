@@ -5,7 +5,6 @@ import { createContext, useEffect, useState, ReactNode } from 'react'
 import { useRouter } from 'next/router'
 
 // ** Axios
-import axios from 'axios'
 
 // ** Config
 import authConfig from 'src/configs/auth'
@@ -74,6 +73,7 @@ const AuthProvider = ({ children }: Props) => {
           }
 
           setUser(normalized)
+
           // Always sync to localStorage so refresh keeps the same company
           window.localStorage.setItem('userData', JSON.stringify(normalized))
         })
@@ -122,6 +122,7 @@ const AuthProvider = ({ children }: Props) => {
         const returnUrl = router.query.returnUrl as string | undefined
         const roleNames = userData?.role_detail?.map(role => role.name) || []
         const homeRoute = getHomeRoute(roleNames)
+        console.log('homeRoute', homeRoute)
 
         // If user has no current company, force company selection page
         const needsCompanySelection =

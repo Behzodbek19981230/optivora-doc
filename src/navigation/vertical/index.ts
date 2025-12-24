@@ -27,6 +27,12 @@ const navigation = (): VerticalNavItemsType => {
       roles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.PERFORMER, ROLES.SIGNATORY]
     },
     {
+      title: 'nav.archive',
+      icon: 'tabler:archive',
+      path: '/archive',
+      roles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.PERFORMER, ROLES.SIGNATORY]
+    },
+    {
       title: 'nav.commands',
       icon: 'tabler:command',
       path: '/commands',

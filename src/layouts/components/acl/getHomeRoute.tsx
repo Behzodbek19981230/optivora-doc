@@ -14,6 +14,7 @@ const getHomeRoute = (roles: string[]) => {
   if (roles.includes('Signatory')) {
     return '/calendar'
   }
+
   return '/login'
 }
 
