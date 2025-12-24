@@ -18,18 +18,24 @@ const GuestGuard = (props: GuestGuardProps) => {
   const router = useRouter()
 
   useEffect(() => {
-    if (!router.isReady) {
-      return
-    }
+    // Wait until auth resolves
+    if (auth.loading) return
 
-    if (window.localStorage.getItem('userData')) {
+    // If already authenticated (or has persisted userData), keep guest pages inaccessible.
+    const hasUserData = Boolean(window.localStorage.getItem('userData'))
+    if (auth.user !== null || hasUserData) {
       router.replace('/')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.route])
+  }, [auth.loading, auth.user])
 
-  if (auth.loading || (!auth.loading && auth.user !== null)) {
+  if (auth.loading) {
     return fallback
+  }
+
+  // If authenticated, we are redirecting away -> don't show guest page.
+  if (auth.user !== null || window.localStorage.getItem('userData')) {
+    return null
   }
 
   return <>{children}</>

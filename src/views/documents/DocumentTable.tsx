@@ -167,11 +167,13 @@ const DocumentTable = ({ status }: Props) => {
   return (
     <Card variant='outlined'>
       <CardContent sx={{ pb: 0 }}>
-        <Stack direction='row' justifyContent='flex-end' sx={{ mb: 2 }}>
-          <Button variant='contained' onClick={() => setCreateOpen(true)}>
-            {String(t('tasks.create.title'))}
-          </Button>
-        </Stack>
+        {status !== 'archive' && (
+          <Stack direction='row' justifyContent='flex-end' sx={{ mb: 2 }}>
+            <Button variant='contained' onClick={() => setCreateOpen(true)}>
+              {String(t('tasks.create.title'))}
+            </Button>
+          </Stack>
+        )}
 
         <Dialog open={createOpen} onClose={creating ? undefined : () => setCreateOpen(false)} fullWidth maxWidth='sm'>
           <DialogTitle>{String(t('tasks.create.modal.title'))}</DialogTitle>

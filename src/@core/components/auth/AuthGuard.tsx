@@ -17,29 +17,27 @@ const AuthGuard = (props: AuthGuardProps) => {
   const auth = useAuth()
   const router = useRouter()
 
-  useEffect(
-    () => {
-      if (!router.isReady) {
-        return
-      }
+  useEffect(() => {
+    // Wait until auth resolves (avoids redirect flicker)
+    if (auth.loading) return
 
-      if (auth.user === null && !window.localStorage.getItem('userData')) {
-        if (router.asPath !== '/') {
-          router.replace({
-            pathname: '/login',
-            query: { returnUrl: router.asPath }
-          })
-        } else {
-          router.replace('/login')
-        }
-      }
-    },
+    // If user is not authenticated, redirect to login.
+    // IMPORTANT: don't rely on `router.isReady/router.route` (can be flaky on fresh load/static export).
+    const hasUserData = Boolean(window.localStorage.getItem('userData'))
+    if (auth.user === null && !hasUserData) {
+      const returnUrl = router.asPath && router.asPath !== '/' ? router.asPath : undefined
+      router.replace(returnUrl ? { pathname: '/login', query: { returnUrl } } : '/login')
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [router.route]
-  )
+  }, [auth.loading, auth.user, router.asPath])
 
-  if (auth.loading || auth.user === null) {
+  if (auth.loading) {
     return fallback
+  }
+
+  // If auth resolved but user is still null, we're redirecting to /login → don't show infinite loader.
+  if (auth.user === null) {
+    return null
   }
 
   return <>{children}</>
