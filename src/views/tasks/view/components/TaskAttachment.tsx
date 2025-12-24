@@ -85,15 +85,25 @@ const getFileIcon = (ext: string) => {
   }
 }
 
-export default function TaskAttachment({ taskId, partId }: { taskId: string | number; partId?: string | number }) {
+export default function TaskAttachment({
+  taskId,
+  partId,
+  isCompact
+}: {
+  taskId: string | number
+  partId?: string | number | null
+  isCompact?: boolean
+}) {
   const { t } = useTranslation()
   const { data, isLoading, isError } = useQuery<{ results: TaskAttachmentType[] }>({
-    queryKey: ['task-attachments', taskId, partId ?? null],
+    queryKey: ['task-attachments', taskId, partId === undefined ? 'all' : partId],
     queryFn: async () => {
-      const params = {
+      const params: any = {
         task: taskId,
-        perPage: 50,
-        ...(partId != null ? { part: partId } : {})
+        perPage: 50
+      }
+      if (partId !== undefined) {
+        params.part = partId === null ? '' : partId
       }
       const res = await DataService.get<{ results: TaskAttachmentType[] }>(endpoints.taskAttachment, params)
 
@@ -125,6 +135,8 @@ export default function TaskAttachment({ taskId, partId }: { taskId: string | nu
   }
 
   if (!attachments.length) {
+    if (isCompact) return null
+
     return (
       <Card>
         <CardContent>
@@ -133,6 +145,41 @@ export default function TaskAttachment({ taskId, partId }: { taskId: string | nu
               {String(t('tasks.view.attachments.empty'))}
             </Typography>
           </Box>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (isCompact) {
+    return (
+      <Card variant='outlined' sx={{ mb: 2 }}>
+        <CardContent sx={{ py: '0.75rem !important' }}>
+          <Stack direction='row' spacing={3} alignItems='center' flexWrap='wrap' useFlexGap>
+            <Typography variant='subtitle2' sx={{ mr: 2 }}>
+              {String(t('tasks.view.attachments.title'))}:
+            </Typography>
+            {attachments.map(a => {
+              const label = getFileLabel(a)
+              const ext = getExt(a.file || a.title)
+              const icon = getFileIcon(ext)
+              const href = a.file || '#'
+
+              return (
+                <Chip
+                  key={a.id}
+                  icon={<Icon icon={icon} />}
+                  label={label}
+                  component='a'
+                  href={href}
+                  target='_blank'
+                  clickable
+                  size='small'
+                  variant='outlined'
+                  color='primary'
+                />
+              )
+            })}
+          </Stack>
         </CardContent>
       </Card>
     )

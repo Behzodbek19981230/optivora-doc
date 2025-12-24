@@ -296,6 +296,10 @@ export default function DocumentTab({
         </Card>
       </Grid>
 
+      {/* <Grid item xs={12}>
+        <TaskAttachment taskId={task.id} partId={null} isCompact />
+      </Grid> */}
+
       <Grid item xs={12}>
         <TaskParts
           parts={parts}
@@ -305,12 +309,17 @@ export default function DocumentTab({
           onEdit={handleEdit}
         />
       </Grid>
-      <Grid item xs={12}>
-        <TaskAttachment taskId={task.id} partId={selectedPartId ?? undefined} />
-      </Grid>
-      <Grid item xs={12}>
-        <TaskComments taskId={task.id} partId={selectedPartId ?? undefined} />
-      </Grid>
+
+      {selectedPartId && (
+        <>
+          <Grid item xs={12}>
+            <TaskAttachment taskId={task.id} partId={selectedPartId} />
+          </Grid>
+          <Grid item xs={12}>
+            <TaskComments taskId={task.id} partId={selectedPartId} />
+          </Grid>
+        </>
+      )}
       <Dialog open={!!editPart} onClose={() => setEditPart(null)} maxWidth='sm' fullWidth>
         <DialogTitle>{String(t('tasks.parts.dialog.title'))}</DialogTitle>
         <DialogContent>
