@@ -74,7 +74,6 @@ type User = {
 }
 
 const UserTable = () => {
-  const router = useRouter()
   const { t } = useTranslation()
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 })
   const {
@@ -126,6 +125,7 @@ const UserTable = () => {
         />
       )
     }
+
     return (
       <CustomAvatar skin='light' color='primary' sx={{ mr: 2.5, width: 38, height: 38, fontWeight: 500 }}>
         {getInitials(row.fullname || row.username)}
@@ -141,6 +141,7 @@ const UserTable = () => {
       minWidth: 220,
       renderCell: params => {
         const row = params.row as User
+
         return (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {renderAvatar(row)}
@@ -163,6 +164,7 @@ const UserTable = () => {
         const row = params.row as User
         const roles = row.roles_detail || []
         if (roles.length === 0) return ''
+
         return roles.map(r => r.name).join(', ')
       }
     },
@@ -198,9 +200,11 @@ const UserTable = () => {
             key = (item.id as number) ?? idx
             label = item.name || (item as any).company_name || item.title || `#${item.id}`
           }
+
           return <Chip key={key} size='small' label={label} sx={{ mr: 1, mb: 1 }} />
         })
         const extra = list.length - maxToShow
+
         return (
           <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
             {chips}
@@ -217,6 +221,7 @@ const UserTable = () => {
       sortable: false,
       renderCell: params => {
         const row = params.row as User
+
         return (
           <>
             <IconButton
