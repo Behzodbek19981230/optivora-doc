@@ -101,6 +101,7 @@ const DocumentTable = ({ status }: Props) => {
       minWidth: 140,
       renderCell: params => {
         const status = (params.row as any).status
+
         return (
           <Chip label={t(`documents.status.${status}`)} color={statusColor(status)} size='small' variant='outlined' />
         )
@@ -113,6 +114,7 @@ const DocumentTable = ({ status }: Props) => {
       minWidth: 120,
       renderCell: params => {
         const type = (params.row as any).type
+
         return t(`tasks.type.${type}`)
       }
     },
@@ -123,6 +125,7 @@ const DocumentTable = ({ status }: Props) => {
       minWidth: 120,
       renderCell: params => {
         const priority = (params.row as any).priority
+
         return (
           <Chip
             label={t(`tasks.priority.${priority}`)}
