@@ -1,5 +1,5 @@
 // ** React Imports
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -20,7 +20,7 @@ import Calendar from './components/CustomCalendar'
 import { CalendarDataType } from 'src/types/calendar'
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
-import { TaskPartType, TaskType } from 'src/types/task'
+import { TaskPartType } from 'src/types/task'
 import TaskTable from './components/TaskTable'
 
 // ** CalendarColors
@@ -31,7 +31,6 @@ const calendarsColor: CalendarColors = {
   Holiday: 'success',
   ETC: 'info'
 }
-const date = new Date()
 
 const store: CalendarDataType = {
   events: [],

@@ -12,7 +12,7 @@
 
 # next.js
 /.next/
-# /out/
+/out
 
 # production
 /build
@@ -20,6 +20,8 @@
 # misc
 .DS_Store
 *.pem
+out.tar.gz
+*.log
 
 # debug
 npm-debug.log*
@@ -28,6 +30,8 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env
+.env.*
 
 # vercel
 .vercel
