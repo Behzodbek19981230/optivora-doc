@@ -7,7 +7,6 @@ import {
   CardContent,
   CardHeader,
   Button,
-  Grid,
   Typography,
   Avatar,
   List,
@@ -72,7 +71,7 @@ const ChooseCompanyPage = () => {
   }, [user, setUser])
 
   const handleSelect = (id: number) => {
-    const updated = { ...user, company_current: id, company_id: id }
+    const updated: UserDataType = { ...(user as UserDataType), company_current: id, company_id: id }
     setUser(updated)
     window.localStorage.setItem('userData', JSON.stringify(updated))
     const roleNames = updated?.role_detail?.map(role => role.name) || []
