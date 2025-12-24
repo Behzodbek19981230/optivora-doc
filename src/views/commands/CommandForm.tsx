@@ -274,7 +274,7 @@ const CommandForm = () => {
 
                   {langTab === 'ru' ? (
                     <Grid container spacing={3}>
-                      <Grid item xs={12} md={6}>
+                      <Grid item xs={12}>
                         <Controller
                           name='basis_ru'
                           control={control}
@@ -289,7 +289,7 @@ const CommandForm = () => {
                           )}
                         />
                       </Grid>
-                      <Grid item xs={12} md={6}>
+                      <Grid item xs={12}>
                         <Controller
                           name='comment_ru'
                           control={control}
@@ -314,7 +314,7 @@ const CommandForm = () => {
 
                   {langTab === 'en' ? (
                     <Grid container spacing={3}>
-                      <Grid item xs={12} md={6}>
+                      <Grid item xs={12}>
                         <Controller
                           name='basis_en'
                           control={control}
@@ -329,7 +329,7 @@ const CommandForm = () => {
                           )}
                         />
                       </Grid>
-                      <Grid item xs={12} md={6}>
+                      <Grid item xs={12}>
                         <Controller
                           name='comment_en'
                           control={control}
