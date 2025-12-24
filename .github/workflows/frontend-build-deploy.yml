@@ -29,6 +29,8 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd /var/www/optivora-doc
+            npm install
+            npm run build
             pm2 stop optivora-doc
             pm2 delete optivora-doc
             pm2 start npm --name optivora-doc -- start
