@@ -5,25 +5,20 @@ on:
     branches: [main]
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
+
   deploy:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Deploy source via rsync (NO TAR, NO OOM)
-        uses: burnett01/rsync-deployments@6.0.0
-        with:
-          switches: -avz --delete \
-            --exclude=node_modules \
-            --exclude=.next \
-            --exclude=out \
-            --exclude=.git
-          path: ./
-          remote_path: /var/www/optivora-doc/
-          remote_host: ${{ secrets.SERVER_HOST }}
-          remote_user: ${{ secrets.SERVER_USER }}
-          remote_key: ${{ secrets.SERVER_SSH_KEY }}
 
       - name: Build & Reload PM2 on server
         uses: appleboy/ssh-action@v1.0.3
