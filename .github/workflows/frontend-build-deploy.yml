@@ -32,5 +32,3 @@ jobs:
             git pull origin main
             npm install
             npm run build
-            pm2 restart npm --name optivora-doc -- start
-            pm2 save
