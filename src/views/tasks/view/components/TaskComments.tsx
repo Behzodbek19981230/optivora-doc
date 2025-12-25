@@ -58,7 +58,7 @@ export default function TaskComments({ taskId, partId }: { taskId: string | numb
 
       return res.data || { results: [] }
     },
-    enabled: !!taskId,
+    enabled: !!taskId || !!partId,
     staleTime: 10_000
   })
 

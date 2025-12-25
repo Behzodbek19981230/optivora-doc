@@ -93,9 +93,15 @@ const TaskTable = () => {
   return (
     <>
       <Stack direction='row' justifyContent='flex-end' sx={{ mb: 2 }}>
-        <Button variant='contained' startIcon={<IconifyIcon icon='tabler:plus' />} onClick={() => setCreateOpen(true)}>
-          {String(t('tasks.create.title'))}
-        </Button>
+        {user?.role_detail?.some((role: any) => role.name !== 'Performer') && (
+          <Button
+            variant='contained'
+            startIcon={<IconifyIcon icon='tabler:plus' />}
+            onClick={() => setCreateOpen(true)}
+          >
+            {String(t('tasks.create.title'))}
+          </Button>
+        )}
       </Stack>
 
       <Dialog open={createOpen} onClose={creating ? undefined : () => setCreateOpen(false)} fullWidth maxWidth='sm'>
@@ -159,6 +165,7 @@ const TaskTable = () => {
             onClick={async () => {
               try {
                 setCreating(true)
+
                 // Create a minimal task and move user to the full update form.
                 const res = await DataService.post(endpoints.task, {
                   type: createType,

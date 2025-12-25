@@ -18,18 +18,24 @@ const RightActionsPanel = ({ task, part, mutate }: { task?: TaskType; part?: Tas
   const partId = part?.id
   const qc = useQueryClient()
   const mutateAndRefresh = async () => {
-    // Make sure we're invalidating the same query key used by this component's useQuery
-    // The useQuery above uses ['/task/with-parts/by-id/', taskId] as the key, so invalidate that
     try {
-      if (partId) await qc.invalidateQueries({ queryKey: ['task-part', partId], refetchType: 'active' })
+      if (partId) {
+        await qc.invalidateQueries({ queryKey: ['task-part', partId], refetchType: 'active' })
+        await qc.invalidateQueries({ queryKey: ['task-comments', partId], refetchType: 'active' })
+        await qc.invalidateQueries({ queryKey: ['task-attachments', partId], refetchType: 'active' })
+
+        await qc.invalidateQueries({ queryKey: ['/task/with-parts/by-id/', taskId], refetchType: 'active' })
+        mutate?.()
+      }
       if (taskId) {
-        // Invalidate the specific combined task+parts query so this panel refetches
+        // Refresh side lists that depend on task/part (comments & attachments)
+        await qc.invalidateQueries({ queryKey: ['task-comments', taskId], refetchType: 'active' })
+        await qc.invalidateQueries({ queryKey: ['task-attachments', taskId], refetchType: 'active' })
+
         await qc.invalidateQueries({ queryKey: ['/task/with-parts/by-id/', taskId], refetchType: 'active' })
         mutate?.()
       }
     } catch (err) {
-      // Keep failures silent but log for debugging
-      // eslint-disable-next-line no-console
       console.error('mutateAndRefresh failed', err)
     }
   }

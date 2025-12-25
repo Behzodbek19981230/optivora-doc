@@ -122,7 +122,7 @@ const AuthProvider = ({ children }: Props) => {
         const returnUrl = router.query.returnUrl as string | undefined
         const roleNames = userData?.role_detail?.map(role => role.name) || []
         const homeRoute = getHomeRoute(roleNames)
-        console.log('homeRoute', homeRoute)
+  
 
         // If user has no current company, force company selection page
         const needsCompanySelection =

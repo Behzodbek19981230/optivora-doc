@@ -1,20 +1,16 @@
 import React, { useState } from 'react'
 import {
-  Box,
   Card,
   CardContent,
-  Chip,
   Divider,
   Grid,
   Stack,
   Typography,
-  useTheme,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Button,
-  MenuItem,
   Autocomplete
 } from '@mui/material'
 import { TaskPartType, TaskType } from 'src/types/task'
@@ -40,7 +36,6 @@ export default function DocumentTab({
   setSelectedPartId: (id: number) => void
 }) {
   const { t } = useTranslation()
-  const theme = useTheme()
   const toast = useThemedToast()
   const queryClient = useQueryClient()
 
@@ -48,9 +43,10 @@ export default function DocumentTab({
     page: 1,
     perPage: 100
   })
-  const { data: users } = useFetchList<{ id: number; fullname: string }>(endpoints.users, {
+  const { data: performers } = useFetchList<{ id: number; fullname: string }>(endpoints.users, {
     page: 1,
-    perPage: 100
+    perPage: 100,
+    roles__name: 'Performer'
   })
 
   const [editPart, setEditPart] = useState<TaskPartType | null>(null)
@@ -63,8 +59,6 @@ export default function DocumentTab({
     note: ''
   })
 
-  // NOTE: Hooks must be called unconditionally on every render.
-  // When task is not ready, we disable the query.
   const taskId = task?.id
   const { data: parts } = useQuery<TaskPartType[]>({
     queryKey: ['task-parts', taskId ?? 'none'],
@@ -72,7 +66,6 @@ export default function DocumentTab({
     queryFn: async (): Promise<TaskPartType[]> => {
       const res = await DataService.get(endpoints.taskPart, { task: String(taskId), perPage: 100 })
 
-      // Our mock list returns {results, pagination}; support both shapes.
       const payload: any = res.data
 
       return (payload?.results || payload || []) as TaskPartType[]
@@ -132,68 +125,6 @@ export default function DocumentTab({
         </CardContent>
       </Card>
     )
-
-  const statusColor = (status?: string) => {
-    switch (status) {
-      case 'new':
-        return 'default'
-      case 'in_progress':
-        return 'info'
-      case 'on_review':
-        return 'warning'
-      case 'returned':
-        return 'warning'
-      case 'done':
-        return 'success'
-      case 'cancelled':
-        return 'error'
-      default:
-        return 'default'
-    }
-  }
-
-  const priorityColor = (priority?: string) => {
-    switch (priority) {
-      case 'orgently':
-        return 'error'
-      case 'normal':
-      case 'ordinary':
-        return 'default'
-      default:
-        return 'default'
-    }
-  }
-
-  const translateStatus = (s?: string) => {
-    if (!s) return '—'
-    const toCamel = (str: string) =>
-      str
-        .split('_')
-        .map((seg, i) => (i === 0 ? seg : seg.charAt(0).toUpperCase() + seg.slice(1)))
-        .join('')
-
-    const key = `documents.status.${toCamel(s)}`
-    const translated = String(t(key))
-
-    return translated === key ? s : translated
-  }
-
-  const translatePriority = (p?: string) => {
-    if (!p) return '—'
-    const normalized = p === 'orgently' ? 'orgently' : p === 'normal' ? 'ordinary' : p
-    const key = `tasks.priority.${normalized}`
-    const translated = String(t(key))
-
-    return translated === key ? p : translated
-  }
-
-  const translateType = (tp?: string) => {
-    if (!tp) return '—'
-    const key = `tasks.type.${tp}`
-    const translated = String(t(key))
-
-    return translated === key ? tp : translated
-  }
 
   const Item = ({ label, value }: { label: string; value?: React.ReactNode }) => (
     <Stack spacing={0.75}>
@@ -309,7 +240,6 @@ export default function DocumentTab({
           onEdit={handleEdit}
         />
       </Grid>
-
       {selectedPartId && (
         <>
           <Grid item xs={12}>
@@ -351,9 +281,9 @@ export default function DocumentTab({
             <Grid item xs={12}>
               <Autocomplete
                 fullWidth
-                options={users || []}
+                options={performers || []}
                 getOptionLabel={option => option.fullname}
-                value={users?.find(u => u.id === editForm.assignee) || null}
+                value={performers?.find(u => u.id === editForm.assignee) || null}
                 onChange={(event, newValue) => setEditForm({ ...editForm, assignee: newValue?.id || 0 })}
                 renderInput={params => (
                   <CustomTextField

@@ -13,12 +13,14 @@ import TaskHistoryTab from './components/TaskHistoryTab'
 import TaskProccessTab from './components/TaskProccessTab'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { useAuth } from 'src/hooks/useAuth'
 
 const TaskViewDetail = () => {
   const { t } = useTranslation()
   const router = useRouter()
   const { id } = router.query
   const [tab, setTab] = useState(0)
+  const { user } = useAuth()
   const [selectedPartId, setSelectedPartId] = useState<number | undefined>(undefined)
   const { data: task, refetch: mutate } = useQuery<TaskType>({
     queryKey: ['task', id],
@@ -84,16 +86,19 @@ const TaskViewDetail = () => {
                     : String(t('tasks.view.header.title'))}
                 </Typography>
                 <Stack direction='row' spacing={1} alignItems='center'>
-                  <Button
-                    size='small'
-                    variant='outlined'
-                    component={Link}
-                    href={id ? `/tasks/update/${id}` : '#'}
-                    disabled={!id}
-                    startIcon={<Icon icon='mdi:pencil' />}
-                  >
-                    {String(t('common.edit'))}
-                  </Button>
+                  {['new', 'in_progress', 'on_review', 'returned'].includes(status) &&
+                    user?.role_detail?.some((role: any) => role.name !== 'Performer') && (
+                      <Button
+                        size='small'
+                        variant='outlined'
+                        component={Link}
+                        href={id ? `/tasks/update/${id}` : '#'}
+                        disabled={!id}
+                        startIcon={<Icon icon='mdi:pencil' />}
+                      >
+                        {String(t('common.edit'))}
+                      </Button>
+                    )}
                   <Chip
                     label={String(t('tasks.view.header.status', { value: translateStatus(task?.status) }))}
                     size='small'

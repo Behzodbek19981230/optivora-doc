@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Card, CardHeader, CardContent, Button, IconButton } from '@mui/material'
+import { Card, CardHeader, Button, IconButton } from '@mui/material'
 import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 import IconifyIcon from 'src/@core/components/icon'
 import endpoints from 'src/configs/endpoints'
@@ -12,14 +12,15 @@ import { useRouter } from 'next/router'
 import moment from 'moment'
 import { useTranslation } from 'react-i18next'
 import { getDataGridLocaleText } from 'src/@core/utils/getDataGridLocaleText'
+import { useAuth } from 'src/hooks/useAuth'
 
 const CommandTable = () => {
   const router = useRouter()
   const { t } = useTranslation()
+  const { user } = useAuth()
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 })
   const {
     data = [],
-    total,
     loading,
     mutate
   } = useFetchList<CommandType>(endpoints.command, {
@@ -72,14 +73,19 @@ const CommandTable = () => {
       sortable: false,
       renderCell: params => {
         const row = params.row as CommandType
+
         return (
           <>
-            <IconButton size='small' aria-label='edit' onClick={() => handleEdit(row)}>
-              <IconifyIcon icon='tabler:edit' />
-            </IconButton>
-            <IconButton size='small' aria-label='delete' color='error' onClick={() => handleDelete(row)}>
-              <IconifyIcon icon='tabler:trash' />
-            </IconButton>
+            {user?.role_detail?.some((role: any) => role.name !== 'Performer') && (
+              <>
+                <IconButton size='small' aria-label='edit' onClick={() => handleEdit(row)}>
+                  <IconifyIcon icon='tabler:edit' />
+                </IconButton>
+                <IconButton size='small' aria-label='delete' color='error' onClick={() => handleDelete(row)}>
+                  <IconifyIcon icon='tabler:trash' />
+                </IconButton>
+              </>
+            )}
           </>
         )
       }
@@ -91,9 +97,11 @@ const CommandTable = () => {
       <CardHeader
         title={String(t('commands.title'))}
         action={
-          <Button variant='contained' onClick={() => router.push('/commands/create')}>
-            {String(t('commands.create.title'))}
-          </Button>
+          user?.role_detail?.some((role: any) => role.name !== 'Performer') && (
+            <Button variant='contained' onClick={() => router.push('/commands/create')}>
+              {String(t('commands.create.title'))}
+            </Button>
+          )
         }
       />
       <>

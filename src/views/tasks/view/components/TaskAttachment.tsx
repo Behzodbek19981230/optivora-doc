@@ -109,7 +109,7 @@ export default function TaskAttachment({
 
       return res.data || { results: [] }
     },
-    enabled: !!taskId,
+    enabled: !!taskId || !!partId,
     staleTime: 10_000
   })
 

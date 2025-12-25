@@ -2,7 +2,6 @@
 import { ReactNode } from 'react'
 
 // ** Next Import
-import Link from 'next/link'
 
 // ** MUI Components
 import Button from '@mui/material/Button'
@@ -47,8 +46,16 @@ const Error404 = () => {
           <Typography sx={{ mb: 6, color: 'text.secondary' }}>
             Oops! 😖 The requested URL was not found on this server.
           </Typography>
-          <Button href='/' component={Link} variant='contained'>
-            Back to Home
+          <Button
+            variant='contained'
+            onClick={() => {
+              localStorage.removeItem('userData')
+              localStorage.removeItem('refreshToken')
+              localStorage.removeItem('accessToken')
+              window.location.href = '/login'
+            }}
+          >
+            Back to Login
           </Button>
         </BoxWrapper>
         <Img height='500' alt='error-illustration' src='/images/pages/404.png' />

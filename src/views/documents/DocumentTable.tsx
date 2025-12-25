@@ -153,11 +153,14 @@ const DocumentTable = ({ status }: Props) => {
                 <IconifyIcon icon='tabler:eye' />
               </IconButton>
             </Tooltip>
-            <Tooltip title={String(t('common.edit'))}>
-              <IconButton size='small' component={Link} href={`/tasks/update/${id}`}>
-                <IconifyIcon icon='tabler:pencil' />
-              </IconButton>
-            </Tooltip>
+            {['new', 'in_progress', 'on_review', 'returned'].includes(status) &&
+              user?.role_detail?.some((role: any) => role.name !== 'Performer') && (
+                <Tooltip title={String(t('common.edit'))}>
+                  <IconButton size='small' component={Link} href={`/tasks/update/${id}`}>
+                    <IconifyIcon icon='tabler:pencil' />
+                  </IconButton>
+                </Tooltip>
+              )}
           </Stack>
         )
       }
@@ -169,9 +172,11 @@ const DocumentTable = ({ status }: Props) => {
       <CardContent sx={{ pb: 0 }}>
         {status !== 'archive' && (
           <Stack direction='row' justifyContent='flex-end' sx={{ mb: 2 }}>
-            <Button variant='contained' onClick={() => setCreateOpen(true)}>
-              {String(t('tasks.create.title'))}
-            </Button>
+            {user?.role_detail?.some((role: any) => role.name !== 'Performer') && (
+              <Button variant='contained' onClick={() => setCreateOpen(true)}>
+                {String(t('tasks.create.title'))}
+              </Button>
+            )}
           </Stack>
         )}
 

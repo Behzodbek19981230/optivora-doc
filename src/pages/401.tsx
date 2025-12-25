@@ -48,8 +48,8 @@ const Error401 = () => {
             You do not have permission to view this page using the credentials that you have provided while login.
           </Typography>
           <Typography sx={{ mb: 6, color: 'text.secondary' }}>Please contact your site administrator.</Typography>
-          <Button href='/' component={Link} variant='contained'>
-            Back to Home
+          <Button href='/login' component={Link} variant='contained'>
+            Back to Login
           </Button>
         </BoxWrapper>
         <Img height='500' alt='error-illustration' src='/images/pages/401.png' />

@@ -105,9 +105,10 @@ const TaskCreateForm = () => {
     page: 1,
     perPage: 100
   })
-  const { data: users } = useFetchList<{ id: number; fullname: string }>(endpoints.users, {
+  const { data: signatories } = useFetchList<{ id: number; fullname: string }>(endpoints.users, {
     page: 1,
-    perPage: 100
+    perPage: 100,
+    roles__name: 'Signatory'
   })
 
   const { data: docFormsData } = useFetchList(endpoints.documentForm, {
@@ -389,8 +390,8 @@ const TaskCreateForm = () => {
                   rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => (
                     <Autocomplete
-                      options={users || []}
-                      value={(users || []).find(u => u.id === field.value) || null}
+                      options={signatories || []}
+                      value={(signatories || []).find(u => u.id === field.value) || null}
                       onChange={(_, v) => field.onChange(v?.id ?? undefined)}
                       isOptionEqualToValue={(o, v) => o.id === v.id}
                       getOptionLabel={o => o?.fullname || ''}

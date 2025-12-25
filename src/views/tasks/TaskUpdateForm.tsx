@@ -182,6 +182,16 @@ const TaskUpdateForm = () => {
     page: 1,
     perPage: 100
   })
+  const { data: performers } = useFetchList<{ id: number; fullname: string }>(endpoints.users, {
+    page: 1,
+    perPage: 100,
+    roles__name: 'Performer'
+  })
+  const { data: signatories } = useFetchList<{ id: number; fullname: string }>(endpoints.users, {
+    page: 1,
+    perPage: 100,
+    roles__name: 'Signatory'
+  })
 
   const { data: docFormsData } = useFetchList(endpoints.documentForm, {
     page: 1,
@@ -863,9 +873,9 @@ const TaskUpdateForm = () => {
                         render={({ field, fieldState }) => (
                           <Autocomplete
                             fullWidth
-                            options={users || []}
+                            options={signatories || []}
                             getOptionLabel={option => option.fullname}
-                            value={users?.find(u => u.id === field.value) || null}
+                            value={signatories?.find(u => u.id === field.value) || null}
                             onChange={(event, newValue) => field.onChange(newValue?.id || 0)}
                             renderInput={params => (
                               <CustomTextField
@@ -946,8 +956,8 @@ const TaskUpdateForm = () => {
               <Grid container spacing={2} alignItems='end'>
                 <Grid item xs={12} sm={8}>
                   <Autocomplete
-                    options={users || []}
-                    value={(users || []).find(u => u.id === simpleAssignee) || null}
+                    options={performers || []}
+                    value={(performers || []).find(u => u.id === simpleAssignee) || null}
                     onChange={(_, v) => setSimpleAssignee(v?.id || 0)}
                     isOptionEqualToValue={(o, v) => o.id === v.id}
                     getOptionLabel={o => o?.fullname || ''}
@@ -1081,9 +1091,9 @@ const TaskUpdateForm = () => {
               <Grid item xs={12}>
                 <Autocomplete
                   fullWidth
-                  options={users || []}
+                  options={performers || []}
                   getOptionLabel={option => option.fullname}
-                  value={users?.find(u => u.id === partForm.assignee) || null}
+                  value={performers?.find(u => u.id === partForm.assignee) || null}
                   onChange={(event, newValue) => setPartForm({ ...partForm, assignee: newValue?.id || 0 })}
                   renderInput={params => (
                     <CustomTextField

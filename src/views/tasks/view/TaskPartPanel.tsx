@@ -38,7 +38,8 @@ const TaskPartPanel = ({ taskId }: Props) => {
 
   const { data: users } = useFetchList<{ id: number; fullname: string }>(endpoints.users, {
     page: 1,
-    perPage: 100
+    perPage: 100,
+    roles__name: 'Performer'
   })
 
   useEffect(() => {
