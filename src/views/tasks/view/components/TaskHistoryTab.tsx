@@ -12,6 +12,7 @@ import TimelineConnector from '@mui/lab/TimelineConnector'
 import { Card, CardContent } from '@mui/material'
 import { TaskEventType } from 'src/types/task'
 import { useTranslation } from 'react-i18next'
+
 const Timeline = styled(MuiTimeline)({
   '& .MuiTimelineItem-root': {
     width: '100%',
@@ -20,6 +21,15 @@ const Timeline = styled(MuiTimeline)({
     }
   }
 })
+
+const translateStatus = (t: (key: string) => string, s?: string | null) => {
+  if (!s) return ''
+  const key = `documents.status.${s}`
+  const translated = String(t(key))
+
+  return translated === key ? s : translated
+}
+
 const getDotColor = (eventType: string) => {
   switch (eventType) {
     case 'assigned':
@@ -54,6 +64,7 @@ export default function TaskHistoryTab({ id }: { id: string }) {
     queryKey: ['task-events', id],
     queryFn: async (): Promise<TaskEventType[]> => {
       const res = await DataService.get<{ results: TaskEventType[] }>(endpoints.taskEvent, { task: id, perPage: 50 })
+
       return (res.data?.results as TaskEventType[]) || []
     },
     staleTime: 10_000
@@ -97,6 +108,21 @@ export default function TaskHistoryTab({ id }: { id: string }) {
                       {ev.created_time ? new Date(ev.created_time).toLocaleString() : ''}
                     </Typography>
                   </Box>
+
+                  {ev.from_status || ev.to_status ? (
+                    <Stack direction='row' spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1 }}>
+                      <Chip
+                        size='small'
+                        variant='outlined'
+                        color='info'
+                        label={
+                          ev.from_status && ev.to_status
+                            ? `${translateStatus(t, ev.from_status)} → ${translateStatus(t, ev.to_status)}`
+                            : translateStatus(t, ev.to_status || ev.from_status)
+                        }
+                      />
+                    </Stack>
+                  ) : null}
                 </TimelineContent>
               </TimelineItem>
             ))}

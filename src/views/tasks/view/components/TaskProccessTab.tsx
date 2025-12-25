@@ -102,10 +102,18 @@ const getEventIcon = (eventType: string) => {
 
 const TaskProccessTab = ({ id }: { id: string }) => {
   const { t } = useTranslation()
+  const translateStatus = (s?: string | null) => {
+    if (!s) return ''
+    const key = `documents.status.${s}`
+    const translated = String(t(key))
+
+    return translated === key ? s : translated
+  }
   const { data: events = [], isLoading } = useQuery<TaskEventType[]>({
     queryKey: ['task-events', id],
     queryFn: async (): Promise<TaskEventType[]> => {
       const res = await DataService.get<{ results: TaskEventType[] }>(endpoints.taskEvent, { task: id, perPage: 50 })
+
       return (res.data?.results as TaskEventType[]) || []
     },
     staleTime: 10_000
@@ -172,6 +180,18 @@ const TaskProccessTab = ({ id }: { id: string }) => {
                       ) : null}
                       {ev.part_detail?.assignee_detail?.fullname ? (
                         <Chip size='small' label={`Ijrochi: ${ev.part_detail.assignee_detail.fullname}`} />
+                      ) : null}
+                      {ev.from_status || ev.to_status ? (
+                        <Chip
+                          size='small'
+                          variant='outlined'
+                          color='info'
+                          label={
+                            ev.from_status && ev.to_status
+                              ? `${translateStatus(ev.from_status)} → ${translateStatus(ev.to_status)}`
+                              : translateStatus(ev.to_status || ev.from_status)
+                          }
+                        />
                       ) : null}
                       {direction ? null : null}
                     </Stack>
