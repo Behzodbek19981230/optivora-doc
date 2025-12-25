@@ -209,7 +209,7 @@
   "tasks.view.attachments.loadError": "Fayllarni yuklab bo'lmadi",
   "tasks.view.attachments.openOrDownload": "Ochish / yuklab olish",
   "tasks.view.attachments.partLabel": "Qism #{{id}}",
-  "tasks.view.attachments.uploader": "• Yuklagan: #{{id}}",
+  "tasks.view.attachments.uploader": "• Yuklagan: {{name}}",
   "tasks.view.comments.title": "Izohlar",
   "tasks.view.comments.count": "{{count}} ta",
   "tasks.view.comments.empty": "Hali izohlar yo'q",

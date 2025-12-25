@@ -209,7 +209,7 @@
   "tasks.view.attachments.loadError": "Не удалось загрузить файлы",
   "tasks.view.attachments.openOrDownload": "Открыть / скачать",
   "tasks.view.attachments.partLabel": "Часть #{{id}}",
-  "tasks.view.attachments.uploader": "• Загрузил: #{{id}}",
+  "tasks.view.attachments.uploader": "• Загрузил: {{name}}",
   "tasks.view.comments.title": "Комментарии",
   "tasks.view.comments.count": "{{count}} шт.",
   "tasks.view.comments.empty": "Комментариев пока нет",

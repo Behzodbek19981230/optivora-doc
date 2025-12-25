@@ -325,7 +325,7 @@
   "tasks.view.attachments.loadError": "Failed to load files",
   "tasks.view.attachments.openOrDownload": "Open / download",
   "tasks.view.attachments.partLabel": "Part #{{id}}",
-  "tasks.view.attachments.uploader": "• Uploaded by: #{{id}}",
+  "tasks.view.attachments.uploader": "• Uploaded by: {{name}}",
   "tasks.view.comments.title": "Comments",
   "tasks.view.comments.count": "{{count}} items",
   "tasks.view.comments.empty": "No comments yet",

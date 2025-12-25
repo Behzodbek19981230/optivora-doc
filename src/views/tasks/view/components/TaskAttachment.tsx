@@ -22,17 +22,24 @@ import Icon from 'src/@core/components/icon'
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
 import { useTranslation } from 'react-i18next'
+import moment from 'moment'
+import { UserDetailType } from 'src/types/task'
 
 type TaskAttachmentType = {
   id: number
-  task: number
+  task: number | null
   part: number | null
   title: string
   file: string
-  uploaded_by: number
-  created_by: number
-  updated_by: number
+  uploaded_by?: number | null
+  uploaded_by_detail?: UserDetailType | null
+  created_by?: number | null
+  created_by_detail?: UserDetailType | null
+  updated_by?: number | null
+  created_time?: string
+  updated_time?: string
   created_at?: string
+  updated_at?: string
 }
 
 const getFileLabel = (a: TaskAttachmentType) => {
@@ -202,7 +209,16 @@ export default function TaskAttachment({
             const label = getFileLabel(a)
             const ext = getExt(a.file || a.title)
             const icon = getFileIcon(ext)
-            const created = a.created_at ? new Date(a.created_at).toLocaleString() : ''
+            const createdIso = a.created_time || a.created_at || a.updated_time || a.updated_at
+            const created = createdIso ? moment(createdIso).format('DD.MM.YYYY HH:mm') : ''
+            const uploaderName =
+              a.uploaded_by_detail?.fullname ||
+              a.created_by_detail?.fullname ||
+              (typeof a.uploaded_by === 'number'
+                ? `#${a.uploaded_by}`
+                : typeof a.created_by === 'number'
+                ? `#${a.created_by}`
+                : '')
             const href = a.file || '#'
 
             return (
@@ -271,9 +287,9 @@ export default function TaskAttachment({
                             {created}
                           </Typography>
                         ) : null}
-                        {typeof a.uploaded_by === 'number' ? (
+                        {uploaderName ? (
                           <Typography variant='caption' color='text.secondary'>
-                            {String(t('tasks.view.attachments.uploader', { id: a.uploaded_by }))}
+                            {String(t('tasks.view.attachments.uploader', { name: uploaderName }))}
                           </Typography>
                         ) : null}
                       </Stack>
