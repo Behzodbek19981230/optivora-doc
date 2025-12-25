@@ -40,20 +40,22 @@ const getInitials = (value: string) => {
   const parts = v.split(' ').filter(Boolean)
   const a = parts[0]?.[0] || ''
   const b = parts[1]?.[0] || ''
+
   return (a + b).toUpperCase() || v[0].toUpperCase()
 }
 
-export default function TaskComments({ taskId, partId }: { taskId: string | number; partId?: string | number }) {
+export default function TaskComments({ taskId, partId }: { taskId: string | number | null; partId?: string | number }) {
   const { t } = useTranslation()
   const { data, isLoading, isError } = useQuery<{ results: TaskCommentType[] }>({
     queryKey: ['task-comments', taskId, partId ?? null],
     queryFn: async () => {
       const params: Record<string, string | number | boolean> = {
-        task: taskId,
+        task: taskId ?? '',
         perPage: 50
       }
       if (partId != null) params.part = partId
       const res = await DataService.get<{ results: TaskCommentType[] }>(endpoints.taskComment, params)
+
       return res.data || { results: [] }
     },
     enabled: !!taskId,

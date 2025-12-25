@@ -313,10 +313,10 @@ export default function DocumentTab({
       {selectedPartId && (
         <>
           <Grid item xs={12}>
-            <TaskAttachment taskId={task.id} partId={selectedPartId} />
+            <TaskAttachment taskId={null} partId={selectedPartId} />
           </Grid>
           <Grid item xs={12}>
-            <TaskComments taskId={task.id} partId={selectedPartId} />
+            <TaskComments taskId={null} partId={selectedPartId} />
           </Grid>
         </>
       )}

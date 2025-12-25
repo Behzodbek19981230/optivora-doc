@@ -447,6 +447,7 @@ const TaskUpdateForm = () => {
         formData.append('part', selectedPartId.toString())
         formData.append('title', row.title)
         if (row.file) formData.append('file', row.file)
+        formData.append('uploaded_by', user?.id?.toString() ?? '')
         await DataService.postForm(endpoints.taskAttachment, formData)
       }
       toast.success(String(t('tasks.attachments.attached')))
@@ -491,6 +492,7 @@ const TaskUpdateForm = () => {
         formData.append('file', fileItem)
         formData.append('title', fileItem.name)
         formData.append('task', id.toString())
+        formData.append('uploaded_by', user?.id?.toString() ?? '')
         await DataService.postForm(endpoints.taskAttachment, formData)
       }
 

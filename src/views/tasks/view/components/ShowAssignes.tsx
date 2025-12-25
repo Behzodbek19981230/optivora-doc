@@ -2,19 +2,7 @@ import React from 'react'
 import moment from 'moment'
 import { TaskPartType } from 'src/types/task'
 import { useTranslation } from 'react-i18next'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Typography,
-  Chip,
-  Avatar,
-  Box
-} from '@mui/material'
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box } from '@mui/material'
 import { Icon } from '@iconify/react'
 
 export default function ShowAssignes({ parts }: { parts?: TaskPartType[] }) {

@@ -90,7 +90,7 @@ export default function TaskAttachment({
   partId,
   isCompact
 }: {
-  taskId: string | number
+  taskId: string | number | null
   partId?: string | number | null
   isCompact?: boolean
 }) {
