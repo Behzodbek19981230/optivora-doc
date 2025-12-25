@@ -86,7 +86,7 @@ const TaskViewDetail = () => {
                     : String(t('tasks.view.header.title'))}
                 </Typography>
                 <Stack direction='row' spacing={1} alignItems='center'>
-                  {['new', 'in_progress', 'on_review', 'returned'].includes(status) &&
+                  {['new'].includes(task?.status as string) &&
                     user?.role_detail?.some((role: any) => role.name !== 'Performer') && (
                       <Button
                         size='small'
