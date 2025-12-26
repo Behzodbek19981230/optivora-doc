@@ -143,6 +143,11 @@ const ChartjsBarChart = (props: BarProp) => {
             startDate={startDate}
             onChange={handleOnChange}
             placeholderText='Click to select a date'
+            showMonthDropdown
+            showYearDropdown
+            dropdownMode='scroll'
+            yearDropdownItemNumber={100}
+            scrollableYearDropdown
             customInput={<CustomInput start={startDate} end={endDate} />}
           />
         }

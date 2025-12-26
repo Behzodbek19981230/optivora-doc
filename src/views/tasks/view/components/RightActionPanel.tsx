@@ -21,16 +21,18 @@ const RightActionsPanel = ({ task, part, mutate }: { task?: TaskType; part?: Tas
     try {
       if (partId) {
         await qc.invalidateQueries({ queryKey: ['task-part', partId], refetchType: 'active' })
-        await qc.invalidateQueries({ queryKey: ['task-comments', partId], refetchType: 'active' })
-        await qc.invalidateQueries({ queryKey: ['task-attachments', partId], refetchType: 'active' })
+        if (taskId) {
+          await qc.invalidateQueries({ queryKey: ['task-comments', taskId, partId], refetchType: 'active' })
+          await qc.invalidateQueries({ queryKey: ['task-attachments', taskId, partId], refetchType: 'active' })
+        }
 
         await qc.invalidateQueries({ queryKey: ['/task/with-parts/by-id/', taskId], refetchType: 'active' })
         mutate?.()
       }
       if (taskId) {
         // Refresh side lists that depend on task/part (comments & attachments)
-        await qc.invalidateQueries({ queryKey: ['task-comments', taskId], refetchType: 'active' })
-        await qc.invalidateQueries({ queryKey: ['task-attachments', taskId], refetchType: 'active' })
+        await qc.invalidateQueries({ queryKey: ['task-comments', taskId, null], refetchType: 'active' })
+        await qc.invalidateQueries({ queryKey: ['task-attachments', taskId, 'all'], refetchType: 'active' })
 
         await qc.invalidateQueries({ queryKey: ['/task/with-parts/by-id/', taskId], refetchType: 'active' })
         mutate?.()
@@ -53,6 +55,15 @@ const RightActionsPanel = ({ task, part, mutate }: { task?: TaskType; part?: Tas
     enabled: !!taskId,
     staleTime: 10_000
   })
+
+  // Use fresh data from query to avoid stale props (e.g. approve button not disappearing until refresh)
+  const liveTask = data?.task || task
+  const livePart = React.useMemo(() => {
+    if (!partId) return part
+    const found = data?.parts?.find(p => p.id === partId)
+
+    return found || part
+  }, [data?.parts, part, partId])
 
   return (
     <Box
@@ -77,13 +88,13 @@ const RightActionsPanel = ({ task, part, mutate }: { task?: TaskType; part?: Tas
                   {String(t('tasks.view.actions.selectedSection'))}
                 </Typography>
                 <Stack direction='row' spacing={1} alignItems='center'>
-                  <Typography variant='body2'>{part?.title || String(t('common.notSet'))}</Typography>
+                  <Typography variant='body2'>{livePart?.title || String(t('common.notSet'))}</Typography>
                 </Stack>
                 <Typography variant='caption' color='text.secondary'>
                   {String(t('tasks.view.actions.partStatus'))}
                 </Typography>
                 <Stack direction='row' spacing={1} alignItems='center'>
-                  {part?.status ? (
+                  {livePart?.status ? (
                     <Chip
                       size='small'
                       color='info'
@@ -95,22 +106,24 @@ const RightActionsPanel = ({ task, part, mutate }: { task?: TaskType; part?: Tas
                             .map((seg, i) => (i === 0 ? seg : seg.charAt(0).toUpperCase() + seg.slice(1)))
                             .join('')
 
-                        const key = `documents.status.${toCamel(part.status as string)}`
+                        const key = `documents.status.${toCamel(livePart.status as string)}`
                         const translated = String(t(key))
 
-                        return translated === key ? (part.status as string) : translated
+                        return translated === key ? (livePart.status as string) : translated
                       })()}
                     />
                   ) : null}
                 </Stack>
-                {user?.id === part?.assignee_detail?.id &&
+                {user?.id === livePart?.assignee_detail?.id &&
                   partId &&
-                  (part?.status === 'new' || part?.status === 'in_progress' || part?.status === 'returned') && (
+                  (livePart?.status === 'new' ||
+                    livePart?.status === 'in_progress' ||
+                    livePart?.status === 'returned') && (
                     <Button size='small' variant='contained' onClick={() => setOpen(true)}>
                       {String(t('tasks.view.actions.ensureExecution') || 'Ensure execution')}
                     </Button>
                   )}
-                {user?.id === task?.signed_by_detail?.id && partId && part?.status === 'on_review' && (
+                {user?.id === liveTask?.signed_by_detail?.id && partId && livePart?.status === 'on_review' && (
                   <Button size='small' variant='contained' onClick={() => setOpen(true)}>
                     {String(t('tasks.view.actions.approve') || 'Approve')}
                   </Button>
@@ -127,14 +140,22 @@ const RightActionsPanel = ({ task, part, mutate }: { task?: TaskType; part?: Tas
       <ShowAssignes parts={data?.parts} />
       <RightActionsDrawer
         open={open}
-        toggle={() => {
-          setOpen(!open)
-          mutateAndRefresh()
-        }}
+        toggle={() =>
+          setOpen(prev => {
+            const next = !prev
+
+            // Only refresh when drawer is being closed
+            if (prev && !next) {
+              void mutateAndRefresh()
+            }
+
+            return next
+          })
+        }
         taskId={taskId ? Number(taskId) : undefined}
         partId={partId ? Number(partId) : undefined}
-        part={part}
-        task={task}
+        part={livePart}
+        task={liveTask}
       />
     </Box>
   )

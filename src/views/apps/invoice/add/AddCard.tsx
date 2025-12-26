@@ -235,6 +235,11 @@ const AddCard = (props: Props) => {
                 <DatePicker
                   id='issue-date'
                   selected={issueDate}
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode='scroll'
+                  yearDropdownItemNumber={100}
+                  scrollableYearDropdown
                   customInput={<CustomInput />}
                   onChange={(date: Date) => setIssueDate(date)}
                 />
@@ -244,6 +249,11 @@ const AddCard = (props: Props) => {
                 <DatePicker
                   id='due-date'
                   selected={dueDate}
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode='scroll'
+                  yearDropdownItemNumber={100}
+                  scrollableYearDropdown
                   customInput={<CustomInput />}
                   onChange={(date: Date) => setDueDate(date)}
                 />

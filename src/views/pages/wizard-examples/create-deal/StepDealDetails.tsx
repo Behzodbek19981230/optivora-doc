@@ -123,6 +123,11 @@ const StepDealDetails = () => {
           id='date-range-picker'
           onChange={handleDateChange}
           shouldCloseOnSelect={false}
+          showMonthDropdown
+          showYearDropdown
+          dropdownMode='scroll'
+          yearDropdownItemNumber={100}
+          scrollableYearDropdown
           customInput={
             <CustomInput label='Deal Duration' start={startDate as Date | number} end={endDate as Date | number} />
           }

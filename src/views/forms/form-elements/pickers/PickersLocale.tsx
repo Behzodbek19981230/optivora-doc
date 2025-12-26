@@ -39,6 +39,11 @@ const PickersLocale = ({ popperPlacement }: { popperPlacement: ReactDatePickerPr
           locale={i18n.language}
           popperPlacement={popperPlacement}
           onChange={(date: Date) => setDate(date)}
+          showMonthDropdown
+          showYearDropdown
+          dropdownMode='scroll'
+          yearDropdownItemNumber={100}
+          scrollableYearDropdown
           customInput={<CustomInput label='Locale Dates' />}
         />
       </div>
@@ -51,6 +56,11 @@ const PickersLocale = ({ popperPlacement }: { popperPlacement: ReactDatePickerPr
           dateFormat='MM/dd/yyyy h:mm aa'
           popperPlacement={popperPlacement}
           onChange={(date: Date) => setTime(date)}
+          showMonthDropdown
+          showYearDropdown
+          dropdownMode='scroll'
+          yearDropdownItemNumber={100}
+          scrollableYearDropdown
           customInput={<CustomInput label='Locale Time' />}
         />
       </div>

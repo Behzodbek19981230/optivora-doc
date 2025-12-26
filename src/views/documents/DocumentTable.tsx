@@ -153,7 +153,7 @@ const DocumentTable = ({ status }: Props) => {
                 <IconifyIcon icon='tabler:eye' />
               </IconButton>
             </Tooltip>
-            {['new'].includes(status) && user?.role_detail?.some((role: any) => role.name !== 'Performer') && (
+            {['new'].includes(status) && user?.role_detail?.some((role: any) => role.name === 'Manager') && (
               <Tooltip title={String(t('common.edit'))}>
                 <IconButton size='small' component={Link} href={`/tasks/update/${id}`}>
                   <IconifyIcon icon='tabler:pencil' />

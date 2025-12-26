@@ -135,6 +135,9 @@ const FormLayoutsTabs = () => {
                     selected={date}
                     showYearDropdown
                     showMonthDropdown
+                    dropdownMode='scroll'
+                    yearDropdownItemNumber={100}
+                    scrollableYearDropdown
                     id='form-layouts-tabs-date'
                     placeholderText='MM-DD-YYYY'
                     customInput={<CustomInput />}

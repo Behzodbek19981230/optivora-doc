@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { useForm, Controller } from 'react-hook-form'
@@ -82,7 +82,8 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
     watch,
     formState: { isSubmitting, errors }
   } = useForm<UserForm>({ defaultValues })
-  const { user } = useAuth()
+  useAuth()
+
   // region/district selects
   const { data: regions = [] } = useFetchList<any>(endpoints.region, { perPage: 100 })
   const selectedRegion = watch('region')
@@ -98,7 +99,8 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
 
   useEffect(() => {
     if (mode === 'edit' && item) {
-      reset({ ...item, password: '', role: item.roles_detail?.map((r: any) => r.id) || [] })
+      // Keep role ids as strings to match ROLES_OPTIONS values
+      reset({ ...item, password: '', role: item.roles_detail?.map((r: any) => String(r.id)) || [] })
       setPreviewUrl(item.avatar || '')
     } else {
       reset(defaultValues)
@@ -111,8 +113,10 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
     if (avatarFile) {
       const url = URL.createObjectURL(avatarFile)
       setPreviewUrl(url)
+
       return () => URL.revokeObjectURL(url)
     }
+
     // if no file chosen, keep existing preview (from item) or empty
   }, [avatarFile])
 
@@ -128,8 +132,9 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
           if (item == 'roles') return
           if (item == 'role') {
             values.role?.forEach(roleId => {
-              form.append('roles', roleId)
+              form.append('roles', String(roleId))
             })
+
             return
           }
 
@@ -141,27 +146,40 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
         })
         await DataService.postForm(endpoints.users, form)
       } else if (mode === 'edit' && item?.id) {
-        const form = new FormData()
-        Object.keys(values).forEach(item => {
-          if (item == 'roles') return
-          if (item == 'role') {
-            values.role?.forEach(roleId => {
-              form.append('roles', roleId)
-            })
-            return
-          }
-          if (item == 'companies') {
-            values.companies.forEach((companyId, index) => {
-              form.append(`companies`, companyId.toString())
-            })
-          } else {
-            if (item == 'avatar') return
-            form.append(item, (values as any)[item])
-          }
-        })
-        if (avatarFile) form.append('avatar', avatarFile)
+        // If user is not changing avatar, send JSON so empty roles ([]) can be persisted (cleared) correctly.
+        if (!avatarFile) {
+          const json: any = { ...values }
+          delete json.role
+          delete json.roles_detail
+          delete json.avatar
 
-        await DataService.putForm(endpoints.userById(item.id), form)
+          json.roles = (values.role || []).map(r => Number(r))
+
+          await DataService.put(endpoints.userById(item.id), json)
+        } else {
+          const form = new FormData()
+          Object.keys(values).forEach(item => {
+            if (item == 'roles') return
+            if (item == 'role') {
+              values.role?.forEach(roleId => {
+                form.append('roles', String(roleId))
+              })
+
+              return
+            }
+            if (item == 'companies') {
+              values.companies.forEach(companyId => {
+                form.append(`companies`, companyId.toString())
+              })
+            } else {
+              if (item == 'avatar') return
+              form.append(item, (values as any)[item])
+            }
+          })
+          form.append('avatar', avatarFile)
+
+          await DataService.putForm(endpoints.userById(item.id), form)
+        }
       }
       toast.success(String(t('users.toast.saved')))
       onSaved()
@@ -226,12 +244,18 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                   control={control}
                   render={({ field }) => {
                     const selectedDate = field.value ? new Date(field.value) : null
+
                     return (
                       <div>
                         <DatePicker
                           selected={selectedDate}
                           onChange={(date: Date | null) => field.onChange(date ? date.toISOString().slice(0, 10) : '')}
                           dateFormat='yyyy-MM-dd'
+                          showMonthDropdown
+                          showYearDropdown
+                          dropdownMode='scroll'
+                          yearDropdownItemNumber={100}
+                          scrollableYearDropdown
                           customInput={<CustomTextField label={String(t('users.form.birthDate'))} fullWidth />}
                           showPopperArrow
                           isClearable
@@ -262,7 +286,7 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
                 <Controller
                   name='role'
                   control={control}
-                  rules={{ required: String(t('errors.required')) }}
+                  rules={mode === 'create' ? { required: String(t('errors.required')) } : {}}
                   render={({ field }) => (
                     <CustomTextField
                       select

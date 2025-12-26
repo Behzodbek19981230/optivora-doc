@@ -202,6 +202,11 @@ const ApexCandlestickChart = () => {
             onChange={handleOnChange}
             id='apexchart-candlestick'
             placeholderText='Click to select a date'
+            showMonthDropdown
+            showYearDropdown
+            dropdownMode='scroll'
+            yearDropdownItemNumber={100}
+            scrollableYearDropdown
             customInput={<CustomInput start={startDate as Date | number} end={endDate as Date | number} />}
           />
         }

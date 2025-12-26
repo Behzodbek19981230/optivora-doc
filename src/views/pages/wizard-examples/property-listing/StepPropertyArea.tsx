@@ -83,6 +83,11 @@ const StepPropertyArea = () => {
           selected={date}
           placeholderText='YYY-MM-DD'
           onChange={(date: Date) => setDate(date)}
+          showMonthDropdown
+          showYearDropdown
+          dropdownMode='scroll'
+          yearDropdownItemNumber={100}
+          scrollableYearDropdown
           customInput={<CustomInput label='Available From' />}
         />
       </Grid>

@@ -100,6 +100,18 @@ const getEventIcon = (eventType: string) => {
   }
 }
 
+const getFileNameFromPath = (p?: string | null) => {
+  const s = (p || '').split('?')[0].trim()
+  if (!s) return ''
+  try {
+    const parts = s.split('/')
+
+    return decodeURIComponent(parts[parts.length - 1] || s)
+  } catch {
+    return s
+  }
+}
+
 const TaskProccessTab = ({ id }: { id: string }) => {
   const { t } = useTranslation()
   const translateStatus = (s?: string | null) => {
@@ -144,6 +156,9 @@ const TaskProccessTab = ({ id }: { id: string }) => {
               const actor = ev.actor_detail?.fullname || '—'
               const title = ev.message || ev.event_type
               const created = ev.created_time ? new Date(ev.created_time).toLocaleString() : ''
+              const filePath = (ev as any)?.extra?.file as string | undefined
+              const fileUrl = `${process.env.NEXT_PUBLIC_FILE_URL}/${filePath}`
+              const fileName = getFileNameFromPath(filePath)
 
               return (
                 <TimelineItem key={ev.id ?? idx}>
@@ -174,6 +189,20 @@ const TaskProccessTab = ({ id }: { id: string }) => {
                     </Box>
 
                     <Stack direction='row' spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1 }}>
+                      {fileUrl ? (
+                        <Chip
+                          size='small'
+                          icon={<Icon icon='tabler:download' />}
+                          label={fileName || String(t('common.file') || 'File')}
+                          component='a'
+                          href={fileUrl}
+                          target='_blank'
+                          rel='noopener noreferrer'
+                          clickable
+                          variant='outlined'
+                          color='primary'
+                        />
+                      ) : null}
                       {ev.part_detail?.title ? <Chip size='small' label={`Qism: ${ev.part_detail.title}`} /> : null}
                       {ev.part_detail?.department_detail?.name ? (
                         <Chip size='small' label={`Bo'lim: ${ev.part_detail.department_detail.name}`} />

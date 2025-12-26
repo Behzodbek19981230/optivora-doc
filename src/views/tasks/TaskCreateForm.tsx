@@ -311,6 +311,11 @@ const TaskCreateForm = () => {
                           selected={selectedDate}
                           onChange={(date: Date | null) => field.onChange(date ? date.toISOString().slice(0, 10) : '')}
                           dateFormat='yyyy-MM-dd'
+                          showMonthDropdown
+                          showYearDropdown
+                          dropdownMode='scroll'
+                          yearDropdownItemNumber={100}
+                          scrollableYearDropdown
                           customInput={
                             <CustomTextField
                               label={String(t('tasks.form.startDate'))}
@@ -341,6 +346,11 @@ const TaskCreateForm = () => {
                           selected={selectedDate}
                           onChange={(date: Date | null) => field.onChange(date ? date.toISOString().slice(0, 10) : '')}
                           dateFormat='yyyy-MM-dd'
+                          showMonthDropdown
+                          showYearDropdown
+                          dropdownMode='scroll'
+                          yearDropdownItemNumber={100}
+                          scrollableYearDropdown
                           customInput={
                             <CustomTextField
                               label={String(t('tasks.form.endDate'))}

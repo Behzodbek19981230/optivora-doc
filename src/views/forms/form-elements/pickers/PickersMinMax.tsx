@@ -29,6 +29,11 @@ const PickersMinMax = ({ popperPlacement }: { popperPlacement: ReactDatePickerPr
           minDate={subDays(new Date(), 5)}
           popperPlacement={popperPlacement}
           onChange={(date: Date) => setMinDate(date)}
+          showMonthDropdown
+          showYearDropdown
+          dropdownMode='scroll'
+          yearDropdownItemNumber={100}
+          scrollableYearDropdown
           customInput={<CustomInput label='Min Date' />}
         />
       </div>
@@ -39,6 +44,11 @@ const PickersMinMax = ({ popperPlacement }: { popperPlacement: ReactDatePickerPr
           maxDate={addDays(new Date(), 5)}
           popperPlacement={popperPlacement}
           onChange={(date: Date) => setMaxDate(date)}
+          showMonthDropdown
+          showYearDropdown
+          dropdownMode='scroll'
+          yearDropdownItemNumber={100}
+          scrollableYearDropdown
           customInput={<CustomInput label='Max Date' />}
         />
       </div>

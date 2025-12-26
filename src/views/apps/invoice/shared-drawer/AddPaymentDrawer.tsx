@@ -98,6 +98,11 @@ const EditInvoiceDrawer = ({ open, toggle }: Props) => {
             <DatePicker
               selected={date}
               id='invoice-payment-date'
+              showMonthDropdown
+              showYearDropdown
+              dropdownMode='scroll'
+              yearDropdownItemNumber={100}
+              scrollableYearDropdown
               customInput={<CustomInput />}
               onChange={(date: Date) => setDate(date)}
             />

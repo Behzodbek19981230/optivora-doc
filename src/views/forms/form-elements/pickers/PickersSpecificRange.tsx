@@ -31,6 +31,11 @@ const PickersSpecificRange = ({ popperPlacement }: { popperPlacement: ReactDateP
           maxDate={addDays(new Date(), 5)}
           popperPlacement={popperPlacement}
           onChange={(date: Date) => setDate(date)}
+          showMonthDropdown
+          showYearDropdown
+          dropdownMode='scroll'
+          yearDropdownItemNumber={100}
+          scrollableYearDropdown
           customInput={<CustomInput label='Specific Date Range' />}
         />
       </div>
@@ -44,6 +49,11 @@ const PickersSpecificRange = ({ popperPlacement }: { popperPlacement: ReactDateP
           onChange={(date: Date) => setTime(date)}
           minTime={setHours(setMinutes(new Date(), 0), 17)}
           maxTime={setHours(setMinutes(new Date(), 30), 20)}
+          showMonthDropdown
+          showYearDropdown
+          dropdownMode='scroll'
+          yearDropdownItemNumber={100}
+          scrollableYearDropdown
           customInput={<CustomInput label='Specific Time' />}
         />
       </div>

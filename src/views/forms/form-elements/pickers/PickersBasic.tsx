@@ -26,6 +26,11 @@ const PickersBasic = ({ popperPlacement }: { popperPlacement: ReactDatePickerPro
           popperPlacement={popperPlacement}
           onChange={(date: Date) => setDate(date)}
           placeholderText='Click to select a date'
+          showMonthDropdown
+          showYearDropdown
+          dropdownMode='scroll'
+          yearDropdownItemNumber={100}
+          scrollableYearDropdown
           customInput={<CustomInput label='Basic' />}
         />
       </div>
@@ -37,6 +42,11 @@ const PickersBasic = ({ popperPlacement }: { popperPlacement: ReactDatePickerPro
           popperPlacement={popperPlacement}
           onChange={(date: Date) => setDate(date)}
           placeholderText='Click to select a date'
+          showMonthDropdown
+          showYearDropdown
+          dropdownMode='scroll'
+          yearDropdownItemNumber={100}
+          scrollableYearDropdown
           customInput={<CustomInput label='Disabled' />}
         />
       </div>
@@ -48,6 +58,11 @@ const PickersBasic = ({ popperPlacement }: { popperPlacement: ReactDatePickerPro
           popperPlacement={popperPlacement}
           onChange={(date: Date) => setDate(date)}
           placeholderText='Click to select a date'
+          showMonthDropdown
+          showYearDropdown
+          dropdownMode='scroll'
+          yearDropdownItemNumber={100}
+          scrollableYearDropdown
           customInput={<CustomInput readOnly label='Readonly' />}
         />
       </div>

@@ -185,6 +185,9 @@ const FormLayoutsSeparator = () => {
                 selected={date}
                 showYearDropdown
                 showMonthDropdown
+                dropdownMode='scroll'
+                yearDropdownItemNumber={100}
+                scrollableYearDropdown
                 placeholderText='MM-DD-YYYY'
                 customInput={<CustomInput />}
                 id='form-layouts-separator-date'
