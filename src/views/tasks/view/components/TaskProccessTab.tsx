@@ -189,7 +189,7 @@ const TaskProccessTab = ({ id }: { id: string }) => {
                     </Box>
 
                     <Stack direction='row' spacing={1} sx={{ flexWrap: 'wrap', rowGap: 1 }}>
-                      {fileUrl ? (
+                      {filePath ? (
                         <Chip
                           size='small'
                           icon={<Icon icon='tabler:download' />}
