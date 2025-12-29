@@ -23,7 +23,7 @@ const EmployeeReports = () => {
     queryFn: async () => {
       const params: any = {
         company:user?.company_id,
-        perPage: 50
+        limit: 50
       }
      
       const res = await DataService.post<EmployeesResponseType>('reports/employees/', params)

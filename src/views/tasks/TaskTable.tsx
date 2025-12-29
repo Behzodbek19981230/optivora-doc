@@ -53,7 +53,7 @@ const TaskTable = () => {
     loading
   } = useFetchList<TaskRow>(endpoints.task, {
     page: paginationModel.page + 1,
-    perPage: paginationModel.pageSize
+    limit: paginationModel.pageSize
   })
 
   const columns: GridColDef[] = [

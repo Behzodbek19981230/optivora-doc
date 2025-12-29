@@ -3,6 +3,7 @@ import CardHeader from '@mui/material/CardHeader'
 import IconButton from '@mui/material/IconButton'
 import Button from '@mui/material/Button'
 import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid'
+
 const AddIcon = () => <span style={{ fontWeight: 'bold' }}>＋</span>
 import CountryFormDialog from '../dialogs/CountryFormDialog'
 import DeleteConfirmDialog from '../dialogs/DeleteConfirmDialog'
@@ -23,7 +24,7 @@ const CountryTable = () => {
     mutate
   } = useFetchList<any>(endpoints.country, {
     page: paginationModel.page + 1,
-    perPage: paginationModel.pageSize,
+    limit: paginationModel.pageSize,
     search
   })
   console.log(data)
@@ -85,7 +86,8 @@ const CountryTable = () => {
                 sortable: false,
                 renderCell: params => {
                   const row = params.row as any
-                  return (
+                  
+return (
                     <>
                       <IconButton size='small' onClick={() => handleEdit(row)}>
                         <IconifyIcon icon='tabler:edit' />
@@ -106,6 +108,7 @@ const CountryTable = () => {
           onPaginationModelChange={setPaginationModel}
           getRowId={row => (row as any).id as number}
           localeText={getDataGridLocaleText(t)}
+          rowCount={total}
         />
       </>
       <CountryFormDialog

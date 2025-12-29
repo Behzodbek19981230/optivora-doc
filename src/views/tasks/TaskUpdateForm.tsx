@@ -176,32 +176,32 @@ const TaskUpdateForm = () => {
 
   const { data: departments } = useFetchList<{ id: number; name: string }>(endpoints.department, {
     page: 1,
-    perPage: 100
+    limit: 100
   })
   const { data: users } = useFetchList<{ id: number; fullname: string }>(endpoints.users, {
     page: 1,
-    perPage: 100
+    limit: 100
   })
   const { data: performers } = useFetchList<{ id: number; fullname: string }>(endpoints.users, {
     page: 1,
-    perPage: 100,
+    limit: 100,
     roles__name: 'Performer'
   })
   const { data: signatories } = useFetchList<{ id: number; fullname: string }>(endpoints.users, {
     page: 1,
-    perPage: 100,
+    limit: 100,
     roles__name: 'Signatory'
   })
 
   const { data: docFormsData } = useFetchList(endpoints.documentForm, {
     page: 1,
-    perPage: 100
+    limit: 100
   })
   const docForms = (docFormsData as Array<{ id: number; name: string }>) || []
 
   const { data: magData } = useFetchList<{ id: number; name: string }>(endpoints.listOfMagazine, {
     page: 1,
-    perPage: 100
+    limit: 100
   })
   const safeMsg = (msg: any) => (typeof msg === 'string' ? msg : undefined)
   const [attachFiles, setAttachFiles] = useState<File[]>([])
@@ -213,7 +213,7 @@ const TaskUpdateForm = () => {
       const data = res.data as TaskPayload
       setAssignmentMode(data.task_type || 'simple')
       if (data.task_type === 'simple') {
-        const res = await DataService.get<TaskPartItem>(endpoints.taskPart, { task: id, perPage: 50 })
+        const res = await DataService.get<TaskPartItem>(endpoints.taskPart, { task: id, limit: 50 })
         const data = (res.data as any)?.results?.[0] as TaskPartItem
         if (data) {
           setSimpleAssignee(data.assignee || 0)
@@ -246,7 +246,7 @@ const TaskUpdateForm = () => {
     const fetchTaskParts = async () => {
       if (!id || Array.isArray(id)) return
       try {
-        const res = await DataService.get<any>(endpoints.taskPart, { task: id, perPage: 50 })
+        const res = await DataService.get<any>(endpoints.taskPart, { task: id, limit: 50 })
         setTaskParts((res.data?.results || []) as TaskPartItem[])
       } catch (e) {
         console.error('Error fetching task parts:', e)
@@ -290,7 +290,7 @@ const TaskUpdateForm = () => {
       toast.success(String(t('tasks.toast.assigneeAssigned')))
 
       // Refresh task parts
-      const res = await DataService.get<any>(endpoints.taskPart, { task: id, perPage: 50 })
+      const res = await DataService.get<any>(endpoints.taskPart, { task: id, limit: 50 })
       const refreshed = (res.data?.results || []) as TaskPartItem[]
       setTaskParts(refreshed)
       if (refreshed?.[0]?.id) setSimplePartId(refreshed[0].id)
@@ -387,7 +387,7 @@ const TaskUpdateForm = () => {
       setEditingPartId(null)
 
       // Refresh task parts
-      const res = await DataService.get<any>(endpoints.taskPart, { task: id, perPage: 50 })
+      const res = await DataService.get<any>(endpoints.taskPart, { task: id, limit: 50 })
       setTaskParts((res.data?.results || []) as TaskPartItem[])
     } catch (e: any) {
       toast.error(e?.message || String(t('errors.somethingWentWrong')))

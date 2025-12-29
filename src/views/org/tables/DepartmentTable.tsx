@@ -27,7 +27,7 @@ const DepartmentTable = () => {
     mutate
   } = useFetchList<any>(endpoints.department, {
     page: paginationModel.page + 1,
-    perPage: paginationModel.pageSize,
+    limit: paginationModel.pageSize,
     search
   })
   const [openForm, setOpenForm] = useState(false)
@@ -87,7 +87,8 @@ const DepartmentTable = () => {
                 sortable: false,
                 renderCell: params => {
                   const row = params.row as any
-                  return (
+                  
+return (
                     <>
                       <IconButton size='small' onClick={() => handleEdit(row)}>
                         <Icon icon='tabler:edit' />
@@ -108,6 +109,7 @@ const DepartmentTable = () => {
           onPaginationModelChange={setPaginationModel}
           getRowId={row => (row as any).id as number}
           localeText={getDataGridLocaleText(t)}
+          rowCount={total}
         />
       </>
       <DepartmentFormDialog

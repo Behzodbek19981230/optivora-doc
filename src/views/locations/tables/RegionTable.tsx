@@ -3,6 +3,7 @@ import CardHeader from '@mui/material/CardHeader'
 import IconButton from '@mui/material/IconButton'
 import Button from '@mui/material/Button'
 import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid'
+
 const AddIcon = () => <span style={{ fontWeight: 'bold' }}>＋</span>
 import RegionFormDialog from '../dialogs/RegionFormDialog'
 import DeleteConfirmDialog from '../dialogs/DeleteConfirmDialog'
@@ -25,7 +26,7 @@ const RegionTable = () => {
     mutate
   } = useFetchList<any>(endpoints.region, {
     page: paginationModel.page + 1,
-    perPage: paginationModel.pageSize,
+    limit: paginationModel.pageSize,
     search
   })
   const [openForm, setOpenForm] = useState(false)
@@ -86,7 +87,8 @@ const RegionTable = () => {
                 sortable: false,
                 renderCell: params => {
                   const row = params.row as any
-                  return (
+                  
+return (
                     <>
                       <IconButton size='small' onClick={() => handleEdit(row)}>
                         <IconifyIcon icon='tabler:edit' />
@@ -107,6 +109,7 @@ const RegionTable = () => {
           onPaginationModelChange={setPaginationModel}
           getRowId={row => (row as any).id as number}
           localeText={getDataGridLocaleText(t)}
+          rowCount={total}
         />
       </>
       <RegionFormDialog

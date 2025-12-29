@@ -46,9 +46,10 @@ const CompanyTable = () => {
   const {
     data = [],
     loading,
-    mutate
+    mutate,
+    total
   } = useFetchList<Company>(endpoints.company, {
-    perPage: paginationModel.pageSize,
+    limit: paginationModel.pageSize,
     page: paginationModel.page + 1
   })
   const [open, setOpen] = useState(false)
@@ -122,7 +123,8 @@ const CompanyTable = () => {
       minWidth: 140,
       renderCell: params => {
         const row = params.row as Company
-        return (
+        
+return (
           <CustomAvatar
             src={row.logo}
             variant='circular'
@@ -146,7 +148,8 @@ const CompanyTable = () => {
       minWidth: 140,
       renderCell: params => {
         const row = params.row as Company
-        return (
+        
+return (
           <>
             <IconButton
               aria-label='view'
@@ -168,7 +171,8 @@ const CompanyTable = () => {
       }
     }
   ]
-  return (
+  
+return (
     <Card>
       <CardHeader
         title={String(t('company.title'))}
@@ -191,6 +195,7 @@ const CompanyTable = () => {
           onPaginationModelChange={setPaginationModel}
           getRowId={row => (row as Company).id}
           localeText={getDataGridLocaleText(t)}
+            rowCount={total }
         />
       </>
 

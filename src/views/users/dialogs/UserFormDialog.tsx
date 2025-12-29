@@ -85,13 +85,13 @@ const UserFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
   useAuth()
 
   // region/district selects
-  const { data: regions = [] } = useFetchList<any>(endpoints.region, { perPage: 100 })
+  const { data: regions = [] } = useFetchList<any>(endpoints.region, { limit: 100 })
   const selectedRegion = watch('region')
   const districtEndpoint = selectedRegion ? `${endpoints.district}?region=${selectedRegion}` : endpoints.district
-  const { data: districts = [] } = useFetchList<any>(districtEndpoint, { perPage: 200 })
+  const { data: districts = [] } = useFetchList<any>(districtEndpoint, { limit: 200 })
 
   // companies multi-select
-  const { data: companies = [] } = useFetchList<any>(endpoints.company, { perPage: 200 })
+  const { data: companies = [] } = useFetchList<any>(endpoints.company, { limit: 200 })
 
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)

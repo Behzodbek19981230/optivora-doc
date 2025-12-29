@@ -53,7 +53,7 @@ const DistrictFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
   } = useForm<District>({ defaultValues })
 
   // Fetch region list
-  const { data: regions = [], loading: loadingRegions } = useFetchList<any>('/region', { perPage: 100 })
+  const { data: regions = [], loading: loadingRegions } = useFetchList<any>('/region', { limit: 100 })
 
   useEffect(() => {
     if (mode === 'edit' && item) {

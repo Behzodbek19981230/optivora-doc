@@ -107,7 +107,7 @@ export default function TaskAttachment({
     queryFn: async () => {
       const params: any = {
         task: taskId,
-        perPage: 50
+        limit: 50
       }
       if (partId !== undefined) {
         params.part = partId === null ? '' : partId

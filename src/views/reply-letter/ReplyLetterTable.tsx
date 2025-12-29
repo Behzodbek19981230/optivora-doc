@@ -21,10 +21,11 @@ const ReplyLetterTable = () => {
   const {
     data = [],
     loading,
+    total,
     mutate
   } = useFetchList(endpoints.replyLetter, {
     page: paginationModel.page + 1,
-    perPage: paginationModel.pageSize
+    limit: paginationModel.pageSize
   })
 
   const handleEdit = (item: any) => {
@@ -111,6 +112,7 @@ const ReplyLetterTable = () => {
           onPaginationModelChange={setPaginationModel}
           getRowId={row => (row as any).id as number}
           localeText={localeText}
+            rowCount={total }
         />
       </>
 

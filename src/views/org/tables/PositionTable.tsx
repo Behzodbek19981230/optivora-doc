@@ -27,7 +27,7 @@ const PositionTable = () => {
     mutate
   } = useFetchList<any>(endpoints.position, {
     page: paginationModel.page + 1,
-    perPage: paginationModel.pageSize,
+    limit: paginationModel.pageSize,
     search
   })
   const [openForm, setOpenForm] = useState(false)
@@ -94,7 +94,8 @@ const PositionTable = () => {
                 sortable: false,
                 renderCell: params => {
                   const row = params.row as any
-                  return (
+                  
+return (
                     <>
                       <IconButton size='small' onClick={() => handleEdit(row)}>
                         <Icon icon='tabler:edit' />
@@ -115,6 +116,7 @@ const PositionTable = () => {
           onPaginationModelChange={setPaginationModel}
           getRowId={row => (row as any).id as number}
           localeText={getDataGridLocaleText(t)}
+          rowCount={total}
         />
       </>
       <PositionFormDialog

@@ -36,7 +36,7 @@ const MagazineListTable = () => {
     mutate
   } = useFetchList<Magazine>(endpoints.listOfMagazine, {
     page: paginationModel.page + 1,
-    perPage: paginationModel.pageSize
+    limit: paginationModel.pageSize
   })
 
   const columns: GridColDef[] = [
@@ -51,7 +51,8 @@ const MagazineListTable = () => {
       sortable: false,
       renderCell: params => {
         const row = params.row as Magazine
-        return (
+        
+return (
           <Stack direction='row' spacing={1}>
             <Tooltip title={String(t('common.edit'))}>
               <IconButton

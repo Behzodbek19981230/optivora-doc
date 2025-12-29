@@ -78,11 +78,14 @@ const UserTable = () => {
   const {
     data = [],
     loading,
+    total,
     mutate
   } = useFetchList<User>(endpoints.users, {
-    perPage: paginationModel.pageSize,
+    limit: paginationModel.pageSize,
     page: paginationModel.page + 1
   })
+  console.log(total);
+  
   const [open, setOpen] = useState(false)
   const [editItem, setEditItem] = useState<User | null>(null)
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false)
@@ -311,7 +314,10 @@ return item.name || (item as any).company_name || item.title || `#${item.id}`
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           getRowId={row => (row as User).id}
-          localeText={getDataGridLocaleText(t)}
+            paginationMode='server'
+            rowCount={total || 0}
+            localeText={getDataGridLocaleText(t)}
+
         />
       </>
 

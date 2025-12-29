@@ -44,30 +44,30 @@ const DocumentTabs = ({ currentStatus }: { currentStatus: DocumentStatus }) => {
 
   // Fetch totals for badges per status (server reports pagination.total)
   const totals = {
-    [DocumentStatus.New]: useFetchList(endpoints.task, { page: 1, perPage: 1, status: DocumentStatus.New }).total,
+    [DocumentStatus.New]: useFetchList(endpoints.task, { page: 1, limit: 1, status: DocumentStatus.New }).total,
     [DocumentStatus.InProgress]: useFetchList(endpoints.task, {
       page: 1,
-      perPage: 1,
+      limit: 1,
       status: DocumentStatus.InProgress
     }).total,
     [DocumentStatus.OnReview]: useFetchList(endpoints.task, {
       page: 1,
-      perPage: 1,
+      limit: 1,
       status: DocumentStatus.OnReview
     }).total,
     [DocumentStatus.Cancelled]: useFetchList(endpoints.task, {
       page: 1,
-      perPage: 1,
+      limit: 1,
       status: DocumentStatus.Cancelled
     }).total,
     [DocumentStatus.Done]: useFetchList(endpoints.task, {
       page: 1,
-      perPage: 1,
+      limit: 1,
       status: DocumentStatus.Done
     }).total,
     [DocumentStatus.Returned]: useFetchList(endpoints.task, {
       page: 1,
-      perPage: 1,
+      limit: 1,
       status: DocumentStatus.Returned
     }).total
   }

@@ -62,7 +62,7 @@ const CalendarActions = () => {
       const response = (await DataService.get(endpoints.taskPart, {
         start_date: selectedDate,
         page: 1,
-        perPage: 1000
+        limit: 1000
       })) as { data?: { results?: TaskPartType[] } }
       setTasks((response?.data?.results as TaskPartType[]) || [])
     } catch (error) {

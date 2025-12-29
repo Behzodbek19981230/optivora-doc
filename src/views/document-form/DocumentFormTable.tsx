@@ -36,7 +36,7 @@ const DocumentFormTable = () => {
     mutate
   } = useFetchList<DocForm>(endpoints.documentForm, {
     page: paginationModel.page + 1,
-    perPage: paginationModel.pageSize
+    limit: paginationModel.pageSize
   })
 
   const columns: GridColDef[] = [
@@ -51,7 +51,8 @@ const DocumentFormTable = () => {
       sortable: false,
       renderCell: params => {
         const row = params.row as DocForm
-        return (
+        
+return (
           <Stack direction='row' spacing={1}>
             <Tooltip title={String(t('common.edit'))}>
               <IconButton

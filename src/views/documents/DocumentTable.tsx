@@ -88,7 +88,7 @@ const DocumentTable = ({ status }: Props) => {
     loading
   } = useFetchList<DocumentRow>(endpoints.task, {
     page: paginationModel.page + 1,
-    perPage: paginationModel.pageSize,
+    limit: paginationModel.pageSize,
     status
   })
 

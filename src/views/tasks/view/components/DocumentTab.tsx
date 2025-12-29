@@ -41,11 +41,11 @@ export default function DocumentTab({
 
   const { data: departments } = useFetchList<{ id: number; name: string }>(endpoints.department, {
     page: 1,
-    perPage: 100
+    limit: 100
   })
   const { data: performers } = useFetchList<{ id: number; fullname: string }>(endpoints.users, {
     page: 1,
-    perPage: 100,
+    limit: 100,
     roles__name: 'Performer'
   })
 
@@ -64,7 +64,7 @@ export default function DocumentTab({
     queryKey: ['task-parts', taskId ?? 'none'],
     enabled: !!taskId,
     queryFn: async (): Promise<TaskPartType[]> => {
-      const res = await DataService.get(endpoints.taskPart, { task: String(taskId), perPage: 100 })
+      const res = await DataService.get(endpoints.taskPart, { task: String(taskId), limit: 100 })
 
       const payload: any = res.data
 

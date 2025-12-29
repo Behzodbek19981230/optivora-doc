@@ -103,23 +103,23 @@ const TaskCreateForm = () => {
 
   const { data: departments } = useFetchList<{ id: number; name: string }>(endpoints.department, {
     page: 1,
-    perPage: 100
+    limit: 100
   })
   const { data: signatories } = useFetchList<{ id: number; fullname: string }>(endpoints.users, {
     page: 1,
-    perPage: 100,
+    limit: 100,
     roles__name: 'Signatory'
   })
 
   const { data: docFormsData } = useFetchList(endpoints.documentForm, {
     page: 1,
-    perPage: 100
+    limit: 100
   })
   const docForms = (docFormsData as Array<{ id: number; name: string }>) || []
 
   const { data: magData } = useFetchList<{ id: number; name: string }>(endpoints.listOfMagazine, {
     page: 1,
-    perPage: 100
+    limit: 100
   })
   const safeMsg = (msg: any) => (typeof msg === 'string' ? msg : undefined)
 

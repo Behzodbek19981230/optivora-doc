@@ -70,12 +70,12 @@ const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Fetch regions and districts
-  const { data: countries = [] } = useFetchList<{ id: number; name: string }>(endpoints.country, { perPage: 100 })
-  const { data: regions = [] } = useFetchList<{ id: number; name: string }>(endpoints.region, { perPage: 100 })
+  const { data: countries = [] } = useFetchList<{ id: number; name: string }>(endpoints.country, { limit: 100 })
+  const { data: regions = [] } = useFetchList<{ id: number; name: string }>(endpoints.region, { limit: 100 })
   const selectedRegion = watch('region')
   const districtEndpoint = selectedRegion ? `${endpoints.district}?region=${selectedRegion}` : endpoints.district
   const { data: districts = [] } = useFetchList<{ id: number; name: string; region_id: number }>(districtEndpoint, {
-    perPage: 200
+    limit: 200
   })
 
   useEffect(() => {

@@ -124,7 +124,7 @@ const TaskProccessTab = ({ id }: { id: string }) => {
   const { data: events = [], isLoading } = useQuery<TaskEventType[]>({
     queryKey: ['task-events', id],
     queryFn: async (): Promise<TaskEventType[]> => {
-      const res = await DataService.get<{ results: TaskEventType[] }>(endpoints.taskEvent, { task: id, perPage: 50 })
+      const res = await DataService.get<{ results: TaskEventType[] }>(endpoints.taskEvent, { task: id, limit: 50 })
 
       return (res.data?.results as TaskEventType[]) || []
     },

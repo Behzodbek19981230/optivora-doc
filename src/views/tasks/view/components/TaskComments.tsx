@@ -51,7 +51,7 @@ export default function TaskComments({ taskId, partId }: { taskId: string | numb
     queryFn: async () => {
       const params: Record<string, string | number | boolean> = {
         task: taskId ?? '',
-        perPage: 50
+        limit: 50
       }
       if (partId != null) params.part = partId
       const res = await DataService.get<{ results: TaskCommentType[] }>(endpoints.taskComment, params)

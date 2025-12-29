@@ -3,6 +3,7 @@ import CardHeader from '@mui/material/CardHeader'
 import IconButton from '@mui/material/IconButton'
 import Button from '@mui/material/Button'
 import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid'
+
 const AddIcon = () => <span style={{ fontWeight: 'bold' }}>＋</span>
 import DistrictFormDialog from '../dialogs/DistrictFormDialog'
 import DeleteConfirmDialog from '../dialogs/DeleteConfirmDialog'
@@ -25,7 +26,7 @@ const DistrictTable = () => {
     mutate
   } = useFetchList<any>(endpoints.district, {
     page: paginationModel.page + 1,
-    perPage: paginationModel.pageSize,
+    limit: paginationModel.pageSize,
     search
   })
   const [openForm, setOpenForm] = useState(false)
@@ -72,6 +73,7 @@ const DistrictTable = () => {
           autoHeight
           rowHeight={56}
           rows={data}
+          rowCount={total}
           columns={
             [
               { field: 'code', headerName: String(t('chooseCompany.code')), flex: 0.12, minWidth: 100 },
@@ -93,7 +95,8 @@ const DistrictTable = () => {
                 sortable: false,
                 renderCell: params => {
                   const row = params.row as any
-                  return (
+                  
+return (
                     <>
                       <IconButton size='small' onClick={() => handleEdit(row)}>
                         <IconifyIcon icon='tabler:edit' />

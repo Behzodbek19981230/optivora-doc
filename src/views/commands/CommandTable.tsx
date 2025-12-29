@@ -22,10 +22,11 @@ const CommandTable = () => {
   const {
     data = [],
     loading,
-    mutate
+    mutate,
+    total
   } = useFetchList<CommandType>(endpoints.command, {
     page: paginationModel.page + 1,
-    perPage: paginationModel.pageSize
+    limit: paginationModel.pageSize
   })
   const [selected, setSelected] = useState<any | null>(null)
   const [openDelete, setOpenDelete] = useState(false)
@@ -116,6 +117,7 @@ const CommandTable = () => {
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           getRowId={row => (row as CommandType).id as number}
+          rowCount={total }
           localeText={getDataGridLocaleText(t)}
         />
       </>

@@ -38,13 +38,13 @@ const TaskPartPanel = ({ taskId }: Props) => {
 
   const { data: users } = useFetchList<{ id: number; fullname: string }>(endpoints.users, {
     page: 1,
-    perPage: 100,
+    limit: 100,
     roles__name: 'Performer'
   })
 
   useEffect(() => {
     const fetch = async () => {
-      const res = await DataService.get<any>(endpoints.taskPart, { task: taskId, perPage: 50 })
+      const res = await DataService.get<any>(endpoints.taskPart, { task: taskId, limit: 50 })
       setParts((res.data?.results || []) as Part[])
       const first = (res.data?.results || [])[0] || null
       setSelected(first)
@@ -58,7 +58,7 @@ const TaskPartPanel = ({ taskId }: Props) => {
   }, [selected, reset])
 
   const refreshList = async () => {
-    const res = await DataService.get<any>(endpoints.taskPart, { task: taskId, perPage: 50 })
+    const res = await DataService.get<any>(endpoints.taskPart, { task: taskId, limit: 50 })
     const list = (res.data?.results || []) as Part[]
     setParts(list)
     const refreshed = selected ? list.find(p => p.id === selected.id) || null : null
