@@ -1,16 +1,15 @@
 import { useState } from 'react'
-import { useRouter } from 'next/router'
 import {
   Card,
   CardHeader,
-  CardContent,
   Button,
   IconButton,
   Chip,
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  Tooltip
 } from '@mui/material'
 import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid'
 import CustomAvatar from 'src/@core/components/mui/avatar'
@@ -137,8 +136,8 @@ const UserTable = () => {
     {
       field: 'fullname',
       headerName: String(t('users.table.fullname')),
-      flex: 0.25,
-      minWidth: 220,
+      flex: 0.35,
+      minWidth: 300,
       renderCell: params => {
         const row = params.row as User
 
@@ -146,7 +145,7 @@ const UserTable = () => {
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {renderAvatar(row)}
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontWeight: 500 }}>{row.fullname || row.username}</span>
+              <span style={{flexWrap: 'wrap', fontWeight: 500 }}>{row.fullname || row.username}</span>
               <span style={{ color: 'gray', fontSize: 12 }}>{row.email}</span>
             </div>
           </div>
@@ -165,7 +164,7 @@ const UserTable = () => {
         const roles = row.roles_detail || []
         if (roles.length === 0) return ''
 
-        return roles.map(r => r.name).join(', ')
+        return roles.map(r => t(`users.roles.${r.name.toLowerCase()}`)).join(', ')
       }
     },
     { field: 'phone_number', headerName: String(t('users.table.phone')), flex: 0.18, minWidth: 160 },
@@ -201,14 +200,59 @@ const UserTable = () => {
             label = item.name || (item as any).company_name || item.title || `#${item.id}`
           }
 
-          return <Chip key={key} size='small' label={label} sx={{ mr: 1, mb: 1 }} />
+          // Use Tooltip for long labels
+          return (
+            <Tooltip key={key} title={label} arrow>
+              <Chip
+                size='small'
+                label={label.length > 18 ? label.slice(0, 15) + '…' : label}
+                sx={{
+                 
+                  fontWeight: 500,
+                  fontSize: 12,
+                  borderRadius: 2,
+                  textTransform: 'capitalize',
+                  color: '#1976d2',
+                }}
+              />
+            </Tooltip>
+          )
         })
         const extra = list.length - maxToShow
 
         return (
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '2px 0'
+            }}
+          >
             {chips}
-            {extra > 0 && <Chip size='small' label={`+${extra}`} sx={{ mb: 1 }} />}
+            {extra > 0 && (
+              <Tooltip
+                title={list.slice(maxToShow).map(item => {
+                  if (typeof item === 'string' || typeof item === 'number') return String(item)
+                  
+return item.name || (item as any).company_name || item.title || `#${item.id}`
+                }).join(', ')}
+                arrow
+              >
+                <Chip
+                  size='small'
+                  label={`+${extra}`}
+                  sx={{
+                    mb: 1,
+                    fontWeight: 500,
+                    fontSize: 13,
+                    borderRadius: 2,
+                  
+                  }}
+                />
+              </Tooltip>
+            )}
           </div>
         )
       }

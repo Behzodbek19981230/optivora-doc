@@ -10,7 +10,8 @@ import { useTranslation } from 'react-i18next'
 const DepartmentPositionTable = () => {
   const [tab, setTab] = useState(0)
   const { t } = useTranslation()
-  return (
+  
+return (
     <Card>
       <Tabs value={tab} onChange={(_, v) => setTab(v)}>
         <Tab label={String(t('org.tabs.departments'))} />

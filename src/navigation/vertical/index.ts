@@ -84,6 +84,15 @@ const navigation = (): VerticalNavItemsType => {
       icon: 'tabler:building',
       path: '/company',
       roles: [ROLES.ADMIN]
+    },
+    {
+      sectionTitle: 'nav.section.reports'
+    },
+    {
+      title: 'nav.reports',
+      icon: 'tabler:report-analytics',  
+      path: '/reports',
+      roles: [ROLES.ADMIN, ROLES.MANAGER]
     }
   ]
 }
