@@ -19,6 +19,7 @@ import { useFetchList } from 'src/hooks/useFetchList'
 import { useTranslation } from 'react-i18next'
 import Icon from 'src/@core/components/icon'
 import CustomAvatar from 'src/@core/components/mui/avatar'
+import { useAuth } from 'src/hooks/useAuth'
 
 type CompanyForm = {
   id?: number
@@ -42,21 +43,21 @@ type Props = {
   item?: CompanyForm | null
 }
 
-const defaultValues: CompanyForm = {
-  code: '',
-  name: '',
-  is_active: true,
-  phone: '',
-  country: 0,
-  region: 0,
-  district: 0,
-  address: '',
-  created_by: 0,
-  logo: ''
-}
-
 const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
   const { t } = useTranslation()
+  const { user } = useAuth()
+  const defaultValues: CompanyForm = {
+    code: '',
+    name: '',
+    is_active: true,
+    phone: '',
+    country: 0,
+    region: 0,
+    district: 0,
+    address: '',
+    created_by: user?.id || 0,
+    logo: ''
+  }
   const {
     control,
     handleSubmit,
