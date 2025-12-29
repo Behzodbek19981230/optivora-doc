@@ -137,6 +137,7 @@ const RightActionsDrawer = ({ open, toggle, taskId, partId, part, task }: Props)
           const formData = new FormData()
           if (row.file) formData.append('file', row.file)
           formData.append('title', row.title.trim())
+          formData.append('link', '124') // Assuming 'link' is optional and can be empty
           formData.append('part', partId ? partId.toString() : '')
           formData.append('uploaded_by', user?.id?.toString() ?? '')
           await DataService.postForm(endpoints.taskAttachment, formData)

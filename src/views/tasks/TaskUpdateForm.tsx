@@ -456,6 +456,8 @@ const TaskUpdateForm = () => {
         const formData = new FormData()
         formData.append('part', selectedPartId.toString())
         formData.append('title', row.title)
+        formData.append('link', '124') // Assuming 'link' is optional and can be empty
+
         if (row.file) formData.append('file', row.file)
         formData.append('uploaded_by', user?.id?.toString() ?? '')
         await DataService.postForm(endpoints.taskAttachment, formData)
@@ -502,6 +504,8 @@ const TaskUpdateForm = () => {
         formData.append('file', fileItem)
         formData.append('title', fileItem.name)
         formData.append('task', id.toString())
+        formData.append('link', '124') // Assuming 'link' is optional and can be empty
+
         formData.append('uploaded_by', user?.id?.toString() ?? '')
         await DataService.postForm(endpoints.taskAttachment, formData)
       }

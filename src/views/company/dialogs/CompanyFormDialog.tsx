@@ -56,7 +56,7 @@ const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
     district: 0,
     address: '',
     created_by: user?.id || 0,
-    logo: ''
+    logo: undefined
   }
   const {
     control,
