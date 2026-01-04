@@ -293,7 +293,7 @@ export default function DocumentTemplate({
                     <div className='meta-label'>
                       {String(t('tasks.view.actions.deadline', { defaultValue: 'Deadline' }))}
                     </div>
-                    <div className='meta-value'>{formatDate(fullTask?.task?.end_date)}</div>
+                    <div className='meta-value'>{formatDate(fullTask?.task?.end_date, true)}</div>
                   </div>
                 </div>
 
@@ -334,8 +334,8 @@ export default function DocumentTemplate({
                       <tr key={part.id}>
                         <td>{part.assignee_detail?.fullname || '—'}</td>
                         <td>{part.department_detail?.name || '—'}</td>
-                        <td>{formatDate(part.start_date)}</td>
-                        <td>{formatDate(part.end_date)}</td>
+                        <td>{formatDate(part.start_date, true)}</td>
+                        <td>{formatDate(part.end_date, true)}</td>
                         <td>{translateStatus(part.status)}</td>
                         <td>{part.note || '—'}</td>
                       </tr>
@@ -442,7 +442,7 @@ export default function DocumentTemplate({
                           <div className='meta-label'>
                             {String(t('tasks.view.actions.deadline', { defaultValue: 'Deadline' }))}
                           </div>
-                          <div className='meta-value'>{formatDate(fullTask?.task?.end_date)}</div>
+                          <div className='meta-value'>{formatDate(fullTask?.task?.end_date, true)}</div>
                         </div>
                       </div>
 
@@ -483,8 +483,8 @@ export default function DocumentTemplate({
                             <tr key={part.id}>
                               <td>{part.assignee_detail?.fullname || '—'}</td>
                               <td>{part.department_detail?.name || '—'}</td>
-                              <td>{formatDate(part.start_date)}</td>
-                              <td>{formatDate(part.end_date)}</td>
+                              <td>{formatDate(part.start_date, true)}</td>
+                              <td>{formatDate(part.end_date, true)}</td>
                               <td>{translateStatus(part.status)}</td>
                               <td>{part.note || '—'}</td>
                             </tr>

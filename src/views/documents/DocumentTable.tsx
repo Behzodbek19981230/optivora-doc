@@ -91,6 +91,18 @@ const DocumentTable = ({ status }: Props) => {
     limit: paginationModel.pageSize,
     status
   })
+  const onDelete = async (id: number) => {
+    if (!confirm(String(t('documents.table.archiveConfirm')))) return
+    try {
+      await DataService.delete(`${endpoints.task}/${id}`)
+      toast.success(String(t('documents.table.archiveSuccess')))
+
+      // Refresh data
+      router.replace(router.asPath)
+    } catch (e: any) {
+      toast.error(e?.message || String(t('documents.table.archiveError')))
+    }
+  }
 
   const columns: GridColDef[] = [
     { field: 'id', headerName: String(t('common.id')), width: 90 },
@@ -157,6 +169,13 @@ const DocumentTable = ({ status }: Props) => {
               <Tooltip title={String(t('common.edit'))}>
                 <IconButton size='small' component={Link} href={`/tasks/update/${id}`}>
                   <IconifyIcon icon='tabler:pencil' />
+                </IconButton>
+              </Tooltip>
+            )}
+            {user?.role_detail?.some((role: any) => role.name === 'Manager') && (
+              <Tooltip title={String(t('documents.table.archive'))}>
+                <IconButton size='small' onClick={() => onDelete(id)}>
+                  <IconifyIcon icon='tabler:archive' />
                 </IconButton>
               </Tooltip>
             )}

@@ -30,7 +30,8 @@ type TaskAttachmentType = {
   task: number | null
   part: number | null
   title: string
-  file: string
+  file?: string | null
+  link?: string | null
   uploaded_by?: number | null
   uploaded_by_detail?: UserDetailType | null
   created_by?: number | null
@@ -43,17 +44,16 @@ type TaskAttachmentType = {
 }
 
 const getFileLabel = (a: TaskAttachmentType) => {
-  const name = (a.title || '').trim()
-  if (name) return name
   const file = (a.file || '').trim()
-  if (!file) return `Fayl #${a.id}`
+  const link = (a.link || '').trim()
+  if (!file && !link) return `Fayl #${a.id}`
   try {
-    const base = file.split('?')[0]
+    const base = (file || link).split('?')[0]
     const parts = base.split('/')
 
     return decodeURIComponent(parts[parts.length - 1] || base)
   } catch {
-    return file
+    return file || link
   }
 }
 
@@ -90,6 +90,21 @@ const getFileIcon = (ext: string) => {
     default:
       return 'tabler:file'
   }
+}
+
+const getAttachmentHref = (a: TaskAttachmentType) => {
+  const link = (a.link || '').trim()
+  const file = (a.file || '').trim()
+
+  return link || file || '#'
+}
+
+const getAttachmentIcon = (a: TaskAttachmentType) => {
+  const isLink = !!(a.link || '').trim() && !(a.file || '').trim()
+  if (isLink) return 'tabler:link'
+  const ext = getExt(String(a.file || a.link || ''))
+
+  return getFileIcon(ext)
 }
 
 export default function TaskAttachment({
@@ -167,9 +182,8 @@ export default function TaskAttachment({
             </Typography>
             {attachments.map(a => {
               const label = getFileLabel(a)
-              const ext = getExt(a.file || a.title)
-              const icon = getFileIcon(ext)
-              const href = a.file || '#'
+              const icon = getAttachmentIcon(a)
+              const href = getAttachmentHref(a)
 
               return (
                 <Chip
@@ -207,8 +221,7 @@ export default function TaskAttachment({
         <List disablePadding>
           {attachments.map((a, idx) => {
             const label = getFileLabel(a)
-            const ext = getExt(a.file || a.title)
-            const icon = getFileIcon(ext)
+            const icon = getAttachmentIcon(a)
             const createdIso = a.created_time || a.created_at || a.updated_time || a.updated_at
             const created = createdIso ? moment(createdIso).format('DD.MM.YYYY HH:mm') : ''
             const uploaderName =
@@ -219,7 +232,7 @@ export default function TaskAttachment({
                 : typeof a.created_by === 'number'
                 ? `#${a.created_by}`
                 : '')
-            const href = a.file || '#'
+            const href = getAttachmentHref(a)
 
             return (
               <React.Fragment key={a.id ?? idx}>
@@ -270,7 +283,11 @@ export default function TaskAttachment({
                           </Typography>
                         )}
 
-                        {ext ? <Chip size='small' variant='outlined' label={ext.toUpperCase()} /> : null}
+                        {(() => {
+                          const ext = getExt(String(a.file || a.link || ''))
+
+                          return ext ? <Chip size='small' variant='outlined' label={ext.toUpperCase()} /> : null
+                        })()}
                         {a.part ? (
                           <Chip
                             size='small'

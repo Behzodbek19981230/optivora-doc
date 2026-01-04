@@ -23,11 +23,11 @@ import {
   Paper,
   IconButton,
   Typography,
-  Chip,
   Autocomplete,
   Box,
   Divider,
-  Tooltip
+  Tooltip,
+  Switch
 } from '@mui/material'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -45,6 +45,42 @@ import DatePicker from 'react-datepicker'
 import { useAuth } from 'src/hooks/useAuth'
 import Icon from 'src/@core/components/icon'
 import { useTranslation } from 'react-i18next'
+import moment from 'moment'
+
+const pad2 = (n: number) => String(n).padStart(2, '0')
+
+const formatLocalDateTime = (date: Date) =>
+  `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}T${pad2(date.getHours())}:${pad2(
+    date.getMinutes()
+  )}`
+
+const parseDateTimeValue = (value?: string): Date | null => {
+  if (!value) return null
+
+  // Treat date-only values as local dates to avoid timezone shifting
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [y, m, d] = value.split('-').map(Number)
+
+    return new Date(y, (m || 1) - 1, d || 1, 0, 0, 0, 0)
+  }
+
+  const d = new Date(value)
+
+  return Number.isNaN(d.getTime()) ? null : d
+}
+
+const normalizeIncomingDateTime = (value?: string) => {
+  const d = parseDateTimeValue(value)
+
+  return d ? formatLocalDateTime(d) : ''
+}
+
+const formatDisplayDateTime = (value?: string) => {
+  if (!value) return '—'
+  const m = moment(value)
+
+  return m.isValid() ? m.format('DD.MM.YYYY HH:mm') : String(value)
+}
 
 export type TaskPayload = {
   status?: string
@@ -171,7 +207,7 @@ const TaskUpdateForm = () => {
   const [attachmentDialogOpen, setAttachmentDialogOpen] = useState(false)
   const [selectedPartId, setSelectedPartId] = useState<number | null>(null)
   const [existingPartFiles, setExistingPartFiles] = useState<any[]>([])
-  const [newPartAttachments, setNewPartAttachments] = useState<{ title: string; file: File | null }[]>([])
+  const [newPartAttachments, setNewPartAttachments] = useState<AttachmentRow[]>([])
   const [uploadingPartFiles, setUploadingPartFiles] = useState(false)
 
   const { data: departments } = useFetchList<{ id: number; name: string }>(endpoints.department, {
@@ -204,7 +240,9 @@ const TaskUpdateForm = () => {
     limit: 100
   })
   const safeMsg = (msg: any) => (typeof msg === 'string' ? msg : undefined)
-  const [attachFiles, setAttachFiles] = useState<File[]>([])
+  type AttachmentRow = { isLink: boolean; link: string; file: File | null }
+
+  const [taskAttachments, setTaskAttachments] = useState<AttachmentRow[]>([])
   const [saving, setSaving] = useState(false)
   useEffect(() => {
     const fetchTask = async () => {
@@ -234,9 +272,9 @@ const TaskUpdateForm = () => {
         signed_by: typeof data.signed_by === 'number' ? data.signed_by : 0,
         list_of_magazine: typeof data.list_of_magazine === 'number' ? data.list_of_magazine : 0,
 
-        // Ensure dates are ISO yyyy-MM-dd if present
-        start_date: data.start_date ? new Date(data.start_date).toISOString().slice(0, 10) : '',
-        end_date: data.end_date ? new Date(data.end_date).toISOString().slice(0, 10) : ''
+        // Keep date + time (local) if present
+        start_date: normalizeIncomingDateTime(data.start_date),
+        end_date: normalizeIncomingDateTime(data.end_date)
       })
     }
     fetchTask()
@@ -269,8 +307,8 @@ const TaskUpdateForm = () => {
         title: String(t('tasks.parts.simpleTitle')),
         assignee: simpleAssignee,
         department: department,
-        start_date: start_date,
-        end_date: end_date,
+        start_date: moment(start_date).format('YYYY-MM-DD HH:mm'),
+        end_date: moment(end_date).format('YYYY-MM-DD HH:mm'),
         note: ''
       }
 
@@ -307,8 +345,8 @@ const TaskUpdateForm = () => {
           title: part.title,
           department: part.department,
           assignee: part.assignee,
-          start_date: part.start_date,
-          end_date: part.end_date,
+          start_date: normalizeIncomingDateTime(part.start_date),
+          end_date: normalizeIncomingDateTime(part.end_date),
           note: part.note
         })
         setEditingPartId(partId)
@@ -362,8 +400,8 @@ const TaskUpdateForm = () => {
           title: partForm.title || '',
           department: partForm.department || 0,
           assignee: partForm.assignee || 0,
-          start_date: partForm.start_date || '',
-          end_date: partForm.end_date || '',
+          start_date: moment(partForm.start_date).format('YYYY-MM-DD HH:mm') || '',
+          end_date: moment(partForm.end_date).format('YYYY-MM-DD HH:mm') || '',
           note: partForm.note || '',
           updated_by: user?.id || 1,
           task: Number(id)
@@ -375,8 +413,8 @@ const TaskUpdateForm = () => {
           title: partForm.title || String(t('tasks.parts.newTitleFallback')),
           department: partForm.department || 0,
           assignee: partForm.assignee || 0,
-          start_date: partForm.start_date || '',
-          end_date: partForm.end_date || '',
+          start_date: moment(partForm.start_date).format('YYYY-MM-DD HH:mm') || '',
+          end_date: moment(partForm.end_date).format('YYYY-MM-DD HH:mm') || '',
           status: 'new',
           note: partForm.note || '',
           created_by: user?.id || 1
@@ -429,16 +467,52 @@ const TaskUpdateForm = () => {
     setNewPartAttachments([])
   }
 
+  const handleAddTaskAttachmentRow = () =>
+    setTaskAttachments(prev => [...prev, { isLink: false, link: '', file: null }])
+  const handleRemoveTaskAttachmentRow = (idx: number) => setTaskAttachments(prev => prev.filter((_, i) => i !== idx))
+  const handleToggleTaskAttachmentType = (idx: number, isLink: boolean) =>
+    setTaskAttachments(prev =>
+      prev.map((row, i) =>
+        i === idx
+          ? {
+              ...row,
+              isLink,
+              link: isLink ? row.link : '',
+              file: isLink ? null : row.file
+            }
+          : row
+      )
+    )
+  const handleChangeTaskAttachmentLink = (idx: number, link: string) =>
+    setTaskAttachments(prev => prev.map((row, i) => (i === idx ? { ...row, link } : row)))
+  const handleChangeTaskAttachmentFile = (idx: number, file: File | null) =>
+    setTaskAttachments(prev => prev.map((row, i) => (i === idx ? { ...row, file } : row)))
+
   const handleAddPartAttachmentRow = () => {
-    setNewPartAttachments(prev => [...prev, { title: '', file: null }])
+    setNewPartAttachments(prev => [...prev, { isLink: false, link: '', file: null }])
   }
 
   const handleRemovePartAttachmentRow = (idx: number) => {
     setNewPartAttachments(prev => prev.filter((_, i) => i !== idx))
   }
 
-  const handleChangePartAttachmentTitle = (idx: number, title: string) => {
-    setNewPartAttachments(prev => prev.map((row, i) => (i === idx ? { ...row, title } : row)))
+  const handleTogglePartAttachmentType = (idx: number, isLink: boolean) => {
+    setNewPartAttachments(prev =>
+      prev.map((row, i) =>
+        i === idx
+          ? {
+              ...row,
+              isLink,
+              link: isLink ? row.link : '',
+              file: isLink ? null : row.file
+            }
+          : row
+      )
+    )
+  }
+
+  const handleChangePartAttachmentLink = (idx: number, link: string) => {
+    setNewPartAttachments(prev => prev.map((row, i) => (i === idx ? { ...row, link } : row)))
   }
 
   const handleChangePartAttachmentFile = (idx: number, file: File | null) => {
@@ -447,18 +521,17 @@ const TaskUpdateForm = () => {
 
   const handleUploadPartAttachments = async () => {
     if (!selectedPartId || !id) return
-    const rowsToUpload = newPartAttachments.filter(r => r.file && r.title.trim().length)
-    if (!rowsToUpload.length) return toast.error(String(t('replyLetter.attachments.validation.fileAndTitleRequired')))
+    const rowsToUpload = newPartAttachments.filter(r => (r.isLink ? r.link.trim().length : !!r.file))
+    if (!rowsToUpload.length) return toast.error(String(t('tasks.attachments.fileRequired')))
 
     try {
       setUploadingPartFiles(true)
       for (const row of rowsToUpload) {
         const formData = new FormData()
         formData.append('part', selectedPartId.toString())
-        formData.append('title', row.title)
-        formData.append('link', '124') // Assuming 'link' is optional and can be empty
-
-        if (row.file) formData.append('file', row.file)
+        formData.append('title', '')
+        formData.append('link', row.isLink ? row.link.trim() : '')
+        if (!row.isLink && row.file) formData.append('file', row.file)
         formData.append('uploaded_by', user?.id?.toString() ?? '')
         await DataService.postForm(endpoints.taskAttachment, formData)
       }
@@ -482,7 +555,7 @@ const TaskUpdateForm = () => {
   const onSubmit = async (values: TaskPayload) => {
     try {
       if (!id || Array.isArray(id)) return
-      if (attachFiles.length) await submitAttachment()
+      if (taskAttachments.some(r => (r.isLink ? r.link.trim().length : !!r.file))) await submitAttachment()
       await DataService.put(endpoints.taskById(id), { ...values, company: user?.company_id })
       toast.success(String(t('tasks.toast.updated')))
     } catch (e: any) {
@@ -491,27 +564,28 @@ const TaskUpdateForm = () => {
   }
   const submitAttachment = async () => {
     if (!id) return
-    if (!attachFiles.length) {
-      toast.error(String(t('tasks.attachments.fileRequired')))
-
-      return
-    }
+    const rowsToUpload = taskAttachments.filter(r => (r.isLink ? r.link.trim().length : !!r.file))
+    if (!rowsToUpload.length) return toast.error(String(t('tasks.attachments.fileRequired')))
 
     try {
       setSaving(true)
-      for (const fileItem of attachFiles) {
+      for (const row of rowsToUpload) {
+        if (row.isLink && !row.link.trim()) continue
+        if (!row.isLink && !row.file) continue
+
         const formData = new FormData()
-        formData.append('file', fileItem)
-        formData.append('title', fileItem.name)
         formData.append('task', id.toString())
-        formData.append('link', '124') // Assuming 'link' is optional and can be empty
+        formData.append('title', '')
+        formData.append('link', row.isLink ? row.link.trim() : '')
+
+        if (!row.isLink && row.file) formData.append('file', row.file)
 
         formData.append('uploaded_by', user?.id?.toString() ?? '')
         await DataService.postForm(endpoints.taskAttachment, formData)
       }
 
       toast.success(String(t('tasks.attachments.attached')))
-      setAttachFiles([])
+      setTaskAttachments([])
     } catch (e) {
       console.error('Failed to create attachment', e)
       toast.error(String(t('tasks.attachments.attachError')))
@@ -640,6 +714,83 @@ const TaskUpdateForm = () => {
                       />
                     </Grid>
 
+                    <Grid item xs={12}>
+                      <Stack spacing={2}>
+                        {taskAttachments.map((row, idx) => (
+                          <Card key={idx} variant='outlined'>
+                            <CardContent sx={{ p: '1rem !important' }}>
+                              <Grid container spacing={2} alignItems='center'>
+                                <Grid item xs={12} md={3}>
+                                  <FormControlLabel
+                                    control={
+                                      <Switch
+                                        checked={row.isLink}
+                                        onChange={e => handleToggleTaskAttachmentType(idx, e.target.checked)}
+                                      />
+                                    }
+                                    label={row.isLink ? 'Link' : 'File'}
+                                  />
+                                </Grid>
+                                <Grid item xs={12} md={8}>
+                                  {row.isLink ? (
+                                    <CustomTextField
+                                      fullWidth
+                                      size='small'
+                                      label={String(t('common.link', { defaultValue: 'Link' }))}
+                                      value={row.link}
+                                      onChange={e => handleChangeTaskAttachmentLink(idx, e.target.value)}
+                                    />
+                                  ) : (
+                                    <Stack spacing={1}>
+                                      <Button
+                                        variant='outlined'
+                                        component='label'
+                                        size='small'
+                                        startIcon={<Icon icon='tabler:paperclip' />}
+                                        disabled={saving}
+                                      >
+                                        {String(t('tasks.attachments.chooseFiles'))}
+                                        <input
+                                          hidden
+                                          type='file'
+                                          onChange={e =>
+                                            handleChangeTaskAttachmentFile(idx, e.target.files?.[0] || null)
+                                          }
+                                        />
+                                      </Button>
+                                      <Typography variant='caption' color='text.secondary'>
+                                        {row.file
+                                          ? row.file.name
+                                          : String(t('replyLetter.attachments.form.noFileSelected'))}
+                                      </Typography>
+                                    </Stack>
+                                  )}
+                                </Grid>
+                                <Grid item xs={12} md={1} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                  <IconButton
+                                    color='error'
+                                    disabled={saving}
+                                    onClick={() => handleRemoveTaskAttachmentRow(idx)}
+                                  >
+                                    <Icon icon='tabler:trash' />
+                                  </IconButton>
+                                </Grid>
+                              </Grid>
+                            </CardContent>
+                          </Card>
+                        ))}
+
+                        <Button
+                          variant='outlined'
+                          size='small'
+                          startIcon={<Icon icon='tabler:plus' />}
+                          disabled={saving}
+                          onClick={handleAddTaskAttachmentRow}
+                        >
+                          {String(t('replyLetter.attachments.addRow'))}
+                        </Button>
+                      </Stack>
+                    </Grid>
                     <Grid item xs={12} sm={6}>
                       <Controller
                         name='sending_org'
@@ -655,60 +806,6 @@ const TaskUpdateForm = () => {
                           />
                         )}
                       />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Button
-                        component='label'
-                        variant='outlined'
-                        disabled={saving}
-                        startIcon={<Icon icon='mdi:file-upload' />}
-                      >
-                        {String(t('tasks.attachments.chooseFiles'))}
-                        <input
-                          hidden
-                          type='file'
-                          multiple
-                          onChange={e => {
-                            const files = Array.from(e.target.files || [])
-                            if (!files.length) return
-                            setAttachFiles(prev => {
-                              const map = new Map<string, File>()
-                              for (const f of prev) map.set(`${f.name}-${f.size}-${f.lastModified}`, f)
-                              for (const f of files) map.set(`${f.name}-${f.size}-${f.lastModified}`, f)
-
-                              return Array.from(map.values())
-                            })
-
-                            // allow choosing same file again later
-                            e.target.value = ''
-                          }}
-                        />
-                      </Button>
-
-                      {attachFiles.length ? (
-                        <Stack direction='row' spacing={1} alignItems='center' flexWrap='wrap' useFlexGap marginTop={5}>
-                          {attachFiles.map(file => {
-                            const key = `${file.name}-${file.size}-${file.lastModified}`
-
-                            return (
-                              <Chip
-                                key={key}
-                                icon={<Icon icon='mdi:file' />}
-                                label={file.name}
-                                variant='outlined'
-                                onDelete={
-                                  saving
-                                    ? undefined
-                                    : () =>
-                                        setAttachFiles(prev =>
-                                          prev.filter(f => `${f.name}-${f.size}-${f.lastModified}` !== key)
-                                        )
-                                }
-                              />
-                            )
-                          })}
-                        </Stack>
-                      ) : null}
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <Controller
@@ -775,16 +872,17 @@ const TaskUpdateForm = () => {
                         control={control}
                         rules={{ required: String(t('errors.required')) }}
                         render={({ field, fieldState }) => {
-                          const selectedDate = field.value ? new Date(field.value) : null
+                          const selectedDate = parseDateTimeValue(field.value)
 
                           return (
                             <div>
                               <DatePicker
                                 selected={selectedDate}
-                                onChange={(date: Date | null) =>
-                                  field.onChange(date ? date.toISOString().slice(0, 10) : '')
-                                }
-                                dateFormat='yyyy-MM-dd'
+                                onChange={(date: Date | null) => field.onChange(date ? formatLocalDateTime(date) : '')}
+                                showTimeSelect
+                                timeFormat='HH:mm'
+                                timeIntervals={5}
+                                dateFormat='yyyy-MM-dd HH:mm'
                                 showMonthDropdown
                                 showYearDropdown
                                 dropdownMode='scroll'
@@ -813,16 +911,17 @@ const TaskUpdateForm = () => {
                         control={control}
                         rules={{ required: String(t('errors.required')) }}
                         render={({ field, fieldState }) => {
-                          const selectedDate = field.value ? new Date(field.value) : null
+                          const selectedDate = parseDateTimeValue(field.value)
 
                           return (
                             <div>
                               <DatePicker
                                 selected={selectedDate}
-                                onChange={(date: Date | null) =>
-                                  field.onChange(date ? date.toISOString().slice(0, 10) : '')
-                                }
-                                dateFormat='yyyy-MM-dd'
+                                onChange={(date: Date | null) => field.onChange(date ? formatLocalDateTime(date) : '')}
+                                showTimeSelect
+                                timeFormat='HH:mm'
+                                timeIntervals={5}
+                                dateFormat='yyyy-MM-dd HH:mm'
                                 showMonthDropdown
                                 showYearDropdown
                                 dropdownMode='scroll'
@@ -1033,8 +1132,8 @@ const TaskUpdateForm = () => {
                             {departments?.find(d => d.id === part.department)?.name || part.department}
                           </TableCell>
                           <TableCell>{users?.find(u => u.id === part.assignee)?.fullname || part.assignee}</TableCell>
-                          <TableCell>{part.start_date}</TableCell>
-                          <TableCell>{part.end_date}</TableCell>
+                          <TableCell>{formatDisplayDateTime(part.start_date)}</TableCell>
+                          <TableCell>{formatDisplayDateTime(part.end_date)}</TableCell>
                           <TableCell>{part.note}</TableCell>
                           <TableCell align='right'>
                             <Stack direction='row' spacing={1} justifyContent='flex-end'>
@@ -1123,7 +1222,7 @@ const TaskUpdateForm = () => {
               <Grid item xs={12} sm={6}>
                 <CustomTextField
                   fullWidth
-                  type='date'
+                  type='datetime-local'
                   label={String(t('tasks.parts.form.startDate'))}
                   value={partForm.start_date}
                   onChange={e => setPartForm({ ...partForm, start_date: e.target.value })}
@@ -1135,7 +1234,7 @@ const TaskUpdateForm = () => {
               <Grid item xs={12} sm={6}>
                 <CustomTextField
                   fullWidth
-                  type='date'
+                  type='datetime-local'
                   label={String(t('tasks.parts.form.endDate'))}
                   value={partForm.end_date}
                   onChange={e => setPartForm({ ...partForm, end_date: e.target.value })}
@@ -1184,7 +1283,6 @@ const TaskUpdateForm = () => {
                     <Table size='small'>
                       <TableHead>
                         <TableRow>
-                          <TableCell>{String(t('replyLetter.attachments.table.title'))}</TableCell>
                           <TableCell>{String(t('replyLetter.attachments.table.file'))}</TableCell>
                           <TableCell align='right'>{String(t('replyLetter.attachments.table.actions'))}</TableCell>
                         </TableRow>
@@ -1192,14 +1290,29 @@ const TaskUpdateForm = () => {
                       <TableBody>
                         {existingPartFiles.map(file => (
                           <TableRow key={file.id}>
-                            <TableCell>{file.title}</TableCell>
-                            <TableCell>{file.file ? file.file.split('/').pop() : '-'}</TableCell>
+                            <TableCell>
+                              {file.link ? file.link : file.file ? file.file.split('/').pop() : '-'}
+                            </TableCell>
                             <TableCell align='right'>
-                              <Tooltip title={String(t('replyLetter.attachments.actions.download'))}>
-                                <IconButton size='small' onClick={() => handleDownloadPartFile(file)}>
-                                  <Icon icon='tabler:download' />
-                                </IconButton>
-                              </Tooltip>
+                              {file.link ? (
+                                <Tooltip title={String(t('common.open', { defaultValue: 'Open' }))}>
+                                  <IconButton
+                                    size='small'
+                                    component='a'
+                                    href={String(file.link)}
+                                    target='_blank'
+                                    rel='noreferrer'
+                                  >
+                                    <Icon icon='tabler:external-link' />
+                                  </IconButton>
+                                </Tooltip>
+                              ) : (
+                                <Tooltip title={String(t('replyLetter.attachments.actions.download'))}>
+                                  <IconButton size='small' onClick={() => handleDownloadPartFile(file)}>
+                                    <Icon icon='tabler:download' />
+                                  </IconButton>
+                                </Tooltip>
+                              )}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -1225,40 +1338,55 @@ const TaskUpdateForm = () => {
                     <Card key={idx} variant='outlined'>
                       <CardContent sx={{ p: '1rem !important' }}>
                         <Grid container spacing={3} alignItems='center'>
-                          <Grid item xs={12} md={5}>
-                            <CustomTextField
-                              fullWidth
-                              label={String(t('replyLetter.attachments.form.title'))}
-                              value={row.title}
-                              onChange={e => handleChangePartAttachmentTitle(idx, e.target.value)}
-                            />
-                          </Grid>
-                          <Grid item xs={12} md={5}>
-                            <Stack direction='row' spacing={2} alignItems='center'>
-                              <Button
-                                variant='outlined'
-                                component='label'
-                                size='small'
-                                startIcon={<Icon icon='tabler:paperclip' />}
-                              >
-                                {String(t('replyLetter.attachments.form.attachFile'))}
-                                <input
-                                  hidden
-                                  type='file'
-                                  onChange={e => handleChangePartAttachmentFile(idx, e.target.files?.[0] || null)}
+                          <Grid item xs={12} md={10}>
+                            <Stack spacing={1}>
+                              <FormControlLabel
+                                control={
+                                  <Switch
+                                    checked={row.isLink}
+                                    onChange={e => handleTogglePartAttachmentType(idx, e.target.checked)}
+                                  />
+                                }
+                                label={row.isLink ? 'Link' : 'File'}
+                              />
+
+                              {row.isLink ? (
+                                <CustomTextField
+                                  fullWidth
+                                  label={String(t('common.link', { defaultValue: 'Link' }))}
+                                  value={row.link}
+                                  onChange={e => handleChangePartAttachmentLink(idx, e.target.value)}
                                 />
-                              </Button>
-                              <Typography
-                                variant='caption'
-                                sx={{
-                                  color: 'text.secondary',
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  whiteSpace: 'nowrap'
-                                }}
-                              >
-                                {row.file ? row.file.name : String(t('replyLetter.attachments.form.noFileSelected'))}
-                              </Typography>
+                              ) : (
+                                <Stack direction='row' spacing={2} alignItems='center'>
+                                  <Button
+                                    variant='outlined'
+                                    component='label'
+                                    size='small'
+                                    startIcon={<Icon icon='tabler:paperclip' />}
+                                  >
+                                    {String(t('replyLetter.attachments.form.attachFile'))}
+                                    <input
+                                      hidden
+                                      type='file'
+                                      onChange={e => handleChangePartAttachmentFile(idx, e.target.files?.[0] || null)}
+                                    />
+                                  </Button>
+                                  <Typography
+                                    variant='caption'
+                                    sx={{
+                                      color: 'text.secondary',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      whiteSpace: 'nowrap'
+                                    }}
+                                  >
+                                    {row.file
+                                      ? row.file.name
+                                      : String(t('replyLetter.attachments.form.noFileSelected'))}
+                                  </Typography>
+                                </Stack>
+                              )}
                             </Stack>
                           </Grid>
                           <Grid item xs={12} md={2} sx={{ display: 'flex', justifyContent: 'flex-end' }}>

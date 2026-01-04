@@ -14,6 +14,28 @@ import DatePicker from 'react-datepicker'
 import { useAuth } from 'src/hooks/useAuth'
 import { useTranslation } from 'react-i18next'
 
+const pad2 = (n: number) => String(n).padStart(2, '0')
+
+const formatLocalDateTime = (date: Date) =>
+  `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}T${pad2(date.getHours())}:${pad2(
+    date.getMinutes()
+  )}`
+
+const parseDateTimeValue = (value?: string): Date | null => {
+  if (!value) return null
+
+  // Treat date-only values as local dates to avoid timezone shifting
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [y, m, d] = value.split('-').map(Number)
+
+    return new Date(y, (m || 1) - 1, d || 1, 0, 0, 0, 0)
+  }
+
+  const d = new Date(value)
+
+  return Number.isNaN(d.getTime()) ? null : d
+}
+
 export type TaskPayload = {
   status?: string
   company?: number
@@ -303,14 +325,17 @@ const TaskCreateForm = () => {
                   control={control}
                   rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => {
-                    const selectedDate = field.value ? new Date(field.value) : null
+                    const selectedDate = parseDateTimeValue(field.value)
 
                     return (
                       <div>
                         <DatePicker
                           selected={selectedDate}
-                          onChange={(date: Date | null) => field.onChange(date ? date.toISOString().slice(0, 10) : '')}
-                          dateFormat='yyyy-MM-dd'
+                          onChange={(date: Date | null) => field.onChange(date ? formatLocalDateTime(date) : '')}
+                          showTimeSelect
+                          timeFormat='HH:mm'
+                          timeIntervals={5}
+                          dateFormat='yyyy-MM-dd HH:mm'
                           showMonthDropdown
                           showYearDropdown
                           dropdownMode='scroll'
@@ -338,14 +363,17 @@ const TaskCreateForm = () => {
                   control={control}
                   rules={{ required: String(t('errors.required')) }}
                   render={({ field, fieldState }) => {
-                    const selectedDate = field.value ? new Date(field.value) : null
+                    const selectedDate = parseDateTimeValue(field.value)
 
                     return (
                       <div>
                         <DatePicker
                           selected={selectedDate}
-                          onChange={(date: Date | null) => field.onChange(date ? date.toISOString().slice(0, 10) : '')}
-                          dateFormat='yyyy-MM-dd'
+                          onChange={(date: Date | null) => field.onChange(date ? formatLocalDateTime(date) : '')}
+                          showTimeSelect
+                          timeFormat='HH:mm'
+                          timeIntervals={5}
+                          dateFormat='yyyy-MM-dd HH:mm'
                           showMonthDropdown
                           showYearDropdown
                           dropdownMode='scroll'

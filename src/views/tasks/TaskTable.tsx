@@ -26,6 +26,14 @@ import { DataService } from 'src/configs/dataService'
 import useThemedToast from 'src/@core/hooks/useThemedToast'
 import { useAuth } from 'src/hooks/useAuth'
 import { getDataGridLocaleText } from 'src/@core/utils/getDataGridLocaleText'
+import moment from 'moment'
+
+const formatDisplayDateTime = (value?: string) => {
+  if (!value) return '—'
+  const m = moment(value)
+
+  return m.isValid() ? m.format('DD.MM.YYYY HH:mm') : String(value)
+}
 
 export type TaskRow = {
   id: number
@@ -62,8 +70,20 @@ const TaskTable = () => {
     { field: 'status', headerName: String(t('tasks.table.status')), flex: 0.2, minWidth: 140 },
     { field: 'type', headerName: String(t('tasks.table.type')), flex: 0.15, minWidth: 120 },
     { field: 'priority', headerName: String(t('tasks.table.priority')), flex: 0.15, minWidth: 120 },
-    { field: 'start_date', headerName: String(t('tasks.table.start')), flex: 0.15, minWidth: 130 },
-    { field: 'end_date', headerName: String(t('tasks.table.end')), flex: 0.15, minWidth: 130 },
+    {
+      field: 'start_date',
+      headerName: String(t('tasks.table.start')),
+      flex: 0.15,
+      minWidth: 160,
+      renderCell: params => formatDisplayDateTime((params.row as any).start_date)
+    },
+    {
+      field: 'end_date',
+      headerName: String(t('tasks.table.end')),
+      flex: 0.15,
+      minWidth: 160,
+      renderCell: params => formatDisplayDateTime((params.row as any).end_date)
+    },
     {
       field: 'actions',
       headerName: String(t('common.actions')),
