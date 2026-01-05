@@ -27,6 +27,7 @@ import { DataService } from 'src/configs/dataService'
 import useThemedToast from 'src/@core/hooks/useThemedToast'
 import { useAuth } from 'src/hooks/useAuth'
 import { getDataGridLocaleText } from 'src/@core/utils/getDataGridLocaleText'
+import moment from 'moment'
 
 export type DocumentRow = {
   company: number
@@ -138,6 +139,7 @@ const DocumentTable = ({ status }: Props) => {
       minWidth: 120,
       renderCell: params => {
         const priority = (params.row as any).priority
+        if (!priority) return ''
 
         return (
           <Chip
@@ -148,8 +150,28 @@ const DocumentTable = ({ status }: Props) => {
         )
       }
     },
-    { field: 'start_date', headerName: String(t('documents.table.start')), flex: 0.15, minWidth: 130 },
-    { field: 'end_date', headerName: String(t('documents.table.end')), flex: 0.15, minWidth: 130 },
+    {
+      field: 'start_date',
+      headerName: String(t('documents.table.start')),
+      flex: 0.15,
+      minWidth: 130,
+      renderCell: params => {
+        const startDate = (params.row as any).start_date
+
+        return moment(startDate).isValid() ? moment(startDate).format('DD.MM.YYYY HH:mm') : ''
+      }
+    },
+    {
+      field: 'end_date',
+      headerName: String(t('documents.table.end')),
+      flex: 0.15,
+      minWidth: 130,
+      renderCell: params => {
+        const endDate = (params.row as any).end_date
+
+        return moment(endDate).isValid() ? moment(endDate).format('DD.MM.YYYY HH:mm') : ''
+      }
+    },
     {
       field: 'actions',
       headerName: String(t('common.actions')),
