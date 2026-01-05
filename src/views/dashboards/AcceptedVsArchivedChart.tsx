@@ -1,11 +1,8 @@
-// ** React Imports
-import { MouseEvent, useState } from 'react'
-
 // ** MUI Imports
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
-import { styled, useTheme } from '@mui/material/styles'
+import { useTheme } from '@mui/material/styles'
 
 // ** Third Party Imports
 import { ApexOptions } from 'apexcharts'
@@ -78,7 +75,14 @@ const AcceptedVsArchivedChart = ({ chartData }: AcceptedVsArchivedChartProps) =>
     },
     yaxis: {
       labels: {
-        style: { colors: theme.palette.text.secondary }
+        style: { colors: theme.palette.text.secondary },
+        formatter: (val: number) => {
+          if (val % 1 === 0) {
+            return Math.floor(val).toString()
+          }
+
+          return val.toString()
+        }
       }
     },
     grid: {
@@ -91,7 +95,16 @@ const AcceptedVsArchivedChart = ({ chartData }: AcceptedVsArchivedChartProps) =>
       }
     },
     tooltip: {
-      theme: 'light'
+      theme: 'light',
+      y: {
+        formatter: (val: number) => {
+          if (val % 1 === 0) {
+            return Math.floor(val).toString()
+          }
+
+          return val.toString()
+        }
+      }
     }
   }
 

@@ -1,5 +1,4 @@
 // ** React Imports
-import { useState } from 'react'
 
 // ** MUI Imports
 import Card from '@mui/material/Card'
@@ -35,7 +34,7 @@ const DocumentsByStatusChart = ({ chartData }: DocumentsByStatusChartProps) => {
   const theme = useTheme()
   const { t } = useTranslation()
 
-  const series = chartData.datasets.map((dataset, index) => ({
+  const series = chartData.datasets.map(dataset => ({
     name: String(t(`dashboards.charts.${dataset.key}`)),
     data: dataset.data
   }))
@@ -80,7 +79,14 @@ const DocumentsByStatusChart = ({ chartData }: DocumentsByStatusChartProps) => {
     },
     yaxis: {
       labels: {
-        style: { colors: theme.palette.text.secondary }
+        style: { colors: theme.palette.text.secondary },
+        formatter: (val: number) => {
+          if (val % 1 === 0) {
+            return Math.floor(val).toString()
+          }
+
+          return val.toString()
+        }
       }
     },
     grid: {
@@ -93,7 +99,16 @@ const DocumentsByStatusChart = ({ chartData }: DocumentsByStatusChartProps) => {
       }
     },
     tooltip: {
-      theme: 'light'
+      theme: 'light',
+      y: {
+        formatter: (val: number) => {
+          if (val % 1 === 0) {
+            return Math.floor(val).toString()
+          }
+
+          return val.toString()
+        }
+      }
     }
   }
 

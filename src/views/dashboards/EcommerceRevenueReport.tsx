@@ -147,6 +147,11 @@ const EcommerceRevenueReport = () => {
           colors: theme.palette.text.disabled,
           fontFamily: theme.typography.fontFamily,
           fontSize: theme.typography.body2.fontSize as string
+        },
+        formatter: (val: number) => {
+          if (val % 1 === 0) return Math.floor(val).toString()
+
+          return val.toString()
         }
       }
     },

@@ -62,7 +62,11 @@ const ApexBarChart = () => {
     },
     yaxis: {
       labels: {
-        style: { colors: theme.palette.text.disabled }
+        style: { colors: theme.palette.text.disabled },
+        formatter: (val: number) => {
+          if (val % 1 === 0) return Math.floor(val).toString()
+          return val.toString()
+        }
       }
     },
     xaxis: {
