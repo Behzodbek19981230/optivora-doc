@@ -15,6 +15,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from 'src/hooks/useAuth'
 import moment from 'moment'
+import useThemedToast from 'src/@core/hooks/useThemedToast'
 
 const TaskViewDetail = () => {
   const { t } = useTranslation()
@@ -22,7 +23,9 @@ const TaskViewDetail = () => {
   const { id } = router.query
   const [tab, setTab] = useState(0)
   const { user } = useAuth()
+  const toast = useThemedToast()
   const [selectedPartId, setSelectedPartId] = useState<number | undefined>(undefined)
+  const [sendingEmail, setSendingEmail] = useState(false)
   const { data: task, refetch: mutate } = useQuery<TaskType>({
     queryKey: ['task', id],
     enabled: !!id,
@@ -72,6 +75,26 @@ const TaskViewDetail = () => {
     const translated = String(t(key))
 
     return translated === key ? tp : translated
+  }
+
+  const handleSendToEmail = async () => {
+    if (!id || !task) {
+      toast.error(String(t('errors.generic')) || 'Task ID not found')
+
+      return
+    }
+
+    setSendingEmail(true)
+
+    try {
+      await DataService.post(endpoints.taskSendToEmail, { task_id: task.id })
+      toast.success(String(t('tasks.view.parts.emailSent') || 'Email sent successfully'))
+    } catch (error: any) {
+      const message = error?.response?.data?.message || error?.message || String(t('errors.generic'))
+      toast.error(message)
+    } finally {
+      setSendingEmail(false)
+    }
   }
 
   return (
@@ -164,14 +187,26 @@ const TaskViewDetail = () => {
 
         {/* Right actions panel */}
         <Grid item xs={12} md={4} lg={3}>
-          <RightActionsPanel
-            task={task}
-            part={selectedPart}
-            mutate={() => {
-              mutate()
-              refetchSelectedPart()
-            }}
-          />
+          <Stack spacing={3}>
+            <RightActionsPanel
+              task={task}
+              part={selectedPart}
+              mutate={() => {
+                mutate()
+                refetchSelectedPart()
+              }}
+            />
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button
+                variant='outlined'
+                onClick={handleSendToEmail}
+                disabled={sendingEmail || !task}
+                startIcon={<Icon icon={sendingEmail ? 'mdi:loading' : 'mdi:email-send'} />}
+              >
+                {String(t('tasks.view.parts.sendToEmail') || 'Send to email')}
+              </Button>
+            </Box>
+          </Stack>
         </Grid>
       </Grid>
     </Box>
