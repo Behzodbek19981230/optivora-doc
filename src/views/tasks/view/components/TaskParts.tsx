@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Card,
   CardContent,
@@ -16,6 +16,10 @@ import {
 import Icon from 'src/@core/components/icon'
 import { TaskPartType } from 'src/types/task'
 import { useTranslation } from 'react-i18next'
+import { DataService } from 'src/configs/dataService'
+import endpoints from 'src/configs/endpoints'
+import useThemedToast from 'src/@core/hooks/useThemedToast'
+import moment from 'moment'
 
 export default function TaskParts({
   parts,
@@ -31,6 +35,31 @@ export default function TaskParts({
   onEdit: (id: number) => void
 }) {
   const { t } = useTranslation()
+  const toast = useThemedToast()
+  const [sendingEmail, setSendingEmail] = useState<Record<number, boolean>>({})
+
+  const handleSendToEmail = async (e: React.MouseEvent, part: TaskPartType) => {
+    e.stopPropagation()
+    const taskId = part.task
+
+    if (!taskId) {
+      toast.error(String(t('errors.generic')) || 'Task ID not found')
+
+      return
+    }
+
+    setSendingEmail(prev => ({ ...prev, [part.id]: true }))
+
+    try {
+      await DataService.post(endpoints.taskSendToEmail, { task_id: taskId })
+      toast.success(String(t('tasks.view.parts.emailSent') || 'Email sent successfully'))
+    } catch (error: any) {
+      const message = error?.response?.data?.message || error?.message || String(t('errors.generic'))
+      toast.error(message)
+    } finally {
+      setSendingEmail(prev => ({ ...prev, [part.id]: false }))
+    }
+  }
   const statusColor = (status?: string) => {
     switch (status) {
       case 'new':
@@ -92,7 +121,7 @@ export default function TaskParts({
                 <TableCell>{String(t('tasks.view.parts.table.assignee'))}</TableCell>
                 <TableCell>{String(t('tasks.view.parts.table.start'))}</TableCell>
                 <TableCell>{String(t('tasks.view.parts.table.end'))}</TableCell>
-                {/* <TableCell align='right'>{String(t('common.actions'))}</TableCell> */}
+                <TableCell align='right'>{String(t('common.actions'))}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -129,22 +158,25 @@ export default function TaskParts({
                     </TableCell>
                     <TableCell>{p.department_detail?.name || p.department}</TableCell>
                     <TableCell>{p.assignee_detail?.fullname || p.assignee}</TableCell>
-                    <TableCell>{p.start_date || '—'}</TableCell>
-                    <TableCell>{p.end_date || '—'}</TableCell>
-                    {/* <TableCell align='right' onClick={e => e.stopPropagation()}>
-                      <Stack direction='row' spacing={1}>
-                        <Tooltip title={String(t('common.edit'))}>
-                          <IconButton size='small' onClick={() => onEdit(p.id)}>
-                            <Icon icon='mdi:pencil' />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title={String(t('common.delete'))}>
-                          <IconButton size='small' onClick={() => onDelete(p.id)}>
-                            <Icon icon='mdi:delete' />
+                    <TableCell>
+                      {moment(p.start_date).isValid() ? moment(p.start_date).format('DD.MM.YYYY HH:mm') : '—'}
+                    </TableCell>
+                    <TableCell>
+                      {moment(p.end_date).isValid() ? moment(p.end_date).format('DD.MM.YYYY HH:mm') : '—'}
+                    </TableCell>
+                    <TableCell align='right' onClick={e => e.stopPropagation()}>
+                      <Stack direction='row' spacing={1} justifyContent='flex-end'>
+                        <Tooltip title={String(t('tasks.view.parts.sendToEmail') || 'Send to email')}>
+                          <IconButton
+                            size='small'
+                            onClick={e => handleSendToEmail(e, p)}
+                            disabled={sendingEmail[p.id] || !p.task}
+                          >
+                            <Icon icon={sendingEmail[p.id] ? 'mdi:loading' : 'mdi:email-send'} />
                           </IconButton>
                         </Tooltip>
                       </Stack>
-                    </TableCell> */}
+                    </TableCell>
                   </TableRow>
                 )
               })}

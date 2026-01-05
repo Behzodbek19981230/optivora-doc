@@ -5,6 +5,7 @@ import { TaskPartType } from 'src/types/task'
 import { useRouter } from 'next/router'
 import { getDataGridLocaleText } from 'src/@core/utils/getDataGridLocaleText'
 import { Chip } from '@mui/material'
+import moment from 'moment'
 
 type Props = {
   data: TaskPartType[]
@@ -78,8 +79,28 @@ export default function TaskTable({ data, loading, total }: Props) {
         )
       }
     },
-    { field: 'start_date', headerName: String(t('documents.table.start')), flex: 0.15, minWidth: 130 },
-    { field: 'end_date', headerName: String(t('documents.table.end')), flex: 0.15, minWidth: 130 }
+    {
+      field: 'start_date',
+      headerName: String(t('documents.table.start')),
+      flex: 0.15,
+      minWidth: 130,
+      renderCell: params => {
+        const startDate = (params.row as any).start_date
+
+        return moment(startDate).isValid() ? moment(startDate).format('DD.MM.YYYY HH:mm') : ''
+      }
+    },
+    {
+      field: 'end_date',
+      headerName: String(t('documents.table.end')),
+      flex: 0.15,
+      minWidth: 130,
+      renderCell: params => {
+        const endDate = (params.row as any).end_date
+
+        return moment(endDate).isValid() ? moment(endDate).format('DD.MM.YYYY HH:mm') : ''
+      }
+    }
   ]
 
   return (

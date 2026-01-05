@@ -93,6 +93,12 @@ const navigation = (): VerticalNavItemsType => {
       icon: 'tabler:report-analytics',  
       path: '/reports',
       roles: [ROLES.ADMIN, ROLES.MANAGER]
+    },
+    {
+      title: 'nav.employeeAccount',
+      icon: 'tabler:clock-hour-4',
+      path: '/employee-account',
+      roles: [ROLES.ADMIN, ROLES.MANAGER]
     }
   ]
 }

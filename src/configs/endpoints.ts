@@ -77,6 +77,8 @@ const endpoints = {
   taskCommentById: (id: string | number | string[] | null | undefined) => `/task-comment/${normalizeId(id)}`,
   taskAttachment: '/task-attachment/',
   taskAttachmentById: (id: string | number | string[] | null | undefined) => `/task-attachment/${normalizeId(id)}`,
+  taskSendToEmail: '/task/send-to-email/',
+  employeeAccount: '/employee-account/',
 
   // Org structure
   department: '/department/',

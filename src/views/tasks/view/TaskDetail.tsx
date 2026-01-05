@@ -14,6 +14,7 @@ import TaskProccessTab from './components/TaskProccessTab'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from 'src/hooks/useAuth'
+import moment from 'moment'
 
 const TaskViewDetail = () => {
   const { t } = useTranslation()
@@ -112,7 +113,12 @@ const TaskViewDetail = () => {
                     size='small'
                   />
                   {task?.end_date && (
-                    <Chip label={String(t('tasks.view.header.deadline', { value: task.end_date }))} size='small' />
+                    <Chip
+                      label={String(
+                        t('tasks.view.header.deadline', { value: moment(task.end_date).format('DD.MM.YYYY HH:mm') })
+                      )}
+                      size='small'
+                    />
                   )}
                 </Stack>
               </Stack>

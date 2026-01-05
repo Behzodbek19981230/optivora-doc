@@ -205,6 +205,23 @@ const CustomCalendar = (props: CalendarType) => {
           const total = Number(row?.total ?? 0)
           if (typeof d !== 'string' || !Number.isFinite(total)) continue
 
+          // Convert ISO datetime string to YYYY-MM-DD format
+          let dateKey: string
+          try {
+            const dateObj = new Date(d)
+            if (!Number.isNaN(dateObj.getTime())) {
+              dateKey = toISODate(dateObj)
+            } else {
+              // Fallback: try to extract YYYY-MM-DD from string
+              const match = d.match(/^(\d{4}-\d{2}-\d{2})/)
+              dateKey = match ? match[1] : d
+            }
+          } catch {
+            // Fallback: try to extract YYYY-MM-DD from string
+            const match = d.match(/^(\d{4}-\d{2}-\d{2})/)
+            dateKey = match ? match[1] : d
+          }
+
           const byStatus: Record<string, number> = {}
           const bs = row?.by_status
           if (bs && typeof bs === 'object') {
@@ -214,7 +231,7 @@ const CustomCalendar = (props: CalendarType) => {
             }
           }
 
-          nextMap[d] = { total, byStatus }
+          nextMap[dateKey] = { total, byStatus }
         }
         setDayCounts(nextMap)
 
