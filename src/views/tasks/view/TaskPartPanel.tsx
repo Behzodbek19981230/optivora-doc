@@ -163,7 +163,7 @@ const TaskPartPanel = ({ taskId }: Props) => {
                 <Typography variant='body2'>{p.title}</Typography>
                 <Chip label={p.status} size='small' />
                 <Typography variant='caption'>
-                  {formatDisplayDateTime(p.start_date)} -> {formatDisplayDateTime(p.end_date)}
+                  {formatDisplayDateTime(p.start_date)} {'→'} {formatDisplayDateTime(p.end_date)}
                 </Typography>
                 <Typography variant='caption'>• Assignee: {p.assignee}</Typography>
                 <Typography variant='caption'>• Bo‘lim: {p.department}</Typography>
