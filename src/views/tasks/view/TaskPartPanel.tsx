@@ -5,6 +5,13 @@ import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
 import CustomTextField from 'src/@core/components/mui/text-field'
 import { useFetchList } from 'src/hooks/useFetchList'
+import moment from 'moment'
+
+const formatDisplayDateTime = (value?: string) => {
+  if (!value) return '—'
+  const m = moment(value)
+  return m.isValid() ? m.format('DD.MM.YYYY HH:mm') : String(value)
+}
 
 type Props = { taskId: string }
 
@@ -156,7 +163,7 @@ const TaskPartPanel = ({ taskId }: Props) => {
                 <Typography variant='body2'>{p.title}</Typography>
                 <Chip label={p.status} size='small' />
                 <Typography variant='caption'>
-                  {p.start_date} → {p.end_date}
+                  {formatDisplayDateTime(p.start_date)} -> {formatDisplayDateTime(p.end_date)}
                 </Typography>
                 <Typography variant='caption'>• Assignee: {p.assignee}</Typography>
                 <Typography variant='caption'>• Bo‘lim: {p.department}</Typography>

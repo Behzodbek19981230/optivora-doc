@@ -74,7 +74,7 @@ const CommandForm = () => {
   } = useForm<CommandType>({ defaultValues })
 
   const [existingFiles, setExistingFiles] = useState<CommandFileItem[]>([])
-  const [newAttachments, setNewAttachments] = useState<{ title: string; file: File | null }[]>([])
+  const [newAttachments, setNewAttachments] = useState<{ file: File | null }[]>([])
   const [uploading, setUploading] = useState(false)
 
   const [commentEnState, setCommentEnState] = useState(EditorState.createEmpty())
@@ -145,10 +145,8 @@ const CommandForm = () => {
   }
 
   // Handlers for attachments UI
-  const handleAddAttachmentRow = () => setNewAttachments(prev => [...prev, { title: '', file: null }])
+  const handleAddAttachmentRow = () => setNewAttachments(prev => [...prev, { file: null }])
   const handleRemoveAttachmentRow = (idx: number) => setNewAttachments(prev => prev.filter((_, i) => i !== idx))
-  const handleChangeAttachmentTitle = (idx: number, title: string) =>
-    setNewAttachments(prev => prev.map((row, i) => (i === idx ? { ...row, title } : row)))
   const handleChangeAttachmentFile = (idx: number, file: File | null) =>
     setNewAttachments(prev => prev.map((row, i) => (i === idx ? { ...row, file } : row)))
 
@@ -168,14 +166,14 @@ const CommandForm = () => {
 
   const uploadAttachments = async () => {
     if (!itemId) return
-    const rowsToUpload = newAttachments.filter(r => r.file && r.title.trim().length)
-    if (!rowsToUpload.length) return toast.error(String(t('commands.attachments.validation.fileAndTitleRequired')))
+    const rowsToUpload = newAttachments.filter(r => r.file)
+    if (!rowsToUpload.length) return toast.error(String(t('commands.attachments.validation.fileRequired')))
     try {
       setUploading(true)
       for (const row of rowsToUpload) {
         const form = new FormData()
         form.append('command', String(itemId))
-        form.append('title', row.title)
+        form.append('title', '')
         if (row.file) form.append('file', row.file)
         await DataService.postForm(endpoints.downloads, form)
       }
@@ -373,9 +371,6 @@ const CommandForm = () => {
                             <TableHead>
                               <TableRow>
                                 <TableCell>
-                                  {String(t('commands.attachments.table.title', { defaultValue: 'Title' }))}
-                                </TableCell>
-                                <TableCell>
                                   {String(t('commands.attachments.table.file', { defaultValue: 'File' }))}
                                 </TableCell>
                                 <TableCell align='right'>
@@ -386,7 +381,6 @@ const CommandForm = () => {
                             <TableBody>
                               {existingFiles.map(f => (
                                 <TableRow key={f.id}>
-                                  <TableCell>{f.title || '—'}</TableCell>
                                   <TableCell>{f.file ? String(f.file).split('/').pop() : '—'}</TableCell>
                                   <TableCell align='right'>
                                     <Tooltip
@@ -422,15 +416,7 @@ const CommandForm = () => {
                             <Card key={idx} variant='outlined'>
                               <CardContent>
                                 <Grid container spacing={3} alignItems='end'>
-                                  <Grid item xs={12} md={5}>
-                                    <CustomTextField
-                                      fullWidth
-                                      label={String(t('commands.attachments.form.title'))}
-                                      value={row.title}
-                                      onChange={e => handleChangeAttachmentTitle(idx, e.target.value)}
-                                    />
-                                  </Grid>
-                                  <Grid item xs={12} md={5}>
+                                  <Grid item xs={12} md={10}>
                                     <Stack direction='row' spacing={2} alignItems='end'>
                                       <Button
                                         variant='outlined'

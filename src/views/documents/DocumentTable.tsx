@@ -27,6 +27,7 @@ import { DataService } from 'src/configs/dataService'
 import useThemedToast from 'src/@core/hooks/useThemedToast'
 import { useAuth } from 'src/hooks/useAuth'
 import { getDataGridLocaleText } from 'src/@core/utils/getDataGridLocaleText'
+import moment from 'moment'
 
 export type DocumentRow = {
   company: number
@@ -91,6 +92,18 @@ const DocumentTable = ({ status }: Props) => {
     limit: paginationModel.pageSize,
     status
   })
+  const onDelete = async (id: number) => {
+    if (!confirm(String(t('documents.table.archiveConfirm')))) return
+    try {
+      await DataService.delete(`${endpoints.task}/${id}`)
+      toast.success(String(t('documents.table.archiveSuccess')))
+
+      // Refresh data
+      router.replace(router.asPath)
+    } catch (e: any) {
+      toast.error(e?.message || String(t('documents.table.archiveError')))
+    }
+  }
 
   const columns: GridColDef[] = [
     { field: 'id', headerName: String(t('common.id')), width: 90 },
@@ -126,6 +139,7 @@ const DocumentTable = ({ status }: Props) => {
       minWidth: 120,
       renderCell: params => {
         const priority = (params.row as any).priority
+        if (!priority) return ''
 
         return (
           <Chip
@@ -136,8 +150,28 @@ const DocumentTable = ({ status }: Props) => {
         )
       }
     },
-    { field: 'start_date', headerName: String(t('documents.table.start')), flex: 0.15, minWidth: 130 },
-    { field: 'end_date', headerName: String(t('documents.table.end')), flex: 0.15, minWidth: 130 },
+    {
+      field: 'start_date',
+      headerName: String(t('documents.table.start')),
+      flex: 0.15,
+      minWidth: 130,
+      renderCell: params => {
+        const startDate = (params.row as any).start_date
+
+        return moment(startDate).isValid() ? moment(startDate).format('DD.MM.YYYY HH:mm') : ''
+      }
+    },
+    {
+      field: 'end_date',
+      headerName: String(t('documents.table.end')),
+      flex: 0.15,
+      minWidth: 130,
+      renderCell: params => {
+        const endDate = (params.row as any).end_date
+
+        return moment(endDate).isValid() ? moment(endDate).format('DD.MM.YYYY HH:mm') : ''
+      }
+    },
     {
       field: 'actions',
       headerName: String(t('common.actions')),
@@ -157,6 +191,13 @@ const DocumentTable = ({ status }: Props) => {
               <Tooltip title={String(t('common.edit'))}>
                 <IconButton size='small' component={Link} href={`/tasks/update/${id}`}>
                   <IconifyIcon icon='tabler:pencil' />
+                </IconButton>
+              </Tooltip>
+            )}
+            {user?.role_detail?.some((role: any) => role.name === 'Manager') && (
+              <Tooltip title={String(t('documents.table.archive'))}>
+                <IconButton size='small' onClick={() => onDelete(id)}>
+                  <IconifyIcon icon='tabler:archive' />
                 </IconButton>
               </Tooltip>
             )}

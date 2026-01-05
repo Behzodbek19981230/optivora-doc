@@ -22,6 +22,38 @@ import TaskAttachment from './TaskAttachment'
 import TaskComments from './TaskComments'
 import { useTranslation } from 'react-i18next'
 import moment from 'moment'
+
+const pad2 = (n: number) => String(n).padStart(2, '0')
+
+const formatLocalDateTime = (date: Date) =>
+  `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}T${pad2(date.getHours())}:${pad2(
+    date.getMinutes()
+  )}`
+
+const parseDateTimeValue = (value?: string): Date | null => {
+  if (!value) return null
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [y, m, d] = value.split('-').map(Number)
+
+    return new Date(y, (m || 1) - 1, d || 1, 0, 0, 0, 0)
+  }
+  const dt = new Date(value)
+
+  return Number.isNaN(dt.getTime()) ? null : dt
+}
+
+const normalizeIncomingDateTime = (value?: string) => {
+  const d = parseDateTimeValue(value)
+
+  return d ? formatLocalDateTime(d) : ''
+}
+
+const formatDisplayDateTime = (value?: string) => {
+  if (!value) return '—'
+  const m = moment(value)
+
+  return m.isValid() ? m.format('DD.MM.YYYY HH:mm') : String(value)
+}
 import CustomTextField from 'src/@core/components/mui/text-field'
 import { useFetchList } from 'src/hooks/useFetchList'
 import useThemedToast from 'src/@core/hooks/useThemedToast'
@@ -81,8 +113,8 @@ export default function DocumentTab({
         title: part.title,
         department: part.department,
         assignee: part.assignee,
-        start_date: part.start_date,
-        end_date: part.end_date,
+        start_date: normalizeIncomingDateTime(part.start_date),
+        end_date: normalizeIncomingDateTime(part.end_date),
         note: part.note
       })
     }
@@ -199,10 +231,16 @@ export default function DocumentTab({
 
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
-                <Item label={String(t('tasks.view.document.fields.startDate'))} value={task.start_date} />
+                <Item
+                  label={String(t('tasks.view.document.fields.startDate'))}
+                  value={formatDisplayDateTime(task.start_date)}
+                />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Item label={String(t('tasks.view.document.fields.endDate'))} value={task.end_date} />
+                <Item
+                  label={String(t('tasks.view.document.fields.endDate'))}
+                  value={formatDisplayDateTime(task.end_date)}
+                />
               </Grid>
             </Grid>
 
@@ -297,7 +335,7 @@ export default function DocumentTab({
             <Grid item xs={12} sm={6}>
               <CustomTextField
                 fullWidth
-                type='date'
+                type='datetime-local'
                 label={String(t('tasks.parts.form.startDate'))}
                 value={editForm.start_date}
                 onChange={e => setEditForm({ ...editForm, start_date: e.target.value })}
@@ -307,7 +345,7 @@ export default function DocumentTab({
             <Grid item xs={12} sm={6}>
               <CustomTextField
                 fullWidth
-                type='date'
+                type='datetime-local'
                 label={String(t('tasks.parts.form.endDate'))}
                 value={editForm.end_date}
                 onChange={e => setEditForm({ ...editForm, end_date: e.target.value })}

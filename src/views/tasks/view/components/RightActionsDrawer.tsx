@@ -12,7 +12,7 @@ import toast from 'react-hot-toast'
 import { useAuth } from 'src/hooks/useAuth'
 import { useTranslation } from 'react-i18next'
 import CustomTextField from 'src/@core/components/mui/text-field'
-import { Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from '@mui/material'
+import { FormControlLabel, Switch, Table, TableBody, TableCell, TableHead, TableRow, Tooltip } from '@mui/material'
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css'
 
 // ** Icon Imports
@@ -46,7 +46,8 @@ const RightActionsDrawer = ({ open, toggle, taskId, partId, part, task }: Props)
   // Comment + Attachment fields (moved into drawer)
 
   const [commentText, setCommentText] = React.useState(EditorState.createEmpty())
-  const [newAttachments, setNewAttachments] = React.useState<{ title: string; file: File | null }[]>([])
+  type AttachmentRow = { isLink: boolean; link: string; file: File | null }
+  const [newAttachments, setNewAttachments] = React.useState<AttachmentRow[]>([])
   const [savingCombined, setSavingCombined] = React.useState(false)
   const [errors, setErrors] = React.useState<{
     comment?: string
@@ -56,17 +57,32 @@ const RightActionsDrawer = ({ open, toggle, taskId, partId, part, task }: Props)
     file: ''
   })
 
-  const handleAddAttachmentRow = () => setNewAttachments(prev => [...prev, { title: '', file: null }])
+  const handleAddAttachmentRow = () => setNewAttachments(prev => [...prev, { isLink: false, link: '', file: null }])
   const handleRemoveAttachmentRow = (idx: number) => setNewAttachments(prev => prev.filter((_, i) => i !== idx))
-  const handleChangeAttachmentTitle = (idx: number, title: string) =>
-    setNewAttachments(prev => prev.map((row, i) => (i === idx ? { ...row, title } : row)))
+  const handleToggleAttachmentType = (idx: number, isLink: boolean) =>
+    setNewAttachments(prev =>
+      prev.map((row, i) =>
+        i === idx
+          ? {
+              ...row,
+              isLink,
+              link: isLink ? row.link : '',
+              file: isLink ? null : row.file
+            }
+          : row
+      )
+    )
+
+  const handleChangeAttachmentLink = (idx: number, link: string) =>
+    setNewAttachments(prev => prev.map((row, i) => (i === idx ? { ...row, link } : row)))
+
   const handleChangeAttachmentFile = (idx: number, file: File | null) =>
     setNewAttachments(prev => prev.map((row, i) => (i === idx ? { ...row, file } : row)))
 
   // Prefill 1 empty row when drawer opens (ReplyLetterForm-like UX)
   React.useEffect(() => {
     if (open && newAttachments.length === 0) {
-      setNewAttachments([{ title: '', file: null }])
+      setNewAttachments([{ isLink: false, link: '', file: null }])
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
@@ -87,7 +103,7 @@ const RightActionsDrawer = ({ open, toggle, taskId, partId, part, task }: Props)
     }
 
     const hasComment = commentText.getCurrentContent().hasText()
-    const hasFile = newAttachments.some(r => r.file)
+    const hasAttachment = newAttachments.some(r => (r.isLink ? !!r.link?.trim() : !!r.file))
     if (!hasComment) {
       setErrors(prev => ({
         ...prev,
@@ -101,10 +117,10 @@ const RightActionsDrawer = ({ open, toggle, taskId, partId, part, task }: Props)
         comment: ''
       }))
     }
-    if (!hasFile) {
+    if (!hasAttachment) {
       setErrors(prev => ({
         ...prev,
-        file: String(t('tasks.view.actions.toasts.fileRequired') || 'File is required')
+        file: String(t('tasks.view.actions.toasts.fileRequired') || 'Attachment is required')
       }))
 
       return
@@ -126,20 +142,20 @@ const RightActionsDrawer = ({ open, toggle, taskId, partId, part, task }: Props)
         })
       }
 
-      if (hasFile) {
-        const rowsToUpload = newAttachments.filter(r => r.file && r.title.trim().length)
+      if (hasAttachment) {
+        const rowsToUpload = newAttachments.filter(r => (r.isLink ? r.link.trim().length : !!r.file))
         if (!rowsToUpload.length) {
-          toast.error(String(t('tasks.view.actions.toasts.fileAndTitleRequired') || 'File and title are required'))
+          toast.error(String(t('tasks.view.actions.toasts.fileRequired') || 'Attachment is required'))
 
           return
         }
         for (const row of rowsToUpload) {
           const formData = new FormData()
-          if (row.file) formData.append('file', row.file)
-          formData.append('title', row.title.trim())
-          formData.append('link', '124') // Assuming 'link' is optional and can be empty
+          formData.append('title', '')
+          formData.append('link', row.isLink ? row.link.trim() : '')
           formData.append('part', partId ? partId.toString() : '')
           formData.append('uploaded_by', user?.id?.toString() ?? '')
+          if (!row.isLink && row.file) formData.append('file', row.file)
           await DataService.postForm(endpoints.taskAttachment, formData)
         }
       }
@@ -294,7 +310,6 @@ const RightActionsDrawer = ({ open, toggle, taskId, partId, part, task }: Props)
                 <Table size='small'>
                   <TableHead>
                     <TableRow>
-                      <TableCell>{String(t('common.title') || 'Title')}</TableCell>
                       <TableCell>{String(t('common.file') || 'File')}</TableCell>
                       <TableCell align='right'>{String(t('common.actions') || 'Actions')}</TableCell>
                     </TableRow>
@@ -302,34 +317,49 @@ const RightActionsDrawer = ({ open, toggle, taskId, partId, part, task }: Props)
                   <TableBody>
                     {newAttachments.map((row, idx) => (
                       <TableRow key={idx}>
-                        <TableCell sx={{ width: '50%' }}>
-                          <CustomTextField
-                            fullWidth
-                            size='small'
-                            label={String(t('tasks.view.actions.attachmentDialog.titleLabel') || 'Attachment title')}
-                            value={row.title}
-                            onChange={e => handleChangeAttachmentTitle(idx, e.target.value)}
+                        <TableCell sx={{ width: '90%' }}>
+                          <FormControlLabel
+                            control={
+                              <Switch
+                                checked={row.isLink}
+                                onChange={e => handleToggleAttachmentType(idx, e.target.checked)}
+                              />
+                            }
+                            label={row.isLink ? 'Link' : 'File'}
                           />
-                        </TableCell>
-                        <TableCell sx={{ width: '40%' }}>
-                          <Button
-                            component='label'
-                            variant='outlined'
-                            size='small'
-                            startIcon={<Icon icon='tabler:upload' />}
-                          >
-                            {String(t('tasks.view.actions.attachmentDialog.chooseFile') || 'Choose file')}
-                            <input
-                              hidden
-                              type='file'
-                              onChange={e => handleChangeAttachmentFile(idx, e.target.files?.[0] || null)}
+
+                          {row.isLink ? (
+                            <CustomTextField
+                              fullWidth
+                              size='small'
+                              label={String(t('common.link', { defaultValue: 'Link' }))}
+                              value={row.link}
+                              onChange={e => handleChangeAttachmentLink(idx, e.target.value)}
                             />
-                          </Button>
-                          <Typography variant='caption' sx={{ display: 'block', mt: 1 }} color='text.secondary'>
-                            {row.file
-                              ? row.file.name
-                              : String(t('tasks.view.actions.attachmentDialog.noFileSelected') || 'No file selected')}
-                          </Typography>
+                          ) : (
+                            <>
+                              <Button
+                                component='label'
+                                variant='outlined'
+                                size='small'
+                                startIcon={<Icon icon='tabler:upload' />}
+                              >
+                                {String(t('tasks.view.actions.attachmentDialog.chooseFile') || 'Choose file')}
+                                <input
+                                  hidden
+                                  type='file'
+                                  onChange={e => handleChangeAttachmentFile(idx, e.target.files?.[0] || null)}
+                                />
+                              </Button>
+                              <Typography variant='caption' sx={{ display: 'block', mt: 1 }} color='text.secondary'>
+                                {row.file
+                                  ? row.file.name
+                                  : String(
+                                      t('tasks.view.actions.attachmentDialog.noFileSelected') || 'No file selected'
+                                    )}
+                              </Typography>
+                            </>
+                          )}
                         </TableCell>
                         <TableCell align='right'>
                           <Tooltip title={String(t('common.delete') || 'Delete')}>

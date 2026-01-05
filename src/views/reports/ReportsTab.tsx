@@ -5,7 +5,7 @@ import Box from '@mui/material/Box'
 import { useTranslation } from 'react-i18next'
 import EmployeeReports from './EmployeeReports'
 import OrganizationReports from './OrganizationReports'
-import { TabContext,TabPanel } from '@mui/lab'
+import { TabContext, TabPanel } from '@mui/lab'
 import { Grid, styled } from '@mui/material'
 import { Icon } from '@iconify/react'
 import MuiTabList, { TabListProps } from '@mui/lab/TabList'
@@ -51,27 +51,31 @@ const ReportsTab = () => {
   }
 
   return (
-      <TabContext value={activeTab}>
-        <Grid container spacing={6}>
-          <Grid item xs={12}>
-            <TabList
-              variant='scrollable'
-              scrollButtons='auto'
-              onChange={handleChange}
-              aria-label='customized tabs example'
-            >
-              <Tab
-                value='employee'
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Icon fontSize='1.25rem' icon='tabler:users' style={{
-                        marginRight:'2px'
-                    }} />
-                    {String(t('reports.tabs.employee'))}
-                  </Box>
-                }
-              />
-              <Tab
+    <TabContext value={activeTab}>
+      <Grid container spacing={6}>
+        <Grid item xs={12}>
+          <TabList
+            variant='scrollable'
+            scrollButtons='auto'
+            onChange={handleChange}
+            aria-label='customized tabs example'
+          >
+            <Tab
+              value='employee'
+              label={
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Icon
+                    fontSize='1.25rem'
+                    icon='tabler:users'
+                    style={{
+                      marginRight: '2px'
+                    }}
+                  />
+                  {String(t('reports.tabs.employee'))}
+                </Box>
+              }
+            />
+            {/* <Tab
                 value='organization'
                 label={
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -81,16 +85,16 @@ const ReportsTab = () => {
                     {String(t('reports.tabs.organization'))}
                   </Box>
                 }
-              />
-            </TabList>
-          </Grid>
-          <Grid item xs={12}>
-            <TabPanel sx={{ p: 0 }} value={activeTab}>
-              {tabContentList[activeTab]}
-            </TabPanel>
-          </Grid>
+              /> */}
+          </TabList>
         </Grid>
-      </TabContext>
+        <Grid item xs={12}>
+          <TabPanel sx={{ p: 0 }} value={activeTab}>
+            {tabContentList[activeTab]}
+          </TabPanel>
+        </Grid>
+      </Grid>
+    </TabContext>
   )
 }
 
