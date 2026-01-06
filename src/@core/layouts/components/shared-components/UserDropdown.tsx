@@ -136,9 +136,6 @@ const UserDropdown = (props: Props) => {
         toast.success(String(t('attendance.outputSuccess') || 'Ishdan chiqish muvaffaqiyatli qayd etildi'))
 
         // Chiqishda logout qilish
-        setTimeout(() => {
-          logout()
-        }, 1000)
       }
 
       handleAttendanceClose()
@@ -148,6 +145,10 @@ const UserDropdown = (props: Props) => {
     } finally {
       setIsSubmitting(false)
     }
+  }
+  const handleLogout = () => {
+    logout()
+    handleDropdownClose('/login')
   }
 
   return (
@@ -207,6 +208,12 @@ const UserDropdown = (props: Props) => {
           <Box sx={styles}>
             <Icon icon='tabler:user-check' />
             {String(t('common.myProfile') || 'My Profile')}
+          </Box>
+        </MenuItemStyled>
+        <MenuItemStyled sx={{ p: 0 }} onClick={handleLogout}>
+          <Box sx={styles}>
+            <Icon icon='tabler:logout' />
+            {String(t('common.signOut') || 'Tizimdan chiqish')}
           </Box>
         </MenuItemStyled>
         <Box sx={{ px: 3, pb: 2, display: 'flex', gap: 1 }}>
