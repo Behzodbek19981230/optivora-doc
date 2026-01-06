@@ -16,7 +16,11 @@ type UseFetchListResult<T> = {
   mutate: () => void
 }
 
-export const useFetchList = <T = any>(path: string, params: ListParams = {}): UseFetchListResult<T> => {
+export const useFetchList = <T = any>(
+  path: string,
+  params: ListParams = {},
+  enabled: boolean = true
+): UseFetchListResult<T> => {
   const queryClient = useQueryClient()
 
   const queryKey = ['list', path, params]
@@ -41,6 +45,7 @@ export const useFetchList = <T = any>(path: string, params: ListParams = {}): Us
 
       return { items, total }
     },
+    enabled,
     staleTime: 30_000
   })
 
