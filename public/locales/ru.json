@@ -74,6 +74,8 @@
   "chooseCompany.region": "Регион",
   "chooseCompany.district": "Район",
   "documents.title": "Документы",
+  "documents.myDocuments": "Мои документы",
+  "documents.allDocuments": "Все",
   "tasks.title": "Задачи",
   "reports.tabs.employee": "Сотрудники",
   "reports.tabs.organization": "Организации",

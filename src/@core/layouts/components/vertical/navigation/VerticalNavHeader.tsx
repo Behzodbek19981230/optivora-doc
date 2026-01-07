@@ -4,7 +4,7 @@ import Link from 'next/link'
 // ** MUI Imports
 import IconButton from '@mui/material/IconButton'
 import Box, { BoxProps } from '@mui/material/Box'
-import { styled, useTheme } from '@mui/material/styles'
+import { styled } from '@mui/material/styles'
 import Typography, { TypographyProps } from '@mui/material/Typography'
 
 // ** Type Import
@@ -14,7 +14,6 @@ import { LayoutProps } from 'src/@core/layouts/types'
 import Icon from 'src/@core/components/icon'
 
 // ** Configs
-import themeConfig from 'src/configs/themeConfig'
 import LogoIcon from 'src/pages/ui/icons/Logo'
 import { useAuth } from 'src/hooks/useAuth'
 
@@ -70,7 +69,6 @@ const VerticalNavHeader = (props: Props) => {
   const {user}=useAuth()
 
   // ** Hooks & Vars
-  const theme = useTheme()
   const { navCollapsed } = settings
 
   const menuCollapsedStyles = navCollapsed && !navHover ? { opacity: 0 } : { opacity: 1 }

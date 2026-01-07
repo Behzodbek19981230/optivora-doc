@@ -181,6 +181,8 @@
   "chooseCompany.region": "Region",
   "chooseCompany.district": "District",
   "documents.title": "Documents",
+  "documents.myDocuments": "My documents",
+  "documents.allDocuments": "All",
   "tasks.title": "Tasks",
   "reports.tabs.employee": "Employees",
   "reports.tabs.organization": "Organizations",

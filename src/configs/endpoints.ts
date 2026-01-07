@@ -68,6 +68,7 @@ const endpoints = {
 
   // Tasks (Documents as Tasks)
   task: '/task/',
+  taskSelf: '/task/self/',
   taskById: (id: string | number | string[] | null | undefined) => `/task/${normalizeId(id)}`,
   taskPart: '/task-part/',
   taskPartById: (id: string | number | string[] | null | undefined) => `/task-part/${normalizeId(id)}`,

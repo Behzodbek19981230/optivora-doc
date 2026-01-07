@@ -197,14 +197,17 @@ const TaskViewDetail = () => {
               }}
             />
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <Button
-                variant='outlined'
-                onClick={handleSendToEmail}
-                disabled={sendingEmail || !task}
-                startIcon={<Icon icon={sendingEmail ? 'mdi:loading' : 'mdi:email-send'} />}
-              >
-                {String(t('tasks.view.parts.sendToEmail') || 'Send to email')}
-              </Button>
+              {user?.role_detail?.some((role: any) => role.name === 'Admin' || role.name === 'Manager') &&
+                task?.status === 'new' && (
+                  <Button
+                    variant='outlined'
+                    onClick={handleSendToEmail}
+                    disabled={sendingEmail || !task}
+                    startIcon={<Icon icon={sendingEmail ? 'mdi:loading' : 'mdi:email-send'} />}
+                  >
+                    {String(t('tasks.view.parts.sendToEmail') || 'Send to email')}
+                  </Button>
+                )}
             </Box>
           </Stack>
         </Grid>

@@ -51,7 +51,7 @@ export type DocumentRow = {
   updated_by: number
 }
 
-type Props = { status: string }
+type Props = { status: string; ownerFilter?: 'mine' | 'all' }
 const statusColor = (status?: string) => {
   switch (status) {
     case 'new':
@@ -72,7 +72,7 @@ const statusColor = (status?: string) => {
       return 'default'
   }
 }
-const DocumentTable = ({ status }: Props) => {
+const DocumentTable = ({ status, ownerFilter }: Props) => {
   const router = useRouter()
   const { t } = useTranslation()
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 })
@@ -83,15 +83,14 @@ const DocumentTable = ({ status }: Props) => {
   const [createType, setCreateType] = useState<'task' | 'application'>('task')
   const [creating, setCreating] = useState(false)
 
+  const listEndpoint = ownerFilter === 'mine' ? endpoints.taskSelf : endpoints.task
+  const params: any = { page: paginationModel.page + 1, limit: paginationModel.pageSize, status }
+
   const {
     data = [],
     total,
     loading
-  } = useFetchList<DocumentRow>(endpoints.task, {
-    page: paginationModel.page + 1,
-    limit: paginationModel.pageSize,
-    status
-  })
+  } = useFetchList<DocumentRow>(listEndpoint, params)
   const onDelete = async (id: number) => {
     if (!confirm(String(t('documents.table.archiveConfirm')))) return
     try {
@@ -106,7 +105,7 @@ const DocumentTable = ({ status }: Props) => {
   }
 
   const columns: GridColDef[] = [
-    { field: 'id', headerName: String(t('common.id')), width: 90 },
+    { field: 'input_doc_number', headerName: String(t('tasks.form.inputDocNumber')), flex: 0.2, minWidth: 150 },
     { field: 'name', headerName: String(t('documents.table.name')), flex: 0.3, minWidth: 180 },
     {
       field: 'status',
@@ -120,6 +119,29 @@ const DocumentTable = ({ status }: Props) => {
           <Chip label={t(`documents.status.${status}`)} color={statusColor(status)} size='small' variant='outlined' />
         )
       }
+    },
+    {
+        field: 'created_by',
+        headerName: String(t('tasks.form.signedBy', { defaultValue: 'Signed by' })),
+        flex: 0.2,
+        minWidth: 150,
+        renderCell: params => {
+          const createdBy = (params.row as any).signed_by_detail
+
+          return (
+            <Box
+              sx={{
+                width: '100%',
+                whiteSpace: 'normal',
+                wordBreak: 'break-word',
+                overflowWrap: 'anywhere',
+                lineHeight: 1.2
+              }}
+            >
+              {createdBy ? `${createdBy.fullname}` : ''}
+            </Box>
+          )
+        }
     },
     {
       field: 'type',

@@ -5,6 +5,7 @@ import DocumentTable from 'src/views/documents/DocumentTable'
 import { useFetchList } from 'src/hooks/useFetchList'
 import endpoints from 'src/configs/endpoints'
 import { useTranslation } from 'react-i18next'
+import { useAuth } from 'src/hooks/useAuth'
 
 export enum DocumentStatus {
   New = 'new',
@@ -26,10 +27,19 @@ const statuses: { key: DocumentStatus; labelKey: string }[] = [
 
 const normalize = (s: string): DocumentStatus => (s as DocumentStatus) || DocumentStatus.New
 
-const DocumentTabs = ({ currentStatus }: { currentStatus: DocumentStatus }) => {
+const DocumentTabs = ({
+  currentStatus,
+  ownerFilter = 'all'
+}: {
+  currentStatus: DocumentStatus
+  ownerFilter?: 'mine' | 'all'
+}) => {
   const router = useRouter()
   const value = useMemo(() => normalize(currentStatus), [currentStatus])
   const { t } = useTranslation()
+
+  // Keep auth hook so this component updates when user changes (token refresh, logout, etc.)
+  useAuth()
 
   useEffect(() => {
     // If route has no status, redirect to default
@@ -43,29 +53,30 @@ const DocumentTabs = ({ currentStatus }: { currentStatus: DocumentStatus }) => {
   }
 
   // Fetch totals for badges per status (server reports pagination.total)
+  const listEndpoint = ownerFilter === 'mine' ? endpoints.taskSelf : endpoints.task
   const totals = {
-    [DocumentStatus.New]: useFetchList(endpoints.task, { page: 1, limit: 1, status: DocumentStatus.New }).total,
-    [DocumentStatus.InProgress]: useFetchList(endpoints.task, {
+    [DocumentStatus.New]: useFetchList(listEndpoint, { page: 1, limit: 1, status: DocumentStatus.New }).total,
+    [DocumentStatus.InProgress]: useFetchList(listEndpoint, {
       page: 1,
       limit: 1,
       status: DocumentStatus.InProgress
     }).total,
-    [DocumentStatus.OnReview]: useFetchList(endpoints.task, {
+    [DocumentStatus.OnReview]: useFetchList(listEndpoint, {
       page: 1,
       limit: 1,
       status: DocumentStatus.OnReview
     }).total,
-    [DocumentStatus.Cancelled]: useFetchList(endpoints.task, {
+    [DocumentStatus.Cancelled]: useFetchList(listEndpoint, {
       page: 1,
       limit: 1,
       status: DocumentStatus.Cancelled
     }).total,
-    [DocumentStatus.Done]: useFetchList(endpoints.task, {
+    [DocumentStatus.Done]: useFetchList(listEndpoint, {
       page: 1,
       limit: 1,
       status: DocumentStatus.Done
     }).total,
-    [DocumentStatus.Returned]: useFetchList(endpoints.task, {
+    [DocumentStatus.Returned]: useFetchList(listEndpoint, {
       page: 1,
       limit: 1,
       status: DocumentStatus.Returned
@@ -90,7 +101,7 @@ const DocumentTabs = ({ currentStatus }: { currentStatus: DocumentStatus }) => {
       </Tabs>
 
       <Box sx={{ mt: 4 }}>
-        <DocumentTable status={value} />
+        <DocumentTable status={value} ownerFilter={ownerFilter} />
       </Box>
     </Box>
   )
