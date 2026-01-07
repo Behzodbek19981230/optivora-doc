@@ -16,6 +16,7 @@ import Icon from 'src/@core/components/icon'
 // ** Configs
 import themeConfig from 'src/configs/themeConfig'
 import LogoIcon from 'src/pages/ui/icons/Logo'
+import { useAuth } from 'src/hooks/useAuth'
 
 interface Props {
   navHover: boolean
@@ -66,6 +67,7 @@ const VerticalNavHeader = (props: Props) => {
     navMenuBranding: userNavMenuBranding,
     menuUnlockedIcon: userMenuUnlockedIcon
   } = props
+  const {user}=useAuth()
 
   // ** Hooks & Vars
   const theme = useTheme()
@@ -95,9 +97,10 @@ const VerticalNavHeader = (props: Props) => {
         userNavMenuBranding(props)
       ) : (
         <LinkStyled href='/'>
-          <LogoIcon />
-          <HeaderTitle variant='h4' sx={{ ...menuCollapsedStyles, ...(navCollapsed && !navHover ? {} : { ml: 2.5 }) }}>
-            {themeConfig.templateName}
+            <LogoIcon logo={user?.companies_detail?.find(company => company.id === user?.company_id)?.logo?`${process.env.NEXT_PUBLIC_FILE_URL}${user?.companies_detail?.find(company => company.id === user?.company_id)?.logo}`:undefined} />
+          <HeaderTitle variant='h6' sx={{ ...menuCollapsedStyles, ...(navCollapsed && !navHover ? {} : { ml: 2.5 }),textOverflow:'ellipsis',overflow:'hidden',whiteSpace:'pre-wrap' }}>
+           
+           {user?.companies_detail?.find(company => company.id === user?.company_id)?.name || ''}
           </HeaderTitle>
         </LinkStyled>
       )}
