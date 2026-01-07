@@ -127,6 +127,7 @@ const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
           form.append('region', values.region.toString())
           form.append('district', values.district.toString())
           form.append('address', values.address)
+          form.append('is_active', values.is_active.toString())
 
           await DataService.putForm(endpoints.companyById(item.id), form)
         } else {
