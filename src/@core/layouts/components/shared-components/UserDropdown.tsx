@@ -202,20 +202,6 @@ const UserDropdown = (props: Props) => {
             </Box>
           </Box>
         </Box>
-        <Divider sx={{ my: theme => `${theme.spacing(2)} !important` }} />
-
-        <MenuItemStyled sx={{ p: 0 }} onClick={() => handleDropdownClose('/my-profile')}>
-          <Box sx={styles}>
-            <Icon icon='tabler:user-check' />
-            {String(t('common.myProfile') || 'My Profile')}
-          </Box>
-        </MenuItemStyled>
-        <MenuItemStyled sx={{ p: 0 }} onClick={handleLogout}>
-          <Box sx={styles}>
-            <Icon icon='tabler:logout' />
-            {String(t('common.signOut') || 'Tizimdan chiqish')}
-          </Box>
-        </MenuItemStyled>
         <Box sx={{ px: 3, pb: 2, display: 'flex', gap: 1 }}>
           <Button
             fullWidth
@@ -238,6 +224,20 @@ const UserDropdown = (props: Props) => {
             {String(t('attendance.output') || 'Ketdi')}
           </Button>
         </Box>
+        <Divider sx={{ my: theme => `${theme.spacing(2)} !important` }} />
+
+        <MenuItemStyled sx={{ p: 0 }} onClick={() => handleDropdownClose('/my-profile')}>
+          <Box sx={styles}>
+            <Icon icon='tabler:user-check' />
+            {String(t('common.myProfile') || 'My Profile')}
+          </Box>
+        </MenuItemStyled>
+        <MenuItemStyled sx={{ p: 0 }} onClick={handleLogout}>
+          <Box sx={styles}>
+            <Icon icon='tabler:logout' />
+            {String(t('common.signOut') || 'Tizimdan chiqish')}
+          </Box>
+        </MenuItemStyled>
       </Menu>
 
       {/* Attendance Modal */}
