@@ -134,9 +134,8 @@ const CompanyFormDialog = ({ open, onClose, onSaved, mode, item }: Props) => {
           delete values.logo
           await DataService.put(endpoints.companyById(item.id), values)
         }
-        if (!item?.is_active) {
           window.location.reload()
-        }
+        
       }
       toast.success(String(t('company.toast.saved')))
       onSaved()
