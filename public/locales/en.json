@@ -411,6 +411,7 @@
   "tasks.parts.table.end": "End",
   "tasks.parts.table.note": "Note",
   "tasks.parts.dialog.title": "Add task part",
+  "tasks.parts.dialog.editTitle": "Edit task part",
   "tasks.parts.form.title": "Title",
   "tasks.parts.form.department": "Department",
   "tasks.parts.form.assignee": "Assignee",

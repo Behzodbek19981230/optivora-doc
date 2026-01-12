@@ -147,6 +147,59 @@ export default function DocumentTab({
     }
   }
 
+  const handleAdd = () => {
+    setEditPart({} as TaskPartType)
+    setEditForm({
+      title: '',
+      department: 0,
+      assignee: 0,
+      start_date: '',
+      end_date: '',
+      note: ''
+    })
+  }
+
+  const handleSaveAdd = async () => {
+    if (!taskId) return
+    try {
+      const errors: { [key: string]: string } = {}
+      if (!editForm.title || !editForm.title.trim()) errors.title = String(t('errors.required'))
+      if (!editForm.department || Number(editForm.department) <= 0) errors.department = String(t('errors.required'))
+      if (!editForm.assignee || Number(editForm.assignee) <= 0) errors.assignee = String(t('errors.required'))
+      if (!editForm.start_date) errors.start_date = String(t('errors.required'))
+      if (!editForm.end_date) errors.end_date = String(t('errors.required'))
+      if (editForm.start_date && editForm.end_date) {
+        const s = new Date(editForm.start_date)
+        const e = new Date(editForm.end_date)
+        if (e < s) errors.end_date = String(t('errors.endAfterStart'))
+      }
+      if (!editForm.note || !String(editForm.note).trim()) errors.note = String(t('errors.required'))
+
+      if (Object.keys(errors).length > 0) {
+        toast.error(String(t('tasks.toast.partFormRequired')))
+
+        return
+      }
+
+      await DataService.post(endpoints.taskPart, {
+        task: taskId,
+        title: editForm.title || '',
+        department: editForm.department || 0,
+        assignee: editForm.assignee || 0,
+        start_date: moment(editForm.start_date).format('YYYY-MM-DD HH:mm') || '',
+        end_date: moment(editForm.end_date).format('YYYY-MM-DD HH:mm') || '',
+        status: 'new',
+        note: editForm.note || '',
+        created_by: 1
+      })
+      toast.success(String(t('tasks.toast.partCreated')))
+      setEditPart(null)
+      queryClient.invalidateQueries({ queryKey: ['task-parts', taskId] })
+    } catch (e: any) {
+      toast.error(e?.message || String(t('errors.somethingWentWrong')))
+    }
+  }
+
   if (!task)
     return (
       <Card>
@@ -271,11 +324,13 @@ export default function DocumentTab({
 
       <Grid item xs={12}>
         <TaskParts
-          parts={parts}
+          parts={parts || []}
           selectedPartId={selectedPartId}
           setSelectedPartId={setSelectedPartId}
           onDelete={handleDelete}
           onEdit={handleEdit}
+          onAdd={handleAdd}
+          taskId={taskId}
         />
       </Grid>
       {selectedPartId && (
@@ -289,7 +344,9 @@ export default function DocumentTab({
         </>
       )}
       <Dialog open={!!editPart} onClose={() => setEditPart(null)} maxWidth='sm' fullWidth>
-        <DialogTitle>{String(t('tasks.parts.dialog.title'))}</DialogTitle>
+        <DialogTitle>
+          {editPart?.id ? String(t('tasks.parts.dialog.editTitle')) : String(t('tasks.parts.dialog.title'))}
+        </DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12}>
@@ -366,7 +423,7 @@ export default function DocumentTab({
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setEditPart(null)}>{String(t('common.cancel'))}</Button>
-          <Button variant='contained' onClick={handleSaveEdit}>
+          <Button variant='contained' onClick={editPart?.id ? handleSaveEdit : handleSaveAdd}>
             {String(t('common.save'))}
           </Button>
         </DialogActions>

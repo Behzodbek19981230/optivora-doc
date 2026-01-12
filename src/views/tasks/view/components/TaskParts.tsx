@@ -9,26 +9,35 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  Typography
+  Typography,
+  Button,
+  IconButton,
+  Tooltip
 } from '@mui/material'
 import { TaskPartType } from 'src/types/task'
 import { useTranslation } from 'react-i18next'
 import moment from 'moment'
+import Icon from 'src/@core/components/icon'
+import { useAuth } from 'src/hooks/useAuth'
 
 export default function TaskParts({
   parts,
   selectedPartId,
   setSelectedPartId,
-  onDelete, // eslint-disable-line @typescript-eslint/no-unused-vars
-  onEdit // eslint-disable-line @typescript-eslint/no-unused-vars
+  onDelete,
+  onAdd
 }: {
   parts: TaskPartType[]
   selectedPartId: number | undefined
   setSelectedPartId: (id: number) => void
   onDelete: (id: number) => void
   onEdit: (id: number) => void
+  onAdd?: () => void
+  taskId?: number
 }) {
   const { t } = useTranslation()
+  const { user } = useAuth()
+  const isAdmin = user?.role_detail?.some((role: any) => role.name === 'Admin')
 
   const statusColor = (status?: string) => {
     switch (status) {
@@ -69,9 +78,16 @@ export default function TaskParts({
         <CardContent>
           <Stack direction='row' justifyContent='space-between' alignItems='center' sx={{ mb: 2 }}>
             <Typography variant='subtitle2'>{String(t('tasks.view.parts.title'))}</Typography>
-            <Typography variant='caption' color='text.secondary'>
-              {String(t('tasks.view.parts.count', { count: parts.length }))}
-            </Typography>
+            <Stack direction='row' spacing={1} alignItems='center'>
+              <Typography variant='caption' color='text.secondary'>
+                {String(t('tasks.view.parts.count', { count: parts.length }))}
+              </Typography>
+              {isAdmin && onAdd && (
+                <Button variant='contained' size='small' startIcon={<Icon icon='mdi:plus' />} onClick={onAdd}>
+                  {String(t('common.add'))}
+                </Button>
+              )}
+            </Stack>
           </Stack>
         </CardContent>
 
@@ -91,6 +107,7 @@ export default function TaskParts({
                 <TableCell>{String(t('tasks.view.parts.table.assignee'))}</TableCell>
                 <TableCell>{String(t('tasks.view.parts.table.start'))}</TableCell>
                 <TableCell>{String(t('tasks.view.parts.table.end'))}</TableCell>
+                {isAdmin && <TableCell align='right'>{String(t('common.actions'))}</TableCell>}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -133,6 +150,25 @@ export default function TaskParts({
                     <TableCell>
                       {moment(p.end_date).isValid() ? moment(p.end_date).format('DD.MM.YYYY HH:mm') : '—'}
                     </TableCell>
+                    {isAdmin && (
+                      <TableCell align='right' onClick={e => e.stopPropagation()}>
+                        <Stack direction='row' spacing={1} justifyContent='flex-end'>
+                          {/* <Tooltip title={String(t('common.edit'))}>
+                            <IconButton
+                              size='small'
+                              onClick={() => onEdit(p.id)}
+                            >
+                              <Icon icon='mdi:pencil' />
+                            </IconButton>
+                          </Tooltip> */}
+                          <Tooltip title={String(t('common.delete'))}>
+                            <IconButton size='small' color='error' onClick={() => onDelete(p.id)}>
+                              <Icon icon='mdi:delete' />
+                            </IconButton>
+                          </Tooltip>
+                        </Stack>
+                      </TableCell>
+                    )}
                   </TableRow>
                 )
               })}

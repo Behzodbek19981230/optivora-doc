@@ -94,7 +94,7 @@ const DocumentTable = ({ status, ownerFilter }: Props) => {
   const onDelete = async (id: number) => {
     if (!confirm(String(t('documents.table.archiveConfirm')))) return
     try {
-      await DataService.delete(`${endpoints.task}/${id}`)
+      await DataService.delete(endpoints.taskById(id.toString()))
       toast.success(String(t('documents.table.archiveSuccess')))
 
       // Refresh data

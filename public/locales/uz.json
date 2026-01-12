@@ -295,6 +295,7 @@
   "tasks.parts.table.end": "Tugash",
   "tasks.parts.table.note": "Izoh",
   "tasks.parts.dialog.title": "Vazifa qismi qo‘shish",
+  "tasks.parts.dialog.editTitle": "Vazifa qismini tahrirlash",
   "tasks.parts.form.title": "Sarlavha",
   "tasks.parts.form.department": "Bo‘lim",
   "tasks.parts.form.assignee": "Ijrochi",

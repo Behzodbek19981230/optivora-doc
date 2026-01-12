@@ -295,6 +295,7 @@
   "tasks.parts.table.end": "Конец",
   "tasks.parts.table.note": "Комментарий",
   "tasks.parts.dialog.title": "Добавить часть задачи",
+  "tasks.parts.dialog.editTitle": "Редактировать часть задачи",
   "tasks.parts.form.title": "Название",
   "tasks.parts.form.department": "Отдел",
   "tasks.parts.form.assignee": "Исполнитель",
