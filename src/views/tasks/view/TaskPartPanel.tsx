@@ -6,10 +6,12 @@ import endpoints from 'src/configs/endpoints'
 import CustomTextField from 'src/@core/components/mui/text-field'
 import { useFetchList } from 'src/hooks/useFetchList'
 import moment from 'moment'
+import { useAuth } from 'src/hooks/useAuth'
 
 const formatDisplayDateTime = (value?: string) => {
   if (!value) return '—'
   const m = moment(value)
+
   return m.isValid() ? m.format('DD.MM.YYYY HH:mm') : String(value)
 }
 
@@ -28,6 +30,7 @@ type Part = {
 
 const TaskPartPanel = ({ taskId }: Props) => {
   const [parts, setParts] = useState<Part[]>([])
+  const { user } = useAuth()
   const [selected, setSelected] = useState<Part | null>(null)
   const [quickAssignee, setQuickAssignee] = useState<number>(0)
   const { control, handleSubmit, reset } = useForm<Part>({
@@ -99,8 +102,7 @@ const TaskPartPanel = ({ taskId }: Props) => {
       end_date: '',
       status: 'new',
       note: '',
-      created_by: 1,
-      updated_by: 1
+      created_by: user?.id || 1
     })
     await refreshList()
   }
@@ -132,7 +134,9 @@ const TaskPartPanel = ({ taskId }: Props) => {
             onChange={(_, v) => setQuickAssignee(v?.id || 0)}
             isOptionEqualToValue={(o, v) => o.id === v.id}
             getOptionLabel={o => o?.fullname || ''}
-            renderInput={params => <CustomTextField {...params} fullWidth label='Ijrochini tanlang' placeholder='---' />}
+            renderInput={params => (
+              <CustomTextField {...params} fullWidth label='Ijrochini tanlang' placeholder='---' />
+            )}
           />
           <Button variant='contained' onClick={createDefaultAssigneePart} disabled={!quickAssignee}>
             Biriktirish
