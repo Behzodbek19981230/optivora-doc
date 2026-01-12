@@ -57,6 +57,7 @@ const formatDisplayDateTime = (value?: string) => {
 import CustomTextField from 'src/@core/components/mui/text-field'
 import { useFetchList } from 'src/hooks/useFetchList'
 import useThemedToast from 'src/@core/hooks/useThemedToast'
+import { useAuth } from 'src/hooks/useAuth'
 
 export default function DocumentTab({
   task,
@@ -68,6 +69,7 @@ export default function DocumentTab({
   setSelectedPartId: (id: number) => void
 }) {
   const { t } = useTranslation()
+  const { user } = useAuth()
   const toast = useThemedToast()
   const queryClient = useQueryClient()
 
@@ -190,7 +192,7 @@ export default function DocumentTab({
         end_date: moment(editForm.end_date).format('YYYY-MM-DD HH:mm') || '',
         status: 'new',
         note: editForm.note || '',
-        created_by: 1
+        created_by: user?.id
       })
       toast.success(String(t('tasks.toast.partCreated')))
       setEditPart(null)
