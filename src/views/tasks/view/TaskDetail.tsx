@@ -110,19 +110,18 @@ const TaskViewDetail = () => {
                     : String(t('tasks.view.header.title'))}
                 </Typography>
                 <Stack direction='row' spacing={1} alignItems='center'>
-                  {['new'].includes(task?.status as string) &&
-                    user?.role_detail?.some((role: any) => role.name !== 'Performer') && (
-                      <Button
-                        size='small'
-                        variant='outlined'
-                        component={Link}
-                        href={id ? `/tasks/update/${id}` : '#'}
-                        disabled={!id}
-                        startIcon={<Icon icon='mdi:pencil' />}
-                      >
-                        {String(t('common.edit'))}
-                      </Button>
-                    )}
+                  {user?.role_detail?.some((role: any) => role.name === 'Admin') && (
+                    <Button
+                      size='small'
+                      variant='outlined'
+                      component={Link}
+                      href={id ? `/tasks/update/${id}` : '#'}
+                      disabled={!id}
+                      startIcon={<Icon icon='mdi:pencil' />}
+                    >
+                      {String(t('common.edit'))}
+                    </Button>
+                  )}
                   <Chip
                     label={String(t('tasks.view.header.status', { value: translateStatus(task?.status) }))}
                     size='small'
