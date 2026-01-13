@@ -15,7 +15,7 @@ type Props = {
 const statusColor = (status?: string) => {
   switch (status) {
     case 'new':
-      return 'info'
+      return 'error'
     case 'in_progress':
       return 'primary'
     case 'on_review':
@@ -44,7 +44,7 @@ export default function TaskTable({ data, loading, total }: Props) {
       flex: 0.2,
       minWidth: 140,
       renderCell: params => {
-        const status = (params.row as any).status
+        const status = (params.row as any).status || 'new'
 
         return (
           <Chip label={t(`documents.status.${status}`)} color={statusColor(status)} size='small' variant='outlined' />
@@ -52,31 +52,20 @@ export default function TaskTable({ data, loading, total }: Props) {
       }
     },
     {
-      field: 'task_detail',
-      headerName: String(t('documents.table.type')),
-      flex: 0.15,
-      minWidth: 120,
-      renderCell: params => {
-        const type = (params.row as any).task_detail?.type
-
-        return t(`tasks.type.${type}`)
-      }
+      field: 'responsible_person',
+      headerName: String(t('documents.table.responsible')),
+      flex: 0.2,
+      minWidth: 150
     },
     {
-      field: 'priority',
-      headerName: String(t('documents.table.priority')),
+      field: 'department',
+      headerName: String(t('documents.table.department')),
       flex: 0.15,
       minWidth: 120,
       renderCell: params => {
-        const priority = (params.row as any).task_detail?.priority
+        const department = (params.row as any).department
 
-        return (
-          <Chip
-            label={t(`tasks.priority.${priority}`)}
-            color={priority === 'ordinary' ? 'primary' : 'warning'}
-            size='small'
-          />
-        )
+        return department?.name || ''
       }
     },
     {
@@ -111,7 +100,12 @@ export default function TaskTable({ data, loading, total }: Props) {
       columns={columns}
       loading={loading}
       rowCount={total}
-      onRowClick={params => router.push(`/tasks/view/${params.row?.task_detail?.id}`)}
+      onRowClick={params => {
+        const taskId = (params.row as any).task_detail?.id || (params.row as any).id
+        if (taskId) {
+          router.push(`/tasks/view/${taskId}`)
+        }
+      }}
       getRowId={row => row.id}
       localeText={getDataGridLocaleText(t)}
     />

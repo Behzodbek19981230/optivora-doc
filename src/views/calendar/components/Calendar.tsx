@@ -226,7 +226,7 @@ const Calendar = (props: CalendarType) => {
   const statusOrder: string[] = ['new', 'in_progress', 'on_review', 'returned', 'done', 'cancelled']
 
   const statusColors: Record<string, string> = {
-    new: '#FF9F43',
+    new: '#EA5455',
     in_progress: '#00CFE8',
     on_review: '#7367F0',
     returned: '#EA5455',

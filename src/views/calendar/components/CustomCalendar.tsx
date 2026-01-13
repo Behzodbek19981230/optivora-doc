@@ -4,14 +4,12 @@ import { useEffect, useMemo, useState } from 'react'
 // ** MUI Imports
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import ButtonGroup from '@mui/material/ButtonGroup'
 import IconButton from '@mui/material/IconButton'
 import MenuItem from '@mui/material/MenuItem'
 import Paper from '@mui/material/Paper'
 import Select from '@mui/material/Select'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
-import Grid from '@mui/material/Grid'
 import { alpha, useTheme } from '@mui/material/styles'
 
 // ** Types / Hooks
@@ -19,9 +17,11 @@ import { CalendarType } from 'src/types/calendar'
 import { useTranslation } from 'react-i18next'
 import { DataService } from 'src/configs/dataService'
 import { useAuth } from 'src/hooks/useAuth'
+import endpoints from 'src/configs/endpoints'
 
 // ** Icon
 import Icon from 'src/@core/components/icon'
+import moment from 'moment'
 
 type ViewMode = 'month' | 'list'
 
@@ -74,7 +74,7 @@ const monthNamesByLang = {
 const statusOrder: string[] = ['new', 'in_progress', 'on_review', 'returned', 'done', 'cancelled']
 
 const statusColors: Record<string, string> = {
-  new: '#FF9F43',
+  new: '#EA5455',
   in_progress: '#00CFE8',
   on_review: '#7367F0',
   returned: '#EA5455',
@@ -134,7 +134,7 @@ const CustomCalendar = (props: CalendarType) => {
   const theme = useTheme()
   const { user } = useAuth()
 
-  const { handleLeftSidebarToggle, handleSelectDate, setCalendarApi } = props
+  const { handleLeftSidebarToggle, handleSelectDate, setCalendarApi, ownerFilter = 'all' } = props
 
   // Tuning (compact like your screenshot)
   const MONTH_CELL_HEIGHT = 56
@@ -143,7 +143,6 @@ const CustomCalendar = (props: CalendarType) => {
   const [year, setYear] = useState<number>(() => new Date().getFullYear())
   const [month, setMonth] = useState<number>(() => new Date().getMonth())
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
-  const [detailDate, setDetailDate] = useState<string | null>(null)
 
   const [dayCounts, setDayCounts] = useState<Record<string, DayStats>>({})
 
@@ -182,21 +181,16 @@ const CustomCalendar = (props: CalendarType) => {
   const fetchMonthStats = async (y: number, m: number) => {
     const monthParam = m + 1
     try {
-      const roleNames = user?.role_detail?.map(r => r.name) || []
-      const isAdminOrManager = roleNames.includes('Admin') || roleNames.includes('Manager')
-
       const payloadBody: any = {
         year: y,
         month: monthParam,
         company: user?.company_id
       }
 
-      // Admin/Manager should see all tasks: do NOT filter by assignee_id
-      if (!isAdminOrManager) {
-        payloadBody.assignee_id = user?.id
-      }
+      // Choose endpoint based on ownerFilter
+      const endpoint = ownerFilter === 'mine' ? endpoints.taskCalendarSelf : endpoints.taskCalendarStats
 
-      const res = await DataService.post<any>('task-calendar/stats/by-start-date/', payloadBody)
+      const res = await DataService.post<any>(endpoint, payloadBody)
       const payload = (res as any)?.data
       const nextMap: Record<string, DayStats> = {}
 
@@ -289,7 +283,7 @@ const CustomCalendar = (props: CalendarType) => {
   useEffect(() => {
     fetchMonthStats(year, month)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [year, month, user?.company_id, user?.id])
+  }, [year, month, user?.company_id, user?.id, ownerFilter])
 
   // Provide a small API object for compatibility (not used elsewhere today).
   useEffect(() => {
@@ -318,21 +312,11 @@ const CustomCalendar = (props: CalendarType) => {
   }
 
   const handleCellClick = (dateStr: string) => {
-    const stats = dayCounts?.[dateStr]
-    const total = Number(stats?.total ?? 0)
-    const byStatus = (stats?.byStatus || {}) as Record<string, number>
-    const hasAnyStatus = Object.values(byStatus).some(v => Number(v) > 0)
-    const hasData = (Number.isFinite(total) && total > 0) || hasAnyStatus
-
-    if (hasData) {
-      setDetailDate(dateStr)
-      onPickDate(dateStr)
-    } else {
-      onPickDate(dateStr)
-    }
+    setSelectedDate(dateStr)
+    handleSelectDate(dateStr)
   }
 
-  const renderStats = (dateStr: string, compact = true) => {
+  const renderStats = (dateStr: string) => {
     const stats = dayCounts?.[dateStr]
     const total = Number(stats?.total ?? 0)
     const byStatus = (stats?.byStatus || {}) as Record<string, number>
@@ -358,81 +342,47 @@ const CustomCalendar = (props: CalendarType) => {
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: 1,
-          px: compact ? 1 : 2,
-          py: compact ? 0.25 : 0.75,
+          px: 1,
+          py: 0.25,
           borderRadius: 1,
-          fontSize: compact ? '10px' : '14px',
-          lineHeight: compact ? '12px' : '20px',
+          fontSize: '10px',
+          lineHeight: '12px',
           backgroundColor: alpha(color, 0.12)
         }}
       >
         <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
           <Box
             sx={{
-              width: compact ? 8 : 12,
-              height: compact ? 8 : 12,
+              width: 8,
+              height: 8,
               borderRadius: 999,
               backgroundColor: color,
               flex: '0 0 auto'
             }}
           />
-          <Typography sx={{ fontSize: compact ? 10 : 14 }} noWrap>
+          <Typography sx={{ fontSize: 10 }} noWrap>
             {label}
           </Typography>
         </Box>
-        <Typography sx={{ fontSize: compact ? 10 : 14, fontWeight: 700, color }} noWrap>
+        <Typography sx={{ fontSize: 10, fontWeight: 700, color }} noWrap>
           {String(count)}
         </Typography>
       </Box>
     )
 
-    if (compact) {
-      return (
-        <Stack spacing={0.5} sx={{ mt: 0.5, overflow: 'hidden' }}>
-          {Number.isFinite(total) && total > 0 ? (
-            <Row label={String(t('calendar.stats.total') || 'Total')} count={total} color={'rgba(115,103,240,0.95)'} />
-          ) : null}
-          {keys.map(k => {
-            const c = Number(byStatus[k] ?? 0)
-            if (!Number.isFinite(c) || c <= 0) return null
-            const label = statusKeyMap[k] ? String(t(statusKeyMap[k])) : k.replaceAll('_', ' ')
-
-            return <Row key={k} label={label} count={c} color={statusColors[k] || '#999'} />
-          })}
-        </Stack>
-      )
-    }
-
-    // Non-compact view: 3 columns grid
-    const statusItems = keys
-      .map(k => {
-        const c = Number(byStatus[k] ?? 0)
-        if (!Number.isFinite(c) || c <= 0) return null
-        const label = statusKeyMap[k] ? String(t(statusKeyMap[k])) : k.replaceAll('_', ' ')
-
-        return { key: k, label, count: c, color: statusColors[k] || '#999' }
-      })
-      .filter(Boolean) as Array<{ key: string; label: string; count: number; color: string }>
-
     return (
-      <Box>
-        <Grid container spacing={2}>
-          {Number.isFinite(total) && total > 0 && (
-            <Grid item xs={12} sm={6} md={4} key={'total'} sx={{ mb: 2 }}>
-              <Row
-                label={String(t('calendar.stats.total') || 'Total')}
-                count={total}
-                color={'rgba(115,103,240,0.95)'}
-              />
-            </Grid>
-          )}
-          {statusItems.map(item => (
-            <Grid item xs={12} sm={6} md={4} key={item.key}>
-              <Row label={item.label} count={item.count} color={item.color} />
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
+      <Stack spacing={0.5} sx={{ mt: 0.5, overflow: 'hidden' }}>
+        {Number.isFinite(total) && total > 0 ? (
+          <Row label={String(t('calendar.stats.total') || 'Total')} count={total} color={'rgba(115,103,240,0.95)'} />
+        ) : null}
+        {keys.map(k => {
+          const c = Number(byStatus[k] ?? 0)
+          if (!Number.isFinite(c) || c <= 0) return null
+          const label = statusKeyMap[k] ? String(t(statusKeyMap[k])) : k.replaceAll('_', ' ')
+
+          return <Row key={k} label={label} count={c} color={statusColors[k] || '#999'} />
+        })}
+      </Stack>
     )
   }
 
@@ -516,23 +466,26 @@ const CustomCalendar = (props: CalendarType) => {
               </MenuItem>
             ))}
           </Select>
-
-          <ButtonGroup variant='contained' size='small'>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Button
+              size='small'
               onClick={() => setView('month')}
               variant={view === 'month' ? 'contained' : 'outlined'}
               sx={{ textTransform: 'capitalize' }}
+              color={view === 'month' ? 'primary' : 'secondary'}
             >
               {String(t('calendar.month') || 'Month')}
             </Button>
             <Button
+              size='small'
               onClick={() => setView('list')}
               variant={view === 'list' ? 'contained' : 'outlined'}
               sx={{ textTransform: 'capitalize' }}
+              color={view === 'list' ? 'primary' : 'secondary'}
             >
               {String(t('calendar.list') || 'List')}
             </Button>
-          </ButtonGroup>
+          </Box>
         </Box>
       </Box>
 
@@ -593,9 +546,7 @@ const CustomCalendar = (props: CalendarType) => {
                   key={dateStr}
                   onClick={showNumber ? () => handleCellClick(dateStr) : undefined}
                   sx={{
-                    height: MONTH_CELL_HEIGHT,
                     minHeight: MONTH_CELL_HEIGHT,
-                    maxHeight: MONTH_CELL_HEIGHT,
                     px: 1,
                     py: 0.5,
                     cursor: showNumber ? 'pointer' : 'default',
@@ -616,21 +567,7 @@ const CustomCalendar = (props: CalendarType) => {
                     )}
                   </Box>
 
-                  {showNumber && hasData ? (
-                    <Box sx={{ mt: 0.5 }}>
-                      <Typography
-                        sx={{
-                          fontSize: 10,
-                          fontWeight: 600,
-                          color: 'primary.main',
-                          textAlign: 'center',
-                          lineHeight: 1.2
-                        }}
-                      >
-                        {total > 0 ? `${total} ${String(t('calendar.stats.total') || 'Total')}` : ''}
-                      </Typography>
-                    </Box>
-                  ) : null}
+                  {showNumber && hasData ? renderStats(dateStr) : null}
                 </Box>
               )
             })}
@@ -651,8 +588,7 @@ const CustomCalendar = (props: CalendarType) => {
               const isSelected = selectedDate === dateStr
               const isToday = todayStr === dateStr
 
-              const fmt = new Intl.DateTimeFormat(intlLocale, { day: '2-digit', month: 'long', year: 'numeric' })
-              const label = fmt.format(d)
+              const label = moment(d).format('DD-MM-YYYY')
 
               return (
                 <Paper
@@ -678,9 +614,6 @@ const CustomCalendar = (props: CalendarType) => {
           </Stack>
         </Box>
       )}
-
-      {/* Detail Card - Shows below calendar when date is selected */}
-      {detailDate && dayCounts?.[detailDate] && <div>{renderStats(detailDate, false)}</div>}
     </Box>
   )
 }

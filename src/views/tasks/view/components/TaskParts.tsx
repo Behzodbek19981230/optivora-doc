@@ -42,9 +42,9 @@ export default function TaskParts({
   const statusColor = (status?: string) => {
     switch (status) {
       case 'new':
-        return 'default'
+        return 'error'
       case 'in_progress':
-        return 'info'
+        return 'primary'
       case 'on_review':
         return 'warning'
       case 'returned':

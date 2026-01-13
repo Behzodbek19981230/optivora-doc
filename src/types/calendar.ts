@@ -86,6 +86,7 @@ export type CalendarType = {
   handleAddEventSidebarToggle: () => void
   handleSelectEvent: (event: EventType) => void
   handleSelectDate: (selectedDate: string) => void
+  ownerFilter?: 'mine' | 'all'
 }
 
 export type AddEventSidebarType = {

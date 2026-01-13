@@ -55,7 +55,7 @@ type Props = { status: string; ownerFilter?: 'mine' | 'all' }
 const statusColor = (status?: string) => {
   switch (status) {
     case 'new':
-      return 'info'
+      return 'error'
     case 'in_progress':
       return 'primary'
     case 'on_review':
