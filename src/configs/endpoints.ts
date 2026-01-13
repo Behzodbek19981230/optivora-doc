@@ -71,6 +71,7 @@ const endpoints = {
   taskSelf: '/task/self/',
   taskById: (id: string | number | string[] | null | undefined) => `/task/${normalizeId(id)}`,
   taskPart: '/task-part/',
+  taskPartSelf: '/task-part/self/',
   taskMix: '/task-calendar/get-task-by-date/',
   taskMixSelf: '/task-calendar/self/get-task-by-date/',
   taskPartById: (id: string | number | string[] | null | undefined) => `/task-part/${normalizeId(id)}`,

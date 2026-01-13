@@ -54,7 +54,7 @@ const TaskPartTabs = ({
 
   // Fetch totals for badges per status (server reports pagination.total)
   // For task-part, we use the same endpoint but filter by status
-  const listEndpoint = endpoints.taskPart
+  const listEndpoint = ownerFilter === 'mine' ? endpoints.taskPartSelf : endpoints.taskPart
   const totals = {
     [TaskPartStatus.New]: useFetchList(listEndpoint, { page: 1, limit: 1, status: TaskPartStatus.New }).total,
     [TaskPartStatus.InProgress]: useFetchList(listEndpoint, {

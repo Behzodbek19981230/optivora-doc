@@ -38,7 +38,7 @@ const TaskPartTable = ({ status, ownerFilter }: Props) => {
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 })
   const { user } = useAuth()
 
-  const listEndpoint = endpoints.taskPart
+  const listEndpoint = ownerFilter === 'mine' ? endpoints.taskPartSelf : endpoints.taskPart
   const params: any = { page: paginationModel.page + 1, limit: paginationModel.pageSize, status }
 
   // If ownerFilter is 'mine', add assignee filter
