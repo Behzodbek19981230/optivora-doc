@@ -27,7 +27,7 @@ const navigation = (): VerticalNavItemsType => {
       roles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.PERFORMER, ROLES.SIGNATORY]
     },
     {
-      title: 'nav.taskParts',
+      title: 'nav.tasks',
       icon: 'tabler:clipboard-list',
       path: '/task-parts',
       roles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.PERFORMER, ROLES.SIGNATORY]
@@ -96,7 +96,7 @@ const navigation = (): VerticalNavItemsType => {
     },
     {
       title: 'nav.reports',
-      icon: 'tabler:report-analytics',  
+      icon: 'tabler:report-analytics',
       path: '/reports',
       roles: [ROLES.ADMIN, ROLES.MANAGER]
     },

@@ -150,7 +150,7 @@ const TaskPartTable = ({ status, ownerFilter }: Props) => {
           getRowId={row => (row as any).id as number}
           localeText={{
             ...getDataGridLocaleText(t),
-            noRowsLabel: String(t('documents.table.emptyForStatus', { status }))
+            noRowsLabel: String(t('documents.table.emptyForStatus', { status: t(`documents.status.${status}`) }))
           }}
         />
       </CardContent>
