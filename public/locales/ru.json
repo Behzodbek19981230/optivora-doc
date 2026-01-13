@@ -255,6 +255,7 @@
   "calendar.list": "Список",
   "calendar.year": "Год",
   "calendar.stats.total": "Всего",
+  "calendar.details.title": "Детали задач",
   "tasks.form.type": "Тип",
   "tasks.form.priority": "Приоритет",
   "tasks.form.name": "Номер/название задачи",

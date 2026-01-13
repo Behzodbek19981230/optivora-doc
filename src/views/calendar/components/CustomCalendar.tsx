@@ -11,6 +11,7 @@ import Paper from '@mui/material/Paper'
 import Select from '@mui/material/Select'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
+import Grid from '@mui/material/Grid'
 import { alpha, useTheme } from '@mui/material/styles'
 
 // ** Types / Hooks
@@ -142,6 +143,7 @@ const CustomCalendar = (props: CalendarType) => {
   const [year, setYear] = useState<number>(() => new Date().getFullYear())
   const [month, setMonth] = useState<number>(() => new Date().getMonth())
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  const [detailDate, setDetailDate] = useState<string | null>(null)
 
   const [dayCounts, setDayCounts] = useState<Record<string, DayStats>>({})
 
@@ -200,6 +202,9 @@ const CustomCalendar = (props: CalendarType) => {
 
       const byStartDate = Array.isArray(payload?.by_start_date) ? payload.by_start_date : null
       if (byStartDate) {
+        // First pass: group by date and aggregate totals and status counts
+        const dateGroups: Record<string, { total: number; byStatus: Record<string, number> }> = {}
+
         for (const row of byStartDate) {
           const d = row?.start_date
           const total = Number(row?.total ?? 0)
@@ -222,17 +227,31 @@ const CustomCalendar = (props: CalendarType) => {
             dateKey = match ? match[1] : d
           }
 
-          const byStatus: Record<string, number> = {}
+          // Initialize date group if it doesn't exist
+          if (!dateGroups[dateKey]) {
+            dateGroups[dateKey] = { total: 0, byStatus: {} }
+          }
+
+          // Aggregate total
+          dateGroups[dateKey].total += total
+
+          // Aggregate by_status counts
           const bs = row?.by_status
           if (bs && typeof bs === 'object') {
             for (const [k, v] of Object.entries(bs)) {
               const c = Number((v as any)?.count ?? 0)
-              if (Number.isFinite(c) && c > 0) byStatus[k] = c
+              if (Number.isFinite(c) && c > 0) {
+                dateGroups[dateKey].byStatus[k] = (dateGroups[dateKey].byStatus[k] || 0) + c
+              }
             }
           }
-
-          nextMap[dateKey] = { total, byStatus }
         }
+
+        // Convert grouped data to the expected format
+        for (const [dateKey, group] of Object.entries(dateGroups)) {
+          nextMap[dateKey] = { total: group.total, byStatus: group.byStatus }
+        }
+
         setDayCounts(nextMap)
 
         return
@@ -298,7 +317,22 @@ const CustomCalendar = (props: CalendarType) => {
     handleSelectDate(dateStr)
   }
 
-  const renderStats = (dateStr: string) => {
+  const handleCellClick = (dateStr: string) => {
+    const stats = dayCounts?.[dateStr]
+    const total = Number(stats?.total ?? 0)
+    const byStatus = (stats?.byStatus || {}) as Record<string, number>
+    const hasAnyStatus = Object.values(byStatus).some(v => Number(v) > 0)
+    const hasData = (Number.isFinite(total) && total > 0) || hasAnyStatus
+
+    if (hasData) {
+      setDetailDate(dateStr)
+      onPickDate(dateStr)
+    } else {
+      onPickDate(dateStr)
+    }
+  }
+
+  const renderStats = (dateStr: string, compact = true) => {
     const stats = dayCounts?.[dateStr]
     const total = Number(stats?.total ?? 0)
     const byStatus = (stats?.byStatus || {}) as Record<string, number>
@@ -324,47 +358,81 @@ const CustomCalendar = (props: CalendarType) => {
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: 1,
-          px: 1,
-          py: 0.25,
+          px: compact ? 1 : 2,
+          py: compact ? 0.25 : 0.75,
           borderRadius: 1,
-          fontSize: '10px',
-          lineHeight: '12px',
+          fontSize: compact ? '10px' : '14px',
+          lineHeight: compact ? '12px' : '20px',
           backgroundColor: alpha(color, 0.12)
         }}
       >
         <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
           <Box
             sx={{
-              width: 8,
-              height: 8,
+              width: compact ? 8 : 12,
+              height: compact ? 8 : 12,
               borderRadius: 999,
               backgroundColor: color,
               flex: '0 0 auto'
             }}
           />
-          <Typography sx={{ fontSize: 10 }} noWrap>
+          <Typography sx={{ fontSize: compact ? 10 : 14 }} noWrap>
             {label}
           </Typography>
         </Box>
-        <Typography sx={{ fontSize: 10, fontWeight: 700, color }} noWrap>
+        <Typography sx={{ fontSize: compact ? 10 : 14, fontWeight: 700, color }} noWrap>
           {String(count)}
         </Typography>
       </Box>
     )
 
-    return (
-      <Stack spacing={0.5} sx={{ mt: 0.5, overflow: 'hidden' }}>
-        {Number.isFinite(total) && total > 0 ? (
-          <Row label={String(t('calendar.stats.total') || 'Total')} count={total} color={'rgba(115,103,240,0.95)'} />
-        ) : null}
-        {keys.map(k => {
-          const c = Number(byStatus[k] ?? 0)
-          if (!Number.isFinite(c) || c <= 0) return null
-          const label = statusKeyMap[k] ? String(t(statusKeyMap[k])) : k.replaceAll('_', ' ')
+    if (compact) {
+      return (
+        <Stack spacing={0.5} sx={{ mt: 0.5, overflow: 'hidden' }}>
+          {Number.isFinite(total) && total > 0 ? (
+            <Row label={String(t('calendar.stats.total') || 'Total')} count={total} color={'rgba(115,103,240,0.95)'} />
+          ) : null}
+          {keys.map(k => {
+            const c = Number(byStatus[k] ?? 0)
+            if (!Number.isFinite(c) || c <= 0) return null
+            const label = statusKeyMap[k] ? String(t(statusKeyMap[k])) : k.replaceAll('_', ' ')
 
-          return <Row key={k} label={label} count={c} color={statusColors[k] || '#999'} />
-        })}
-      </Stack>
+            return <Row key={k} label={label} count={c} color={statusColors[k] || '#999'} />
+          })}
+        </Stack>
+      )
+    }
+
+    // Non-compact view: 3 columns grid
+    const statusItems = keys
+      .map(k => {
+        const c = Number(byStatus[k] ?? 0)
+        if (!Number.isFinite(c) || c <= 0) return null
+        const label = statusKeyMap[k] ? String(t(statusKeyMap[k])) : k.replaceAll('_', ' ')
+
+        return { key: k, label, count: c, color: statusColors[k] || '#999' }
+      })
+      .filter(Boolean) as Array<{ key: string; label: string; count: number; color: string }>
+
+    return (
+      <Box>
+        <Grid container spacing={2}>
+          {Number.isFinite(total) && total > 0 && (
+            <Grid item xs={12} sm={6} md={4} key={'total'} sx={{ mb: 2 }}>
+              <Row
+                label={String(t('calendar.stats.total') || 'Total')}
+                count={total}
+                color={'rgba(115,103,240,0.95)'}
+              />
+            </Grid>
+          )}
+          {statusItems.map(item => (
+            <Grid item xs={12} sm={6} md={4} key={item.key}>
+              <Row label={item.label} count={item.count} color={item.color} />
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
     )
   }
 
@@ -514,10 +582,16 @@ const CustomCalendar = (props: CalendarType) => {
                 ? alpha(theme.palette.primary.main, 0.1)
                 : 'transparent'
 
+              const stats = dayCounts?.[dateStr]
+              const total = Number(stats?.total ?? 0)
+              const byStatus = (stats?.byStatus || {}) as Record<string, number>
+              const hasAnyStatus = Object.values(byStatus).some(v => Number(v) > 0)
+              const hasData = (Number.isFinite(total) && total > 0) || hasAnyStatus
+
               return (
                 <Box
                   key={dateStr}
-                  onClick={showNumber ? () => onPickDate(dateStr) : undefined}
+                  onClick={showNumber ? () => handleCellClick(dateStr) : undefined}
                   sx={{
                     height: MONTH_CELL_HEIGHT,
                     minHeight: MONTH_CELL_HEIGHT,
@@ -542,7 +616,21 @@ const CustomCalendar = (props: CalendarType) => {
                     )}
                   </Box>
 
-                  {showNumber ? renderStats(dateStr) : null}
+                  {showNumber && hasData ? (
+                    <Box sx={{ mt: 0.5 }}>
+                      <Typography
+                        sx={{
+                          fontSize: 10,
+                          fontWeight: 600,
+                          color: 'primary.main',
+                          textAlign: 'center',
+                          lineHeight: 1.2
+                        }}
+                      >
+                        {total > 0 ? `${total} ${String(t('calendar.stats.total') || 'Total')}` : ''}
+                      </Typography>
+                    </Box>
+                  ) : null}
                 </Box>
               )
             })}
@@ -590,6 +678,9 @@ const CustomCalendar = (props: CalendarType) => {
           </Stack>
         </Box>
       )}
+
+      {/* Detail Card - Shows below calendar when date is selected */}
+      {detailDate && dayCounts?.[detailDate] && <div>{renderStats(detailDate, false)}</div>}
     </Box>
   )
 }

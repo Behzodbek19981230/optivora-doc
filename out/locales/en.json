@@ -371,6 +371,7 @@
   "calendar.list": "List",
   "calendar.year": "Year",
   "calendar.stats.total": "Total",
+  "calendar.details.title": "Task Details",
   "tasks.form.type": "Type",
   "tasks.form.priority": "Priority",
   "tasks.form.name": "Task number/name",
