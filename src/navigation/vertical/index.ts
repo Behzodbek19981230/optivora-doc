@@ -27,6 +27,12 @@ const navigation = (): VerticalNavItemsType => {
       roles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.PERFORMER, ROLES.SIGNATORY]
     },
     {
+      title: 'nav.taskParts',
+      icon: 'tabler:clipboard-list',
+      path: '/task-parts',
+      roles: [ROLES.ADMIN, ROLES.MANAGER, ROLES.PERFORMER, ROLES.SIGNATORY]
+    },
+    {
       title: 'nav.archive',
       icon: 'tabler:archive',
       path: '/archive',

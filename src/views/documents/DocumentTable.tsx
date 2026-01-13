@@ -86,21 +86,27 @@ const DocumentTable = ({ status, ownerFilter }: Props) => {
   const listEndpoint = ownerFilter === 'mine' ? endpoints.taskSelf : endpoints.task
   const params: any = { page: paginationModel.page + 1, limit: paginationModel.pageSize, status }
 
-  const {
-    data = [],
-    total,
-    loading
-  } = useFetchList<DocumentRow>(listEndpoint, params)
-  const onDelete = async (id: number) => {
+  const { data = [], total, loading } = useFetchList<DocumentRow>(listEndpoint, params)
+  const onArchive = async (id: number) => {
     if (!confirm(String(t('documents.table.archiveConfirm')))) return
     try {
-      await DataService.delete(endpoints.taskById(id.toString()))
+      await DataService.patch(endpoints.taskById(id.toString()) + '/archive/')
       toast.success(String(t('documents.table.archiveSuccess')))
 
       // Refresh data
       router.replace(router.asPath)
     } catch (e: any) {
       toast.error(e?.message || String(t('documents.table.archiveError')))
+    }
+  }
+
+  const onDelete = async (id: number) => {
+    if (!confirm(String(t('documents.table.deleteConfirm')))) return
+    try {
+      await DataService.delete(endpoints.taskById(id.toString()))
+      toast.success(String(t('documents.table.deleteSuccess')))
+    } catch (e: any) {
+      toast.error(e?.message || String(t('documents.table.deleteError')))
     }
   }
 
@@ -121,27 +127,27 @@ const DocumentTable = ({ status, ownerFilter }: Props) => {
       }
     },
     {
-        field: 'created_by',
-        headerName: String(t('tasks.form.signedBy', { defaultValue: 'Signed by' })),
-        flex: 0.2,
-        minWidth: 150,
-        renderCell: params => {
-          const createdBy = (params.row as any).signed_by_detail
+      field: 'created_by',
+      headerName: String(t('tasks.form.signedBy', { defaultValue: 'Signed by' })),
+      flex: 0.2,
+      minWidth: 150,
+      renderCell: params => {
+        const createdBy = (params.row as any).signed_by_detail
 
-          return (
-            <Box
-              sx={{
-                width: '100%',
-                whiteSpace: 'normal',
-                wordBreak: 'break-word',
-                overflowWrap: 'anywhere',
-                lineHeight: 1.2
-              }}
-            >
-              {createdBy ? `${createdBy.fullname}` : ''}
-            </Box>
-          )
-        }
+        return (
+          <Box
+            sx={{
+              width: '100%',
+              whiteSpace: 'normal',
+              wordBreak: 'break-word',
+              overflowWrap: 'anywhere',
+              lineHeight: 1.2
+            }}
+          >
+            {createdBy ? `${createdBy.fullname}` : ''}
+          </Box>
+        )
+      }
     },
     {
       field: 'type',
@@ -216,10 +222,17 @@ const DocumentTable = ({ status, ownerFilter }: Props) => {
                 </IconButton>
               </Tooltip>
             )}
-            {user?.role_detail?.some((role: any) => role.name === 'Manager') && (
+            {user?.role_detail?.some((role: any) => role.name === 'Manager') && !['archive'].includes(status) && (
               <Tooltip title={String(t('documents.table.archive'))}>
-                <IconButton size='small' onClick={() => onDelete(id)}>
+                <IconButton size='small' onClick={() => onArchive(id)}>
                   <IconifyIcon icon='tabler:archive' />
+                </IconButton>
+              </Tooltip>
+            )}
+            {user?.role_detail?.some((role: any) => role.name === 'Manager') && (
+              <Tooltip title={String(t('common.delete'))}>
+                <IconButton size='small' color='error' onClick={() => onDelete(id)}>
+                  <IconifyIcon icon='tabler:trash' />
                 </IconButton>
               </Tooltip>
             )}
