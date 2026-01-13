@@ -72,6 +72,7 @@ const endpoints = {
   taskById: (id: string | number | string[] | null | undefined) => `/task/${normalizeId(id)}`,
   taskPart: '/task-part/',
   taskMix: '/task-calendar/get-task-by-date/',
+  taskMixSelf: '/task-calendar/self/get-task-by-date/',
   taskPartById: (id: string | number | string[] | null | undefined) => `/task-part/${normalizeId(id)}`,
   taskEvent: '/task-event/',
   taskEventById: (id: string | number | string[] | null | undefined) => `/task-event/${normalizeId(id)}`,
@@ -82,7 +83,7 @@ const endpoints = {
   taskSendToEmail: '/task/send-to-email/',
   employeeAccount: '/employee-account/',
   taskCalendarStats: '/task-calendar/stats/by-start-date/',
-  taskCalendarSelf: '/task-calendar/self/get-task-by-date/',
+  taskCalendarSelf: '/task-calendar/self/by-start-date/',
 
   // Org structure
   department: '/department/',

@@ -12,12 +12,13 @@ import moment from 'moment'
 import TaskComments from 'src/views/tasks/view/components/TaskComments'
 import TaskAttachment from 'src/views/tasks/view/components/TaskAttachment'
 import TaskPartRightActionsPanel from './components/TaskPartRightActionsPanel'
+import { useAuth } from 'src/hooks/useAuth'
 
 const TaskPartViewDetail = () => {
   const { t } = useTranslation()
   const router = useRouter()
   const { id } = router.query
-
+  const { user } = useAuth()
   const { data: taskPart, refetch: refetchTaskPart } = useQuery<TaskPartType>({
     queryKey: ['task-part', id],
     enabled: !!id,
@@ -208,7 +209,7 @@ const TaskPartViewDetail = () => {
                 <Stack spacing={2}>
                   <Stack direction='row' alignItems='center' justifyContent='space-between'>
                     <Typography variant='subtitle1'>{String(t('taskParts.view.relatedTask'))}</Typography>
-                    {taskId && (
+                    {taskId && taskPart.assignee !== user?.id && (
                       <Button
                         size='small'
                         variant='outlined'

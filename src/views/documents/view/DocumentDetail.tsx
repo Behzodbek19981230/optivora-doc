@@ -13,7 +13,6 @@ import {
   Avatar,
   ListItemText,
   Box,
-  Divider,
   Stack,
   Tabs,
   Tab
@@ -83,6 +82,7 @@ const DocumentDetail = () => {
     if (a.includes('comment')) return 'info'
     if (a.includes('cancel') || a.includes('error')) return 'error'
     if (a.includes('return')) return 'warning'
+
     return 'primary'
   }
 
@@ -95,6 +95,7 @@ const DocumentDetail = () => {
     if (a.includes('cancel')) return 'tabler:x'
     if (a.includes('return')) return 'tabler:arrow-back-up'
     if (a.includes('progress')) return 'tabler:loader-2'
+
     return 'tabler:dot'
   }
 

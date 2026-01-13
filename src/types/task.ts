@@ -3,6 +3,7 @@ export type TaskType = {
   status: 'new' | string
   company: number
   company_detail: CompanyDetailType
+  created_by_detail: UserDetailType
   type: 'task' | string
   name: string
   task_form: number

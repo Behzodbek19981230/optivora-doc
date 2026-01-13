@@ -101,11 +101,17 @@ const CalendarActions = () => {
   const fetchTasks = async (selectedDate: string) => {
     setIsLoading(true)
     try {
-      const response = await DataService.get(endpoints.taskMix, {
+      const params: any = {
         date: selectedDate,
         page: 1,
         limit: 1000
-      })
+      }
+
+      if (ownerFilter === 'mine' && user?.id) {
+        params.user_id = user.id
+      }
+
+      const response = await DataService.get(ownerFilter === 'mine' ? endpoints.taskMixSelf : endpoints.taskMix, params)
 
       // Response can be either { data: [...] } or directly [...]
       let tasks: TaskPartType[] = []

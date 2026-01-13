@@ -313,7 +313,10 @@ export default function DocumentTab({
               </Grid>
 
               <Grid item xs={12} sm={6}>
-                <Item label={String(t('tasks.view.document.fields.createdBy'))} value={task.created_by} />
+                <Item
+                  label={String(t('tasks.view.document.fields.createdBy'))}
+                  value={task.created_by_detail?.fullname || task.created_by}
+                />
               </Grid>
             </Grid>
           </CardContent>
