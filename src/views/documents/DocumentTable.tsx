@@ -229,7 +229,7 @@ const DocumentTable = ({ status, ownerFilter }: Props) => {
                 </IconButton>
               </Tooltip>
             )}
-            {user?.role_detail?.some((role: any) => role.name === 'Manager') && (
+            {user?.role_detail?.some((role: any) => role.name === 'Manager') && ['new'].includes(status) && (
               <Tooltip title={String(t('common.delete'))}>
                 <IconButton size='small' color='error' onClick={() => onDelete(id)}>
                   <IconifyIcon icon='tabler:trash' />

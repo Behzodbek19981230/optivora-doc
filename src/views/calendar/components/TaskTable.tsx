@@ -101,9 +101,10 @@ export default function TaskTable({ data, loading, total }: Props) {
       loading={loading}
       rowCount={total}
       onRowClick={params => {
-        const taskId = (params.row as any).task_detail?.id || (params.row as any).id
-        if (taskId) {
-          router.push(`/tasks/view/${taskId}`)
+        if (params.row?.url === 'task-part') {
+          router.push(`/task-parts/view/${params.row.id}`)
+        } else {
+          router.push(`/tasks/view/${params.row.id}`)
         }
       }}
       getRowId={row => row.id}

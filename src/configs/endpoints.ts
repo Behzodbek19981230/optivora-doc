@@ -82,7 +82,7 @@ const endpoints = {
   taskSendToEmail: '/task/send-to-email/',
   employeeAccount: '/employee-account/',
   taskCalendarStats: '/task-calendar/stats/by-start-date/',
-  taskCalendarSelf: '/task-calendar/self/by-start-date/',
+  taskCalendarSelf: '/task-calendar/self/get-task-by-date/',
 
   // Org structure
   department: '/department/',
