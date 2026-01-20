@@ -6,19 +6,21 @@ import {
   CardContent,
   Chip,
   Divider,
+  IconButton,
   List,
   ListItem,
   ListItemAvatar,
   ListItemText,
   Skeleton,
   Stack,
+  Tooltip,
   Typography
 } from '@mui/material'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Icon from 'src/@core/components/icon'
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
-import { UserDetailType } from 'src/types/task'
+import { UserDetailType, TaskPartType } from 'src/types/task'
 import { useTranslation } from 'react-i18next'
 
 type TaskCommentType = {
@@ -46,6 +48,20 @@ const getInitials = (value: string) => {
 
 export default function TaskComments({ taskId, partId }: { taskId: string | number | null; partId?: string | number }) {
   const { t } = useTranslation()
+  const qc = useQueryClient()
+
+  const { data: partData } = useQuery<TaskPartType>({
+    queryKey: ['task-part', partId],
+    queryFn: async () => {
+      const res = await DataService.get<TaskPartType>(endpoints.taskPartById(partId))
+
+      return res.data
+    },
+    enabled: !!partId
+  })
+
+  const partStatus = partData?.status
+
   const { data, isLoading, isError } = useQuery<{ results: TaskCommentType[] }>({
     queryKey: ['task-comments', taskId, partId ?? null],
     queryFn: async () => {
@@ -60,6 +76,13 @@ export default function TaskComments({ taskId, partId }: { taskId: string | numb
     },
     enabled: !!taskId || !!partId,
     staleTime: 10_000
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => DataService.delete(endpoints.taskCommentById(id)),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['task-comments', taskId, partId ?? null] })
+    }
   })
 
   const comments = (data?.results || []) as TaskCommentType[]
@@ -113,6 +136,19 @@ export default function TaskComments({ taskId, partId }: { taskId: string | numb
                 <ListItem
                   disableGutters
                   alignItems='flex-start'
+                  secondaryAction={
+                    partStatus === 'returned' ? (
+                      <Tooltip title={String(t('tasks.view.comments.delete'))}>
+                        <IconButton
+                          onClick={() => deleteMutation.mutate(c.id)}
+                          disabled={deleteMutation.isPending}
+                          color='error'
+                        >
+                          <Icon icon='tabler:trash' />
+                        </IconButton>
+                      </Tooltip>
+                    ) : null
+                  }
                   sx={{
                     py: 1.25,
                     px: 1,

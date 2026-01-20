@@ -17,13 +17,13 @@ import {
   Typography
 } from '@mui/material'
 import Avatar from '@mui/material/Avatar'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import Icon from 'src/@core/components/icon'
 import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
 import { useTranslation } from 'react-i18next'
 import moment from 'moment'
-import { UserDetailType } from 'src/types/task'
+import { UserDetailType, TaskPartType } from 'src/types/task'
 
 type TaskAttachmentType = {
   id: number
@@ -117,6 +117,20 @@ export default function TaskAttachment({
   isCompact?: boolean
 }) {
   const { t } = useTranslation()
+  const qc = useQueryClient()
+
+  const { data: partData } = useQuery<TaskPartType>({
+    queryKey: ['task-part', partId],
+    queryFn: async () => {
+      const res = await DataService.get<TaskPartType>(endpoints.taskPartById(partId))
+
+      return res.data
+    },
+    enabled: !!partId
+  })
+
+  const partStatus = partData?.status
+
   const { data, isLoading, isError } = useQuery<{ results: TaskAttachmentType[] }>({
     queryKey: ['task-attachments', taskId, partId === undefined ? 'all' : partId],
     queryFn: async () => {
@@ -133,6 +147,13 @@ export default function TaskAttachment({
     },
     enabled: !!taskId || !!partId,
     staleTime: 10_000
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => DataService.delete(endpoints.taskAttachmentById(id)),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['task-attachments', taskId, partId === undefined ? 'all' : partId] })
+    }
   })
 
   const attachments = (data?.results || []) as TaskAttachmentType[]
@@ -239,13 +260,26 @@ export default function TaskAttachment({
                 <ListItem
                   disableGutters
                   secondaryAction={
-                    href && href !== '#' ? (
-                      <Tooltip title={String(t('tasks.view.attachments.openOrDownload'))}>
-                        <IconButton component='a' href={href} target='_blank' rel='noreferrer'>
-                          <Icon icon='tabler:download' />
-                        </IconButton>
-                      </Tooltip>
-                    ) : null
+                    <Stack direction='row' spacing={1}>
+                      {href && href !== '#' ? (
+                        <Tooltip title={String(t('tasks.view.attachments.openOrDownload'))}>
+                          <IconButton component='a' href={href} target='_blank' rel='noreferrer'>
+                            <Icon icon='tabler:download' />
+                          </IconButton>
+                        </Tooltip>
+                      ) : null}
+                      {partStatus === 'returned' ? (
+                        <Tooltip title={String(t('tasks.view.attachments.delete'))}>
+                          <IconButton
+                            onClick={() => deleteMutation.mutate(a.id)}
+                            disabled={deleteMutation.isPending}
+                            color='error'
+                          >
+                            <Icon icon='tabler:trash' />
+                          </IconButton>
+                        </Tooltip>
+                      ) : null}
+                    </Stack>
                   }
                   sx={{
                     py: 1.25,

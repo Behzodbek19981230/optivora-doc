@@ -1,10 +1,24 @@
-import { Card, CardContent, Stack, Typography, Chip, Divider, Button, Box, Grid } from '@mui/material'
+import {
+  Card,
+  CardContent,
+  Stack,
+  Typography,
+  Chip,
+  Divider,
+  Button,
+  Box,
+  Grid,
+  List,
+  ListItemButton,
+  ListItemText
+} from '@mui/material'
 import React from 'react'
 import { TaskType, TaskPartType } from 'src/types/task'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from 'src/hooks/useAuth'
 import { useTranslation } from 'react-i18next'
 import RightActionsDrawer from 'src/views/tasks/view/components/RightActionsDrawer'
+import TaskAttachment from 'src/views/tasks/view/components/TaskAttachment'
 import moment from 'moment'
 import endpoints from 'src/configs/endpoints'
 import { DataService } from 'src/configs/dataService'
@@ -43,6 +57,30 @@ const TaskPartRightActionsPanel = ({
 
   // Use fetched task data if available, otherwise fallback to task prop or part.task_detail
   const liveTask = fetchedTask || task || (part?.task_detail as TaskType | undefined)
+
+  const { data: allParts } = useQuery<TaskPartType[]>({
+    queryKey: ['task-parts', taskId ?? 'none'],
+    enabled: !!taskId,
+    queryFn: async (): Promise<TaskPartType[]> => {
+      const res = await DataService.get(endpoints.taskPart, { task: String(taskId), limit: 200 })
+
+      const payload: any = res.data
+
+      return (payload?.results || payload || []) as TaskPartType[]
+    },
+    initialData: []
+  })
+
+  const doneParts = (allParts || []).filter(p => p?.status === 'done')
+
+  const [selectedDonePartId, setSelectedDonePartId] = React.useState<number | null>(null)
+
+  React.useEffect(() => {
+    if (selectedDonePartId != null) return
+    if (!doneParts.length) return
+
+    setSelectedDonePartId(doneParts[0].id)
+  }, [doneParts, selectedDonePartId])
 
   const mutateAndRefresh = async () => {
     try {
@@ -130,7 +168,7 @@ const TaskPartRightActionsPanel = ({
                 <Grid item xs={12} sm={6}>
                   <Item
                     label={String(t('tasks.view.document.fields.responsiblePerson'))}
-                    value={liveTask.sending_respon_person ?? '—'}
+                    value={liveTask.respon_person ?? '—'}
                   />
                 </Grid>
 
@@ -258,6 +296,59 @@ const TaskPartRightActionsPanel = ({
           </Stack>
         </CardContent>
       </Card>
+
+      {taskId ? (
+        <Card>
+          <CardContent>
+            <Stack spacing={2}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
+                <Typography variant='subtitle1'>
+                  {String(t('documents.status.done'))} {String(t('tasks.view.actions.selectedSection'))}
+                </Typography>
+                <Chip size='small' color='success' variant='outlined' label={doneParts.length} />
+              </Box>
+
+              {doneParts.length ? (
+                <List dense disablePadding>
+                  {doneParts.map(p => {
+                    const dept = p.department_detail?.name || String(p.department)
+                    const assignee = p.assignee_detail?.fullname || String(p.assignee)
+
+                    return (
+                      <ListItemButton
+                        key={p.id}
+                        selected={p.id === selectedDonePartId}
+                        onClick={() => setSelectedDonePartId(p.id)}
+                        sx={{ borderRadius: 2, mb: 0.5 }}
+                      >
+                        <ListItemText
+                          primary={p.title || `#${p.id}`}
+                          secondary={`${dept} • ${assignee}`}
+                          primaryTypographyProps={{ variant: 'body2', fontWeight: 700 }}
+                          secondaryTypographyProps={{ variant: 'caption', color: 'text.secondary' }}
+                        />
+                      </ListItemButton>
+                    )
+                  })}
+                </List>
+              ) : (
+                <Typography variant='body2' color='text.secondary'>
+                  {String(t('tasks.view.actions.noPartSelected'))}
+                </Typography>
+              )}
+
+              {selectedDonePartId ? (
+                <TaskAttachment taskId={taskId} partId={selectedDonePartId} />
+              ) : (
+                <Typography variant='body2' color='text.secondary'>
+                  {String(t('tasks.view.attachments.empty'))}
+                </Typography>
+              )}
+            </Stack>
+          </CardContent>
+        </Card>
+      ) : null}
+
       <RightActionsDrawer
         open={open}
         toggle={() =>

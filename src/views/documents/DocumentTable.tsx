@@ -42,7 +42,7 @@ export type DocumentRow = {
   output_doc_number: string
   priority: string
   sending_org: string
-  sending_respon_person: string
+  respon_person: string
   signed_by: number
   start_date: string
   status: string

@@ -94,7 +94,7 @@ export type TaskPayload = {
   start_date?: string
   end_date?: string
   priority?: string
-  sending_respon_person?: string
+  respon_person?: string
   department?: number
   signed_by?: number
   note?: string
@@ -713,6 +713,31 @@ const TaskUpdateForm = () => {
                         )}
                       />
                     </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Controller
+                        name='list_of_magazine'
+                        control={control}
+                        rules={{ required: String(t('errors.required')) }}
+                        render={({ field, fieldState }) => (
+                          <Autocomplete
+                            options={magData || []}
+                            value={(magData || []).find(m => m.id === field.value) || null}
+                            onChange={(_, v) => field.onChange(v?.id ?? 0)}
+                            isOptionEqualToValue={(o, v) => o.id === v.id}
+                            getOptionLabel={o => o?.name || ''}
+                            renderInput={params => (
+                              <CustomTextField
+                                {...params}
+                                fullWidth
+                                label={String(t('tasks.form.magazine'))}
+                                error={!!fieldState.error}
+                                helperText={safeMsg(fieldState.error?.message)}
+                              />
+                            )}
+                          />
+                        )}
+                      />
+                    </Grid>
 
                     <Grid item xs={12}>
                       <Stack spacing={2}>
@@ -809,29 +834,18 @@ const TaskUpdateForm = () => {
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <Controller
-                        name='list_of_magazine'
+                        name='respon_person'
                         control={control}
-                        rules={{ required: String(t('errors.required')) }}
-                        render={({ field, fieldState }) => (
-                          <Autocomplete
-                            options={magData || []}
-                            value={(magData || []).find(m => m.id === field.value) || null}
-                            onChange={(_, v) => field.onChange(v?.id ?? 0)}
-                            isOptionEqualToValue={(o, v) => o.id === v.id}
-                            getOptionLabel={o => o?.name || ''}
-                            renderInput={params => (
-                              <CustomTextField
-                                {...params}
-                                fullWidth
-                                label={String(t('tasks.form.magazine'))}
-                                error={!!fieldState.error}
-                                helperText={safeMsg(fieldState.error?.message)}
-                              />
-                            )}
+                        render={({ field }) => (
+                          <CustomTextField
+                            fullWidth
+                            label={String(t('tasks.view.document.fields.responsiblePerson'))}
+                            {...field}
                           />
                         )}
                       />
                     </Grid>
+
                     <Grid item xs={12} sm={6}>
                       <Controller
                         name='output_doc_number'

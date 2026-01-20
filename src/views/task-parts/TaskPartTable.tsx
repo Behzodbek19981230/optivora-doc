@@ -114,13 +114,12 @@ const TaskPartTable = ({ status, ownerFilter }: Props) => {
       width: 120,
       sortable: false,
       renderCell: params => {
-        const taskId = (params.row as any).task_detail?.id || (params.row as any).task
-
+        const taskId = (params.row as any).id
         return (
           <Stack direction='row' spacing={1}>
             {taskId && (
               <Tooltip title={String(t('common.view'))}>
-                <IconButton size='small' component={Link} href={`/tasks/view/${taskId}`}>
+                <IconButton size='small' component={Link} href={`/task-parts/view/${taskId}`}>
                   <IconifyIcon icon='tabler:eye' />
                 </IconButton>
               </Tooltip>

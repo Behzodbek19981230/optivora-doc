@@ -19,7 +19,7 @@ export type Task = {
   start_date: string
   end_date: string
   priority: (typeof TASK_PRIORITY)[number]
-  sending_respon_person: string
+  respon_person: string
   department: number
   signed_by: number
   note: string
@@ -95,7 +95,7 @@ let tasks: Task[] = [
     start_date: '2025-12-01',
     end_date: '2025-12-20',
     priority: 'orgently',
-    sending_respon_person: 'Behzod',
+    respon_person: 'Behzod',
     department: 2,
     signed_by: 5,
     note: 'Shoshilinch',
@@ -278,7 +278,7 @@ mock.onPost('/task/').reply(config => {
     start_date: body.start_date || '',
     end_date: body.end_date || '',
     priority: (body.priority as Task['priority']) || 'ordinary',
-    sending_respon_person: body.sending_respon_person || '',
+    respon_person: body.respon_person || '',
     department: body.department || 0,
     signed_by: body.signed_by || 0,
     note: body.note || '',

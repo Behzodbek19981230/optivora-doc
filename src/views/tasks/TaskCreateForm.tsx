@@ -48,7 +48,7 @@ export type TaskPayload = {
   start_date?: string
   end_date?: string
   priority?: string
-  sending_respon_person?: string
+  respon_person?: string
   department?: number
   signed_by?: number
   note?: string

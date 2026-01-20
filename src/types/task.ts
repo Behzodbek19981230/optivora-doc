@@ -14,7 +14,7 @@ export type TaskType = {
   start_date: string // YYYY-MM-DD
   end_date: string // YYYY-MM-DD
   priority: 'orgently' | 'normal' | string
-  sending_respon_person: number | null
+  respon_person: number | null
   department: number
   department_detail: DepartmentDetailType
   signed_by: number

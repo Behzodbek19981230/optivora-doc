@@ -269,7 +269,7 @@ export default function DocumentTab({
               <Grid item xs={12} sm={6}>
                 <Item
                   label={String(t('tasks.view.document.fields.responsiblePerson'))}
-                  value={task.sending_respon_person ?? '—'}
+                  value={task.respon_person ?? '—'}
                 />
               </Grid>
             </Grid>
