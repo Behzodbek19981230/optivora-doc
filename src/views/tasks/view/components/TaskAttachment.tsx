@@ -24,6 +24,8 @@ import endpoints from 'src/configs/endpoints'
 import { useTranslation } from 'react-i18next'
 import moment from 'moment'
 import { UserDetailType, TaskPartType } from 'src/types/task'
+import { useAuth } from 'src/hooks/useAuth'
+import DeleteModal from 'src/@core/components/modals/DeleteModal'
 
 type TaskAttachmentType = {
   id: number
@@ -118,7 +120,7 @@ export default function TaskAttachment({
 }) {
   const { t } = useTranslation()
   const qc = useQueryClient()
-
+  const { user } = useAuth()
   const { data: partData } = useQuery<TaskPartType>({
     queryKey: ['task-part', partId],
     queryFn: async () => {
@@ -155,6 +157,10 @@ export default function TaskAttachment({
       qc.invalidateQueries({ queryKey: ['task-attachments', taskId, partId === undefined ? 'all' : partId] })
     }
   })
+
+  const [deleteOpen, setDeleteOpen] = React.useState(false)
+  const [deleteId, setDeleteId] = React.useState<number | null>(null)
+  const [deleteTitle, setDeleteTitle] = React.useState<string>('')
 
   const attachments = (data?.results || []) as TaskAttachmentType[]
 
@@ -268,10 +274,14 @@ export default function TaskAttachment({
                           </IconButton>
                         </Tooltip>
                       ) : null}
-                      {partStatus === 'returned' ? (
+                      {partStatus === 'returned' && user?.id === a.uploaded_by ? (
                         <Tooltip title={String(t('tasks.view.attachments.delete'))}>
                           <IconButton
-                            onClick={() => deleteMutation.mutate(a.id)}
+                            onClick={() => {
+                              setDeleteId(a.id)
+                              setDeleteTitle(getFileLabel(a))
+                              setDeleteOpen(true)
+                            }}
                             disabled={deleteMutation.isPending}
                             color='error'
                           >
@@ -352,6 +362,27 @@ export default function TaskAttachment({
             )
           })}
         </List>
+
+        <DeleteModal
+          open={deleteOpen}
+          handleClose={() => {
+            if (deleteMutation.isPending) return
+            setDeleteOpen(false)
+            setDeleteId(null)
+            setDeleteTitle('')
+          }}
+          handleDelete={() => {
+            if (!deleteId) return
+            deleteMutation.mutate(deleteId, {
+              onSuccess: () => {
+                setDeleteOpen(false)
+                setDeleteId(null)
+                setDeleteTitle('')
+              }
+            })
+          }}
+          title={deleteTitle || '—'}
+        />
       </CardContent>
     </Card>
   )

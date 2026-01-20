@@ -75,13 +75,6 @@ const TaskPartRightActionsPanel = ({
 
   const [selectedDonePartId, setSelectedDonePartId] = React.useState<number | null>(null)
 
-  React.useEffect(() => {
-    if (selectedDonePartId != null) return
-    if (!doneParts.length) return
-
-    setSelectedDonePartId(doneParts[0].id)
-  }, [doneParts, selectedDonePartId])
-
   const mutateAndRefresh = async () => {
     try {
       if (partId) {
@@ -123,6 +116,55 @@ const TaskPartRightActionsPanel = ({
         gap: 2
       }}
     >
+      <Card>
+        <CardContent>
+          <Stack spacing={2}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
+              <Typography variant='subtitle1'>
+                {String(t('documents.status.done'))} {String(t('tasks.view.actions.selectedSection'))}
+              </Typography>
+              <Chip size='small' color='success' variant='outlined' label={doneParts.length} />
+            </Box>
+
+            {doneParts.length ? (
+              <List dense disablePadding>
+                {doneParts.map(p => {
+                  const dept = p.department_detail?.name || String(p.department)
+                  const assignee = p.assignee_detail?.fullname || String(p.assignee)
+
+                  return (
+                    <ListItemButton
+                      key={p.id}
+                      selected={p.id === selectedDonePartId}
+                      onClick={() => setSelectedDonePartId(p.id)}
+                      sx={{ borderRadius: 2, mb: 0.5 }}
+                    >
+                      <ListItemText
+                        primary={p.title || `#${p.id}`}
+                        secondary={`${dept} • ${assignee}`}
+                        primaryTypographyProps={{ variant: 'body2', fontWeight: 700 }}
+                        secondaryTypographyProps={{ variant: 'caption', color: 'text.secondary' }}
+                      />
+                    </ListItemButton>
+                  )
+                })}
+              </List>
+            ) : (
+              <Typography variant='body2' color='text.secondary'>
+                {String(t('tasks.view.actions.noPartSelected'))}
+              </Typography>
+            )}
+
+            {selectedDonePartId ? (
+              <TaskAttachment taskId={null} partId={selectedDonePartId} />
+            ) : (
+              <Typography variant='body2' color='text.secondary'>
+                {String(t('tasks.view.attachments.empty'))}
+              </Typography>
+            )}
+          </Stack>
+        </CardContent>
+      </Card>
       {/* Task Information Cards */}
       {liveTask && (
         <>
@@ -296,58 +338,6 @@ const TaskPartRightActionsPanel = ({
           </Stack>
         </CardContent>
       </Card>
-
-      {taskId ? (
-        <Card>
-          <CardContent>
-            <Stack spacing={2}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
-                <Typography variant='subtitle1'>
-                  {String(t('documents.status.done'))} {String(t('tasks.view.actions.selectedSection'))}
-                </Typography>
-                <Chip size='small' color='success' variant='outlined' label={doneParts.length} />
-              </Box>
-
-              {doneParts.length ? (
-                <List dense disablePadding>
-                  {doneParts.map(p => {
-                    const dept = p.department_detail?.name || String(p.department)
-                    const assignee = p.assignee_detail?.fullname || String(p.assignee)
-
-                    return (
-                      <ListItemButton
-                        key={p.id}
-                        selected={p.id === selectedDonePartId}
-                        onClick={() => setSelectedDonePartId(p.id)}
-                        sx={{ borderRadius: 2, mb: 0.5 }}
-                      >
-                        <ListItemText
-                          primary={p.title || `#${p.id}`}
-                          secondary={`${dept} • ${assignee}`}
-                          primaryTypographyProps={{ variant: 'body2', fontWeight: 700 }}
-                          secondaryTypographyProps={{ variant: 'caption', color: 'text.secondary' }}
-                        />
-                      </ListItemButton>
-                    )
-                  })}
-                </List>
-              ) : (
-                <Typography variant='body2' color='text.secondary'>
-                  {String(t('tasks.view.actions.noPartSelected'))}
-                </Typography>
-              )}
-
-              {selectedDonePartId ? (
-                <TaskAttachment taskId={taskId} partId={selectedDonePartId} />
-              ) : (
-                <Typography variant='body2' color='text.secondary'>
-                  {String(t('tasks.view.attachments.empty'))}
-                </Typography>
-              )}
-            </Stack>
-          </CardContent>
-        </Card>
-      ) : null}
 
       <RightActionsDrawer
         open={open}

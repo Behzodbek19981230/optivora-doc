@@ -27,7 +27,8 @@ import {
   Box,
   Divider,
   Tooltip,
-  Switch
+  Switch,
+  MenuItem
 } from '@mui/material'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -94,7 +95,7 @@ export type TaskPayload = {
   start_date?: string
   end_date?: string
   priority?: string
-  respon_person?: string
+  respon_person?: number | null
   department?: number
   signed_by?: number
   note?: string
@@ -839,9 +840,22 @@ const TaskUpdateForm = () => {
                         render={({ field }) => (
                           <CustomTextField
                             fullWidth
+                            select
                             label={String(t('tasks.view.document.fields.responsiblePerson'))}
                             {...field}
-                          />
+                            value={field.value ?? ''}
+                            onChange={e => {
+                              const v = e.target.value
+                              field.onChange(v === '' ? null : Number(v))
+                            }}
+                          >
+                            <MenuItem value=''>{String(t('common.all', { defaultValue: '—' }))}</MenuItem>
+                            {(users || []).map(u => (
+                              <MenuItem key={u.id} value={u.id}>
+                                {u.fullname}
+                              </MenuItem>
+                            ))}
+                          </CustomTextField>
                         )}
                       />
                     </Grid>

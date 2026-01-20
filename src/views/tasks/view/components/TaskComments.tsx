@@ -22,6 +22,8 @@ import { DataService } from 'src/configs/dataService'
 import endpoints from 'src/configs/endpoints'
 import { UserDetailType, TaskPartType } from 'src/types/task'
 import { useTranslation } from 'react-i18next'
+import DeleteModal from 'src/@core/components/modals/DeleteModal'
+import { useAuth } from 'src/hooks/useAuth'
 
 type TaskCommentType = {
   id: number
@@ -61,6 +63,7 @@ export default function TaskComments({ taskId, partId }: { taskId: string | numb
   })
 
   const partStatus = partData?.status
+  const { user } = useAuth()
 
   const { data, isLoading, isError } = useQuery<{ results: TaskCommentType[] }>({
     queryKey: ['task-comments', taskId, partId ?? null],
@@ -84,6 +87,10 @@ export default function TaskComments({ taskId, partId }: { taskId: string | numb
       qc.invalidateQueries({ queryKey: ['task-comments', taskId, partId ?? null] })
     }
   })
+
+  const [deleteOpen, setDeleteOpen] = React.useState(false)
+  const [deleteId, setDeleteId] = React.useState<number | null>(null)
+  const [deleteTitle, setDeleteTitle] = React.useState<string>('')
 
   const comments = (data?.results || []) as TaskCommentType[]
 
@@ -137,10 +144,14 @@ export default function TaskComments({ taskId, partId }: { taskId: string | numb
                   disableGutters
                   alignItems='flex-start'
                   secondaryAction={
-                    partStatus === 'returned' ? (
+                    partStatus === 'returned' && user?.id === c.author ? (
                       <Tooltip title={String(t('tasks.view.comments.delete'))}>
                         <IconButton
-                          onClick={() => deleteMutation.mutate(c.id)}
+                          onClick={() => {
+                            setDeleteId(c.id)
+                            setDeleteTitle((c.text || '—').slice(0, 120))
+                            setDeleteOpen(true)
+                          }}
                           disabled={deleteMutation.isPending}
                           color='error'
                         >
@@ -213,6 +224,27 @@ export default function TaskComments({ taskId, partId }: { taskId: string | numb
             )
           })}
         </List>
+
+        <DeleteModal
+          open={deleteOpen}
+          handleClose={() => {
+            if (deleteMutation.isPending) return
+            setDeleteOpen(false)
+            setDeleteId(null)
+            setDeleteTitle('')
+          }}
+          handleDelete={() => {
+            if (!deleteId) return
+            deleteMutation.mutate(deleteId, {
+              onSuccess: () => {
+                setDeleteOpen(false)
+                setDeleteId(null)
+                setDeleteTitle('')
+              }
+            })
+          }}
+          title={deleteTitle || '—'}
+        />
       </CardContent>
     </Card>
   )
