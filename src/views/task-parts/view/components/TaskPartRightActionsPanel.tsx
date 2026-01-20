@@ -272,7 +272,7 @@ const TaskPartRightActionsPanel = ({
             return next
           })
         }
-        taskId={undefined}
+        taskId={taskId ? Number(taskId) : undefined}
         partId={partId ? Number(partId) : undefined}
         part={livePart}
         task={liveTask}
