@@ -105,6 +105,7 @@ const DocumentTable = ({ status, ownerFilter }: Props) => {
     try {
       await DataService.delete(endpoints.taskById(id.toString()))
       toast.success(String(t('documents.table.deleteSuccess')))
+      router.replace(router.asPath)
     } catch (e: any) {
       toast.error(e?.message || String(t('documents.table.deleteError')))
     }
@@ -203,7 +204,7 @@ const DocumentTable = ({ status, ownerFilter }: Props) => {
     {
       field: 'actions',
       headerName: String(t('common.actions')),
-      width: 120,
+      width: 180,
       sortable: false,
       renderCell: params => {
         const id = (params.row as any).id
