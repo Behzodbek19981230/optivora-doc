@@ -27,6 +27,7 @@ export type TaskType = {
   list_of_magazine: number
   list_of_magazine_detail: MagazineDetailType
   signed_date: string // YYYY-MM-DD
+  respon_person_detail: UserDetailType | null
 }
 
 export type CompanyDetailType = {

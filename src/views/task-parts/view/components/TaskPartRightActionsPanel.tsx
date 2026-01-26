@@ -210,7 +210,7 @@ const TaskPartRightActionsPanel = ({
                 <Grid item xs={12} sm={6}>
                   <Item
                     label={String(t('tasks.view.document.fields.responsiblePerson'))}
-                    value={liveTask.respon_person ?? '—'}
+                    value={liveTask.respon_person_detail?.fullname ?? '—'}
                   />
                 </Grid>
 
