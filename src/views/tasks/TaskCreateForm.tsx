@@ -115,7 +115,7 @@ const buildSchema = (t: (key: string, options?: any) => any): yup.ObjectSchema<T
 const TaskCreateForm = () => {
   const { t } = useTranslation()
   const schema = buildSchema(t)
-  const { control, handleSubmit } = useForm<TaskPayload>({
+  const { control, handleSubmit, setError } = useForm<TaskPayload>({
     defaultValues: defaults,
     resolver: yupResolver(schema)
   })
@@ -153,7 +153,11 @@ const TaskCreateForm = () => {
       if (id) router.push(`/tasks/update/${id}`)
       else router.push('/tasks')
     } catch (e: any) {
-      toast.error(e?.message || String(t('tasks.toast.createError')))
+      if (e?.message && Object.keys(e?.message).length) {
+        for (const key of Object.keys(e?.message)) {
+          setError(key as keyof TaskPayload, { type: 'server', message: String(e?.message[key]) })
+        }
+      }
     }
   }
 

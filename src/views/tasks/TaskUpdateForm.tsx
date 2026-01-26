@@ -178,7 +178,14 @@ type TaskPartItem = TaskPartPayload & { id: number; status: string }
 const TaskUpdateForm = () => {
   const { t } = useTranslation()
   const schema = buildSchema(t)
-  const { control, handleSubmit, reset, getValues } = useForm<TaskPayload>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    getValues,
+    setError,
+    formState: { errors }
+  } = useForm<TaskPayload>({
     defaultValues: defaults,
     resolver: yupResolver(schema)
   })
@@ -560,7 +567,11 @@ const TaskUpdateForm = () => {
       await DataService.put(endpoints.taskById(id), { ...values, company: user?.company_id })
       toast.success(String(t('tasks.toast.updated')))
     } catch (e: any) {
-      toast.error(e?.message || String(t('tasks.toast.updateError')))
+      if (e?.message && Object.keys(e?.message).length) {
+        for (const key of Object.keys(e?.message)) {
+          setError(key as keyof TaskPayload, { type: 'server', message: String(e?.message[key]) })
+        }
+      }
     }
   }
   const submitAttachment = async () => {
@@ -677,14 +688,16 @@ const TaskUpdateForm = () => {
                         name='name'
                         control={control}
                         rules={{ required: String(t('errors.required')) }}
-                        render={({ field, fieldState }) => (
-                          <CustomTextField
-                            fullWidth
-                            label={String(t('tasks.form.name'))}
-                            {...field}
-                            error={!!fieldState.error}
-                            helperText={safeMsg(fieldState.error?.message)}
-                          />
+                        render={({ field }) => (
+                          <div>
+                            <CustomTextField
+                              fullWidth
+                              label={String(t('tasks.form.name'))}
+                              {...field}
+                              error={!!errors.name}
+                              helperText={safeMsg(errors.name?.message)}
+                            />
+                          </div>
                         )}
                       />
                     </Grid>
