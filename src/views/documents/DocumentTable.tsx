@@ -105,7 +105,7 @@ const DocumentTable = ({ status, ownerFilter }: Props) => {
     try {
       await DataService.delete(endpoints.taskById(id.toString()))
       toast.success(String(t('documents.table.deleteSuccess')))
-      router.replace(router.asPath)
+      router.reload()
     } catch (e: any) {
       toast.error(e?.message || String(t('documents.table.deleteError')))
     }
