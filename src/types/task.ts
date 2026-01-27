@@ -95,6 +95,7 @@ export type TaskPartType = {
   created_by: number
   updated_by: number
   show_date?: string // YYYY-MM-DD
+  is_read_file?: boolean
 }
 export type TaskEventType = {
   id: number

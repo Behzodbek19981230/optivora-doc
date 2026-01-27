@@ -120,7 +120,15 @@ export default function TaskParts({
                     hover
                     selected={isSelected}
                     onClick={() => setSelectedPartId(p.id)}
-                    sx={{ cursor: 'pointer' }}
+                    sx={
+                      !p?.is_read_file &&
+                      user?.role_detail?.some((role: any) => role.name === 'Manager' || role.name === 'Admin')
+                        ? {
+                            backgroundColor: '#ff4c5129',
+                            cursor: 'pointer'
+                          }
+                        : { cursor: 'pointer' }
+                    }
                   >
                     <TableCell>
                       <Stack direction='row' spacing={1} alignItems='center'>
