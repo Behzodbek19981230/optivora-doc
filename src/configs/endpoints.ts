@@ -80,6 +80,7 @@ const endpoints = {
   taskComment: '/task-comment/',
   taskCommentById: (id: string | number | string[] | null | undefined) => `/task-comment/${normalizeId(id)}`,
   taskAttachment: '/task-attachment/',
+  taskAttachmentAll: '/task-attachment/all',
   taskAttachmentById: (id: string | number | string[] | null | undefined) => `/task-attachment/${normalizeId(id)}`,
   taskSendToEmail: '/task/send-to-email/',
   employeeAccount: '/employee-account/',

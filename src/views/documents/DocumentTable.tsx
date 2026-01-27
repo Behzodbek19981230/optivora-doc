@@ -49,6 +49,7 @@ export type DocumentRow = {
   task_form: number
   type: string
   updated_by: number
+  is_read_file: boolean
 }
 
 type Props = { status: string; ownerFilter?: 'mine' | 'all' }
@@ -352,6 +353,15 @@ const DocumentTable = ({ status, ownerFilter }: Props) => {
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           getRowId={row => (row as any).id as number}
+          getRowClassName={params => {
+            if (
+              !params.row?.is_read_file &&
+              user?.role_detail?.some((role: any) => role.name === 'Manager' || role.name === 'Admin')
+            ) {
+              return 'bg-error'
+            }
+            return ''
+          }}
           localeText={{
             ...getDataGridLocaleText(t),
             noRowsLabel: String(t('documents.table.emptyForStatus', { status: t(`documents.status.${status}`) }))

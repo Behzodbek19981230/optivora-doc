@@ -146,6 +146,15 @@ const TaskPartTable = ({ status, ownerFilter }: Props) => {
           paginationModel={paginationModel}
           onPaginationModelChange={setPaginationModel}
           onRowClick={params => router.push(`/task-parts/view/${params.row.id}`)}
+          getRowClassName={params => {
+            if (
+              !params.row?.is_read_file &&
+              user?.role_detail?.some((role: any) => role.name === 'Manager' || role.name === 'Admin')
+            ) {
+              return 'bg-error'
+            }
+            return ''
+          }}
           getRowId={row => (row as any).id as number}
           localeText={{
             ...getDataGridLocaleText(t),

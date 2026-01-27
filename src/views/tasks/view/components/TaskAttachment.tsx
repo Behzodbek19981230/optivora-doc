@@ -93,6 +93,9 @@ const getFileIcon = (ext: string) => {
       return 'tabler:file'
   }
 }
+const isReadFile = async (attachmentId: number) => {
+  await DataService.patch(`/task-attachment/${attachmentId}/isread`)
+}
 
 const getAttachmentHref = (a: TaskAttachmentType) => {
   const link = (a.link || '').trim()
@@ -143,7 +146,10 @@ export default function TaskAttachment({
       if (partId !== undefined) {
         params.part = partId === null ? '' : partId
       }
-      const res = await DataService.get<{ results: TaskAttachmentType[] }>(endpoints.taskAttachment, params)
+      const res = await DataService.get<{ results: TaskAttachmentType[] }>(
+        isCompact ? endpoints.taskAttachmentAll : endpoints.taskAttachment,
+        params
+      )
 
       return res.data || { results: [] }
     },
@@ -221,6 +227,9 @@ export default function TaskAttachment({
                   href={href}
                   target='_blank'
                   clickable
+                  onClick={() => {
+                    isReadFile(a.id)
+                  }}
                   size='small'
                   variant='outlined'
                   color='primary'
@@ -269,7 +278,15 @@ export default function TaskAttachment({
                     <Stack direction='row' spacing={1}>
                       {href && href !== '#' ? (
                         <Tooltip title={String(t('tasks.view.attachments.openOrDownload'))}>
-                          <IconButton component='a' href={href} target='_blank' rel='noreferrer'>
+                          <IconButton
+                            component='a'
+                            href={href}
+                            target='_blank'
+                            rel='noreferrer'
+                            onClick={() => {
+                              isReadFile(a.id)
+                            }}
+                          >
                             <Icon icon='tabler:download' />
                           </IconButton>
                         </Tooltip>
@@ -316,7 +333,16 @@ export default function TaskAttachment({
                     primary={
                       <Stack direction='row' spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap', rowGap: 1 }}>
                         {href && href !== '#' ? (
-                          <Link href={href} target='_blank' rel='noreferrer' underline='hover' color='inherit'>
+                          <Link
+                            href={href}
+                            target='_blank'
+                            rel='noreferrer'
+                            underline='hover'
+                            color='inherit'
+                            onClick={() => {
+                              isReadFile(a.id)
+                            }}
+                          >
                             <Typography variant='subtitle2' sx={{ fontWeight: 600 }}>
                               {label}
                             </Typography>
